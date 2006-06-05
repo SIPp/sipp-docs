@@ -1,0 +1,79 @@
+
+  The  -trace_stat option dumps all statistics in the
+  <scenario_name.csv> file. The dump starts with one header
+  line with all counters. All following lines are 'snapshots' of 
+  statistics counter given the statistics report frequency
+  (-fd option). This file can be easily imported in any
+  spreadsheet application, like Excel.
+
+  In counter names, (P) means 'Periodic' - since last
+  statistic row and (C) means 'Cumulated' - since sipp was
+  started.
+
+  Available statistics are:
+
+  - StartTime: 
+    Date and time when the test has started.
+
+  - LastResetTime:
+    Date and time when periodic counters where last reseted.
+
+  - CurrentTime:
+    Date and time of the statistic row.
+
+  - ElapsedTime:
+    Elapsed time.
+
+  - CallRate:
+    Call rate (calls per seconds).
+
+  - IncomingCall:
+    Number of incoming calls.
+
+  - OutgoingCall:
+    Number of outgoing calls.
+
+  - TotalCallCreated:
+    Number of calls created.
+
+  - CurrentCall:
+    Number of calls currently ongoing.
+
+  - SuccessfulCall:
+    Number of successful calls.
+
+  - FailedCall:
+    Number of failed calls (all reasons).
+
+  - FailedCannotSendMessage:
+    Number of failed calls because Sipp cannot send the
+    message (transport issue).
+
+  - FailedMaxUDPRetrans:
+    Number of failed calls because the maximum number of
+    UDP retransmission attempts has been reached.
+
+  - FailedUnexpectedMessage:
+    Number of failed calls because the SIP message received
+    cannot be associated to an existing call.
+
+  - FailedCallRejected:
+    Number of failed calls because of Sipp internal error.
+    (a scenario sync command is not recognized or a scenario
+    action failed or a scenario variable assignment failed).
+
+  - FailedCmdNotSent:
+    Number of failed calls because of inter-Sipp
+    communication error (a scenario sync command failed to
+    be sent).
+
+  - FailedRegexpDoesntMatch:
+    Number of failed calls because of regexp that doesn't
+    match (there might be several regexp that don't match
+    during the call but the counter is increased only by
+    one).
+
+  - FailedRegexpHdrNotFound:
+    Number of failed calls because of regexp with hdr    
+    option but no matching header found.
+

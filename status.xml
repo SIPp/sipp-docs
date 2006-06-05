@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<status>
+
+  <developers>
+    <person name="Olivier JACQUES"      email="ojacques@users.sourceforge.net"      id="OJA" />
+    <person name="Looking for someone"            id="UNK" />
+    <!-- Add more people here -->
+  </developers>
+
+  <changes>
+    <!-- Add new releases here -->
+    <release version="1.1" date="December 21th, 2004">
+      <action type="add" context="admin" dev="S. Natarajan">Authentication: change to have default algorithm be 'MD5' if nothing else is specified</action>
+      <action type="fix" context="admin" dev="A. Kumar and S. Natarajan">Fixed issue with 'address not supported'</action>
+      <action type="fix" context="admin" dev="S. Natarajan">Changed SunOS Makefile back to gcc and g++</action>
+    </release>
+    <release version="1.1" date="December 20th, 2004">
+      <action type="add" context="admin" dev="F. Tarek Rogers">Authentication user/pass as option in the XML scenario.</action>
+    </release>
+    <release version="1.1" date="December 10th, 2004">
+      <action type="add" context="admin" dev="Eric Miller">Changed call-id format to pass through some crappy SIP aware firewalls.</action>
+      <action type="add" context="admin" dev="Peter Higginson">Added [len] keyword for automatic Content-Length computation.</action>
+      <action type="add" context="admin" dev="Peter Higginson">Added offset add for remote_port, local_port, media_port and len keywords.</action>
+      <action type="fix" context="admin" dev="Eric Miller">Changed media_ip and media_port format to remove extra blank spaces.</action>
+    </release>
+    <release version="1.1" date="December 6th, 2004">
+      <action type="add" context="admin" dev="Zarko Coklin">Added compilation for both cc and gcc on SunOS.</action>
+    </release>
+    <release version="1.1" date="November 30th, 2004">
+      <action type="fix" context="admin" dev="Alexandre Ajjan">Fixed finding headers like refer-to.</action>
+    </release>
+    <release version="1.1" date="November 29th, 2004">
+      <action type="add" context="admin" dev="Olivier Jacques">More errno usage for transport related errors.</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Fixed IPv6 handling for long addresses. Added [] for IPv6 addresses in SIP messages. </action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">Fixed SIGUSR2 signal handling to dump screens in background mode (could cause core dumps in some systems).</action>
+    </release>
+    <release version="1.1" date="November 22th, 2004">
+      <action type="fix" context="admin" dev="F. Tarek Rogers">Fixed Makefile for OS specific include directories</action>
+    </release>
+    <release version="1.1" date="November 15th, 2004">
+      <action type="fix" context="admin" dev="Alexandre Ajjan">Fixed crash when using UDP retransmissions introduced with new branching features</action>
+    </release>
+    <release version="1.1" date="November 14th, 2004">
+      <action type="fix" context="admin" dev="Olivier Jacques">Changed to Cseq instead of CSeq for auto 4xx/5xx responses</action>
+    </release>
+    <release version="1.1" date="November 10th, 2004">
+      <action type="fix" context="admin" dev="Shriram Natarajan">updated Makefile so that OpenSSL works also on SunOS.</action>
+      <action type="fix" context="admin" dev="F. Tarek Rogers">fixed authentication for both registrars and proxy.</action>
+    </release>
+    <release version="1.1" date="November 9th, 2004">
+      <action type="add" context="admin" dev="Shriram Natarajan">Log and exec actions. </action>
+      <action type="add" context="admin" dev="Olivier Jacques">Documentation updated for TLS, IPv6, branching and log and exec actions.</action>
+    </release>
+    <release version="1.1" date="November 2th, 2004">
+      <action type="add" context="admin" dev="David Mansutti">IPv6 support</action>
+      <action type="add" context="admin" dev="F. Tarek Rogers">SIP authentication support</action>
+      <action type="add" context="admin" dev="Gundu Rao">TLS (via OpenSSL) support</action>
+      <action type="add" context="admin" dev="Peter Higginson">Branching and conditional branching in scenarios</action>
+    </release>
+    <release version="1.0final" date="October 19th, 2004">
+      <action type="fix" context="admin" dev="F. Tarek Rogers">Change all trace file names from pid_scenario to scenario_pid which fixes a pb when using relative paths. Actually enabling -trace_err switch. If -trace_err is not given, unexpected messages are not printed anywhere, except the very last one on exit (along with a message to use -trace_err if desired).</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Fix quitting 3PCC controller with ctrl-C and allow reuse of internal twin socket just after closing.</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Counter in case of receive error that was not incremented</action>
+      <action type="fix" context="admin" dev="Olivier Jacques"><![CDATA[bug 917436 (regexp with < or > are not supported). Just need to replace < by &lt; and > by &gt; when specifying regexp.]]></action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">Really disabling retransmission when -nr switch is specified for UDP transport. The fix also benefits to other transports in terms of performances (no more message hash computed).</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Modified default 3PCC scenario for rtd and response time.</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">bug 1035687 where SDP elements where not properly ordered in default scenarios</action>
+    </release>
+    <release version="1.0rc3" date="September 22st, 2004">
+      <action type="add" context="admin" dev="Rhys Ulerich">logging for calls that timeout.
+</action>
+      <action type="add" context="admin" dev="Olivier Jacques">PID in CSV stat file name and trace file names</action>
+      <action type="add" context="admin" dev="Olivier Jacques"> Dumping screens in a file
+	  on SIGUSR2 signal and sipp exit (check ./sipp -h for usage)</action>
+      <action type="add" context="admin" dev="F. Tarek Rogers">Allow to specify the remote_host parameter even in
+	  server mode. The [remote_ip] field in XML scenarios will then
+	  properly be set.</action>
+      <action type="add" context="admin" dev="Olivier Jacques">Added process PID
+	  in trace files names. Added timestamp in SIP message traces.
+</action>
+      <action type="add" context="admin" dev="Olivier Jacques">Make the difference in statistics
+	  on unexpected messages for an existing call (call marked as
+	  failed) and unexpected messages for a non existing call (call not
+	  marked as failed, but message counted in new OutOfCallMsgs
+	  counter
+</action>
+      <action type="add" context="admin" dev="Olivier Jacques">Added timestamp and
+	  call-id in logged error messages
+</action>
+      <action type="fix" context="admin" dev="Thys Ulerich">Multiline header CR-LF handing with [last_XXX:].
+</action>
+      <action type="fix" context="admin" dev="Joseph Bannino">Fixed wrong CSeq when
+	  auto answer on out-of-scenario message.</action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">Fixed potential memory issues
+	  after valgrind tool run
+</action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">RTP echo
+	  thread must be insensible to signals</action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">coredump when using
+	  kill -SIGUSR1
+</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Some small performance improvements</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Fixed case where a 200 OK has been received and call must be
+	  aborted before ACK is sent (happens in 3PCC).</action>
+    </release>
+    <release version="1.0rc1" date="August 25th, 2004">
+      <action type="add" context="admin" dev="Alexandre Ajjan"> answer unexpected errors (4XX, 5XX and beyond) with an ACK and 
+close the call</action>
+      <action type="add" context="admin" dev="Olivier Jacques">if unexpected PING message is received, answer it with an ACK. 
+Call goes on and is not marked as failed. PING message is counted 
+(AUTO_ANSWERED counter)</action>
+      <action type="add" context="admin" dev="Alexandre Ajjan">sipp_errors.log and sipp_messages.log are now dependent of the 
+scenario name (scenarioname_errors.log and scenarioname_messages.log)</action>
+      <action type="add" context="admin" dev="Alexandre Ajjan">check that a message received is actually a SIP message to handle 
+it (fix issue with broadcasts on all UDP ports)</action>
+      <action type="add" context="admin" dev="Alexandre Ajjan">added -rp option to allow to have n calls every m milliseconds</action>
+      <action type="add" context="admin" dev="Shriram Natarajan">added a new 3PCC controller A passive role, as described here: 
+http://sourceforge.net/mailarchive/message.php?msg_id=9102837 </action>
+      <action type="add" context="admin" dev="Shriram Natarajan">added ability to specify 3PCC remote socket </action>
+      <action type="add" context="admin" dev="Shriram Natarajan">allow comments starting with # in CSV file for -inf feature </action>
+      <action type="add" context="admin" dev="Olivier Jacques">added a final dump in statistics file when quitting SIPp</action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">SIP message format bug with double CRLF (Bug #966519)</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">remove unexpected calls from call statistics</action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">in default scenarios, changed Cseq to CSeq</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">soft exit by SIGUSR1 signal when sipp is launched in background</action>
+      <action type="fix" context="admin" dev="Shriram Natarajn">a bug in record routing when there are multiple hops between UAC 
+and UAS</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Makefile for HPUX: always using aCC</action>
+    </release>
+    <release version="Web pages" date="">
+      <action type="add" context="admin" dev="Olivier Jacques">Html version of XML scenarios in documentation.</action>
+    </release>
+    <release version="Latest" date="July 16th, 2004">
+      <action type="add" context="admin" dev="Jesper Dalberg">Added FreeBSD support, contributed by Jesper Dalberg</action>
+      <action type="add" context="admin" dev="Joseph Bannino">send CANCEL/BYE when unexpected message received</action>
+      <action type="add" context="admin" dev="Shriram Natarajan">Support of call specific data input file (-inf)</action>
+      <action type="add" context="admin" dev="Joseph Bannino">remote sending address forcing (-rsa)</action>
+      <action type="add" context="admin" dev="Olivier Jacques">Added DTD for XML scenarios</action>
+      <action type="add" context="admin" dev="Xiaofeng">Added Win32/Cygwin support</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Fixed sipp exit when using -m option in server mode (Bug # 975331)</action>
+      <action type="fix" context="admin" dev="Alexandre Ajjan">Fix tag on To: header bug</action>
+      <action type="fix" context="admin" dev="Olivier Jacques">Updated regexp and 3PCC scenarios for XML syntax compliance.</action>
+    </release>
+    <release version="0.4rc1" date="May 27, 2004">
+      <action type="add" context="admin" dev="Shriram Natarajan">
+The main new features compared to 0.3 are:
+<ul><li>Routing recording to support stateful proxies</li>
+<li>Exit code according to call success </li>
+<li>SunOS support</li>
+</ul>
+      </action>
+    </release>
+    <release version="0.3" date="April 5, 2004">
+      <!-- Some action types have associated images. By default, images are
+      defined for 'add', 'fix', 'remove', 'update' and 'hack'. If you add
+      src/documentation/resources/images/<foo>.jpg images, these will
+      automatically be used for entries of type <foo>. -->
+
+      <action dev="Olivier Jacques" type="add" context="admin">
+        Initial Import
+      </action>
+    </release>
+  </changes>
+
+  <todo>
+    <actions priority="high">
+      <action context="sipp" dev="UNK">
+        Add better media support (sending/receiving RTP files, DTMF in scenarios).
+      </action>
+    </actions>
+    <!-- Add todo items. @context is an arbitrary string. Eg:
+    <actions priority="high">
+      <action context="code" dev="SN">
+      </action>
+    </actions>
+    <actions priority="medium">
+      <action context="docs" dev="open">
+      </action>
+    </actions>
+    -->
+  </todo>
+
+</status>

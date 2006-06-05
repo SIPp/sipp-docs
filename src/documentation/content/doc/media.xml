@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE scenario SYSTEM "sipp.dtd">
+
+<scenario name="Media scenario">
+        <!-- mediasend is used to send media (currently RTP only)           -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <mediasend file="xxx.wav" />
+        <mediasend dtmf="123" />
+        
+        <!-- 'tmf                                                           -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <!--                                                                -->
+        <mediarecv timeout="10000" record="all" />
+        
+        <mediarecv dtmf="1" record="20" />
+</scenario>

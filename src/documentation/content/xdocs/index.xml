@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document>
+  <header> 
+    <title>Welcome to SIPp</title>
+    <authors>
+        <person name="Olivier JACQUES [code/documentation]" email="ojacques@users.sourceforge.net"/>
+    </authors>
+  </header>
+  <body>
+    <section>
+      <title>Welcome to SIPp</title>
+      <p>SIPp is a free Open Source test tool / traffic generator for the SIP protocol. 
+      It includes a few basic <a href="http://www.sipstone.org">SipStone</a> 
+      user agent scenarios (UAC and UAS) and establishes and releases multiple calls with 
+      the INVITE and BYE methods. It can also reads 
+      <a href="doc1.1/uac.xml.html">custom XML</a> scenario files describing 
+      from very simple to <a href="doc1.1/reference.html#3PCC">complex</a> call flows. 
+      It features the <a href="doc1.1/reference.html#stat_screen">dynamic display</a> of 
+      statistics about running tests (call rate, round trip delay, and message statistics), 
+      periodic CSV <a href="doc1.1/reference.html#Statistics">statistics</a> dumps, 
+      TCP and UDP over multiple sockets or multiplexed with 
+      retransmission management and <a href="doc1.1/reference.html#traffic_control">dynamically 
+      adjustable</a> call rates.</p>
+      <p>Other advanced features include support of <a href="doc1.1/reference.html#ipv6">IPv6</a>, 
+      <a href="doc1.1/reference.html#tls">TLS</a>, SIP <a href="doc1.1/reference.html#authentication">authentication</a>,
+      <a href="doc1.1/reference.html#branching">conditional scenarios</a>, UDP retransmissions, 
+      <a href="doc1.1/reference.html#Error+handling">error robustness</a> (call
+      timeout, protocol defense), call specific variable, Posix <a href="doc1.1/reference.html#action_regexp">regular expression</a> 
+      to extract and re-inject any protocol fields, <a href="doc1.1/reference.html#actions">custom actions</a> 
+      (log, system command exec, call stop)
+      on message receive, field injection from <a href="doc1.1/reference.html#inffile">external CSV</a> file to emulate live users.</p>
+      <p>SIPp can also send media (RTP) traffic through <a href="doc1.1/reference.html#RTP+echo">RTP echo</a> and 
+      <a href="doc1.1/reference.html#PCAP+Play">RTP / pcap</a> replay. Media can be audio or audio+video.</p>
+      <p>While optimized for traffic, stress and performance testing, SIPp can be used to
+      run one single call and exit, providing a <a href="doc1.1/reference.html#Exit+codes">passed/failed</a> verdict.</p>
+      <p>Last, but not least, SIPp has a <a href="doc1.1/reference.html" >comprehensive documentation</a> available
+      both in HTML and PDF format.</p>
+      <p>SIPp can be used to test many real SIP equipements like SIP proxies, 
+      B2BUAs, SIP media servers, SIP/x gateways, SIP PBX, ... 
+      It is also very useful to emulate thousands of user agents calling your SIP system.</p>
+      <p>Here is a screenshot:</p>
+      <p>
+        <img src="images/sipp-01.jpg" alt="SIPp screenshot" />
+      </p>
+      <p>And here is a video of SIPp in action (Windows Media Player 9 codec or above required):</p>
+      <p>
+        <icon src="images/wmv.gif" alt="wmv" />
+        <a href="images/sipp-01.wmv">sipp-01.wmv</a>
+      </p>
+    </section>
+    <section>
+      <title>Want to know more?</title>
+      <p>Please jump to the <a href="doc/index.html">documentation section</a>.</p>
+    </section>
+  </body>
+</document>
