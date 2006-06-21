@@ -44,7 +44,7 @@ See http://xml.apache.org/forrest/linking.html for more info
 
   <sourceforge label="Sourceforge">
      <dev label='Sourceforge' href='ext:sourceforge_dev' />
-     <cvs label='CVS' href='ext:sourceforge_cvs' />
+     <cvs label='SVN' href='ext:sourceforge_svn' />
      <cvs label='Mailing list' href='ext:sourceforge_ml' />
   </sourceforge>
 
@@ -63,8 +63,8 @@ See http://xml.apache.org/forrest/linking.html for more info
     </sourceforge_dev>
     <sourceforge_home href="http://sipp.sourceforge.net/">
     </sourceforge_home>
-    <sourceforge_cvs href="http://sourceforge.net/cvs/?group_id=104305">
-    </sourceforge_cvs>
+    <sourceforge_svn href="http://sourceforge.net/svn/?group_id=104305">
+    </sourceforge_svn>
     <sourceforge_ml href="http://lists.sourceforge.net/lists/listinfo/sipp-users">
     </sourceforge_ml>
     <wikilink href="http://sipp.sourceforge.net/wiki/">
