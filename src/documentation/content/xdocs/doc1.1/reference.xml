@@ -456,6 +456,38 @@ nkthread : 4096</source>
         have SIPp exit when this is done. Use the <code>-m</code> option on the
         command line.</note>
         </section>
+        <anchor id="remote_control" /><section><title>Remote control</title>
+          <p>SIPp can be "remote-controlled" through a UDP socket. This allows for example</p>
+          <ul>
+            <li>To automate a serie of action, like increasing the call rate smoothly, 
+            wait for 10 seconds, increase more, wait for 1 minute and loop</li>
+            <li>Have a feedback loop so that an application under test can
+            remote control SIPp to lower the load, pause the traffic, ...</li>
+          </ul>
+          <p>Each SIPp instance is listening to a UDP socket. It 
+          starts to listen to port 8888 and each following SIPp instance (up to 10)
+          will listen to base_port + 1 (8889, 8890, ...).</p>
+          <p>It is then possible to control SIPp like this:</p>
+          <source>echo p >/dev/udp/x.y.z.t/8888 -> put SIPp in pause state (p key)
+echo q >/dev/udp/x.y.z.t/8888 -> quit SIPp (q key)</source>
+          <note>All keys available through keyboard are also available in 
+          the remote control interface</note>
+          <p>You could also have a small shell script to automate a serie of action. 
+          For example, this script will 
+          increase the call rate by 10 more new calls/s every 5 seconds, wait at this call rate
+          for one minute and exit SIPp:</p>
+          <source>#!/bin/sh
+echo "*" >/dev/udp/127.0.0.1/8889
+sleep 5
+echo "*" >/dev/udp/127.0.0.1/8889
+sleep 5
+echo "*" >/dev/udp/127.0.0.1/8889
+sleep 5
+echo "*" >/dev/udp/127.0.0.1/8889
+sleep 60
+echo "q" >/dev/udp/127.0.0.1/8889
+</source>
+        </section>
         <section><title>Running SIPp in background</title>
           <p>SIPp can be launched in background mode (<code>-bg</code> command
           line option).</p>
