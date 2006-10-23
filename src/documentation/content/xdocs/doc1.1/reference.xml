@@ -998,6 +998,12 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>-</td>
                     <td>Provide the message number in the scenario.</td>
                 </tr>
+                <tr>
+                    <td><strong>[cseq]</strong></td>
+                    <td>-</td>
+                    <td>Provides the CSeq value of the last request received. This value can be incremented (e.g. [cseq+1] adds 1 to
+                        the CSeq value of the last request).</td>
+                </tr>
             </table>
             <p>Now that the INVITE message is sent, SIPp can wait for an answer by using the "<a href="#recv">recv</a>" command.</p>
 <source>  &lt;recv response="100"&gt; optional="true"
