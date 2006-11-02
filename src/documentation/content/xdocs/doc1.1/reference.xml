@@ -49,7 +49,7 @@
             <p>Like many other "open source" projects, there are two versions of
             SIPp: a stable and unstable release. Stable release: before being
             labelled as "stable", a SIPp release is thoroughly tested. So you
-            can be confident that all mentionned features will work :) </p>
+            can be confident that all mentioned features will work :) </p>
             <note>Use the stable release for your everyday use and if you are
             not blocked by a specific feature present in the "unstable release"
             (see below).</note> <p><a
@@ -57,9 +57,9 @@
             stable download page</a></p>
             </section>
         <section><title>Unstable release</title>
-            <p>Unstable release: every new features and bug fixes are checked in
-            <a href="http://cvs.sourceforge.net/viewcvs.py/sipp/sipp/">SIPp's
-            CVS</a> repository as soon as they are available. Every night, an
+            <p>Unstable release: all new features and bug fixes are checked in
+            <a href="http://sipp.svn.sourceforge.net/viewvc/sipp/sipp/trunk/">SIPp's
+            SVN</a> repository as soon as they are available. Every night, an
             automatic extraction is done and the source code of this release is
             made available. </p>
             <note> Use the unstable release if you absolutely need a bug fix or
@@ -136,7 +136,7 @@
         <p>You have two ways to overcome this limit: either use the <a href="#maxsocket"><code>-max_socket</code></a>
         command line option or change the limits of your system.</p> 
         <p>Depending on the operating system you use, different procedures 
-        allow to increase the maximum number of file descriptors:</p>
+        allow you to increase the maximum number of file descriptors:</p>
         <ul>
             <li><p>On Linux 2.4 kernels the default number of file descriptors can 
             be increased by modifying the <code>/etc/security/limits.conf</code> 
@@ -459,7 +459,7 @@ nkthread : 4096</source>
         <anchor id="remote_control" /><section><title>Remote control</title>
           <p>SIPp can be "remote-controlled" through a UDP socket. This allows for example</p>
           <ul>
-            <li>To automate a serie of action, like increasing the call rate smoothly, 
+            <li>To automate a series of actions, like increasing the call rate smoothly, 
             wait for 10 seconds, increase more, wait for 1 minute and loop</li>
             <li>Have a feedback loop so that an application under test can
             remote control SIPp to lower the load, pause the traffic, ...</li>
@@ -492,7 +492,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
           <p>SIPp can be launched in background mode (<code>-bg</code> command
           line option).</p>
           <p>By doing so, SIPp will be detached from the current terminal and run
-          in background. The PID of the SIPp process is provided. If you didn't specified a number of calls to execute
+          in the background. The PID of the SIPp process is provided. If you didn't specify a number of calls to execute
           with the <code>-m</code> option, SIPp will run forever.</p>
           <p>There is a mechanism implemented to stop SIPp smoothly. The command
           <code>kill -SIGUSR1 [SIPp_PID]</code> will instruct SIPp to stop placing
@@ -501,8 +501,9 @@ echo "q" >/dev/udp/127.0.0.1/8889
         <anchor id="xmlsyntax" /><section><title>Create your own XML scenarios</title>
             <p>Of course embedded scenarios will not be enough. So it's time to
             create your own scenarios. A SIPp scenario is written in XML
-            (although there are currently no DTD to help you write SIPp
-            scenarios). A scenario will always start with:</p>
+            (a DTD that may help you write SIPp
+            scenarios does exist and has been tested with jEdit - this is described in a later section).
+            A scenario will always start with:</p>
             <source>&lt;?xml version="1.0" encoding="ISO-8859-1" ?&gt;
 &lt;scenario name="Basic Sipstone UAC"&gt;
 </source>
@@ -1214,15 +1215,15 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <li><strong>Internal</strong> commands (specified using int_cmd attribute) are stop_call, stop_gracefully (similar to pressing 'q'), stop_now (similar to ctrl+C).</li>
                     <li><strong>External</strong> commands (specified using command attribute) are anything that can be executed on local host with a shell.</li>
                     <li><strong>PCAP play</strong> commands (specified using play_pcap_audio / play_pcap_video attributes) 
-                    allow to send a pre-recorded RTP stream using the <a href="http://www.tcpdump.org/pcap3_man.html">pcap library</a>.
+                    allow you to send a pre-recorded RTP stream using the <a href="http://www.tcpdump.org/pcap3_man.html">pcap library</a>.
                       <p>Choose <strong>play_pcap_audio</strong> to send the pre-recorded RTP stream using the "m=audio" SIP/SDP line port as a base for the replay.</p>
                       <p>Choose <strong>play_pcap_video</strong> to send the pre-recorded RTP stream using the "m=video" SIP/SDP line port as a base.</p> 
                       <p>The play_pcap_audio/video command has the following format: play_pcap_audio="[file_to_play]" with:</p>
                           <ul>
                             <li>file_to_play: the pre-recorded pcap file to play</li>
                           </ul>
-                          <note>The action is non-blocking. SIPp will start a light-weighted thread to play the file 
-                          and the scenario with continue immediatly. If needed, you will need to add a pause
+                          <note>The action is non-blocking. SIPp will start a light-weight thread to play the file 
+                          and the scenario with continue immediately. If needed, you will need to add a pause
                           to wait for the end of the pcap play.</note>
                        </li>
                   </ul>
@@ -1399,7 +1400,7 @@ User0003;[authentication username=betty password=boop]</source>
         </section>
         <section><title>Screens</title>
             <p>Several screens are available to monitor SIP traffic. You can 
-            change of screen by pressing 1, 2, 3 or 4 keys on the keyboard.</p>
+            change the screen view by pressing 1 to 9 keys on the keyboard.</p>
             <ul>
                 <li>Key '1': Scenario screen. It displays a call flow of
                 the scenario as well as some important informations.
@@ -1474,7 +1475,7 @@ User0003;[authentication username=betty password=boop]</source>
                 </source>
             </section>
             <anchor id="maxsocket" /><section><title>Multi-socket limit</title>
-                <p>When using one of the "multi-socket" transport, the maximum number of sockets that can be opened
+                <p>When using one of the "multi-socket" transports, the maximum number of sockets that can be opened
                 (which corresponds to the number of simultaneous calls) will be determined by
                 the system (see <a href="#filedesc">how to increase file descriptors section</a> to
                 modify those limits). You can also limit the number of socket used by using the <code>-max_socket</code>
@@ -1498,15 +1499,15 @@ User0003;[authentication username=betty password=boop]</source>
           <anchor id="pcapplay" /><section><title>PCAP Play</title>
             <p>The PCAP play feature makes use of the <a href="http://www.tcpdump.org/pcap3_man.html">PCAP library</a>
             to replay pre-recorded RTP streams towards a destination. RTP streams can be 
-            recorded by tools like <a href="http://www.ethereal.com/">Ethereal</a>
-            or <a href="http://www.tcpdump.org/">tcpdump</a>. This allows to:</p>
+            recorded by tools like <a href="http://www.wireshark.org/">Wireshark</a>
+            (formerly known as Ethereal) or <a href="http://www.tcpdump.org/">tcpdump</a>. This allows you to:</p>
             <ul>
               <li>Play any RTP stream (voice, video, voice+video, out of band DTMFs/RFC 2833, T38 fax, ...)</li>
               <li>Use any codec as the codec is not handled by SIPp</li>
               <li>Emulate precisely the behavior of any SIP equipment as the 
               pcap play will try to replay the RTP stream as it was recorded (limited
               to the performances of the system).</li>
-              <li>Reproduce exactly what has been captured using an IP sniffer like <a href="http://www.ethereal.com/">Ethereal</a>.</li>
+              <li>Reproduce exactly what has been captured using an IP sniffer like <a href="http://www.wireshark.org/">Wireshark</a>.</li>
             </ul>
             <p>A good example is the <a href="#uac_with_media">UAC with media</a> (uac_pcap) embedded scenario.</p>
             <p>SIPp comes with a G711 alaw pre-recorded pcap file and 
@@ -1595,7 +1596,7 @@ User0003;[authentication username=betty password=boop]</source>
     option but no matching header found.</li>
     <li>OutOfCallMsgs:
     Number of SIP messages received that cannot be associated
-    to an existing call.</li>
+    with an existing call.</li>
     <li>AutoAnswered:
     Number of unexpected specific messages received for new Call-ID.
     The message has been automatically answered by a 200 OK
@@ -1992,7 +1993,7 @@ Example:
         (as described in "<a href="#scheduling">SIPp's internal scheduling</a>"
         section). You might want to use another "objective" method if 
         you want to measure those response times with a high precision (a tool
-        like <a href="http://www.ethereal.com/">Ethereal</a> will allow you to do so).</p>
+        like <a href="http://www.wireshark.org/">Wireshark</a> will allow you to do so).</p>
       </section>
       <anchor id="scheduling" /><section><title>SIPp's internal scheduling</title>
         <p>Three parameters can be set to allow SIPp to benefit of the
@@ -2045,14 +2046,14 @@ Example:
             (<a href="http://sipp.sourceforge.net/doc/sipp.dtd">sipp.dtd</a>)
             in the same directory as your XML scenario.</p>
         </section>
-        <section><title>Ethereal/tethereal</title>
-            <p>Ethereal (<a href="http://www.ethereal.com/">http://www.ethereal.com/</a>) is a
-            GNU GPL protocol analyzer. It supports SIP.</p>
+        <section><title>Wireshark/tshark</title>
+            <p>Wireshark (<a href="http://www.wireshark.org/">http://www.wireshark.org/</a>) is a
+            GNU GPL protocol analyzer. It was formerly known as Ethereal. It supports SIP/SDP/RTP.</p>
             <p></p>
         </section>
         <section><title>SIP callflow</title>
             <p>When tracing SIP calls, it is very useful to be able 
-            to get a call flow from an ethereal trace. The "callflow" tool allows you to do 
+            to get a call flow from an wireshark trace. The "callflow" tool allows you to do 
             that in a graphical way:
             <a href="http://callflow.sourceforge.net/">http://callflow.sourceforge.net/</a></p>
             <p>An equivalent exist if you want to generate HTML only call flows
