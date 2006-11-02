@@ -1692,7 +1692,6 @@ User0003;[authentication username=betty password=boop]</source>
           <p>The online help, available through the -h option is duplicated here for your
           convenience</p>
           <source><![CDATA[Usage:
-
   sipp remote_host[:remote_port] [options]
 
   Available options:
@@ -1703,6 +1702,8 @@ User0003;[authentication username=betty password=boop]</source>
 
    -p local_port    : Set the local port number. Default is a
                       random free port chosen by the system.
+
+   -buff_size buff_size: Set the send and receive buffer size.
 
    -i local_ip      : Set the local IP address for 'Contact:',
                       'Via:', and 'From:' headers. Default is
@@ -1747,6 +1748,17 @@ User0003;[authentication username=betty password=boop]</source>
                       (by using -r n -rp m).
                       Example: -r 7 -rp 2000 ==> 7 calls every 2 seconds.
 
+   -rate_increase   : Specify the rate increase every -fd seconds
+                      This allows you to increase the load for each
+                      independent logging period
+                      Example: -rate_increase 10 -fd 10 
+                        ==> increase calls by 10 every 10 seconds.
+
+   -rate_max        : If -rate_increase is set, then quit after the rate
+                      reaches this value.
+                      Example: -rate_increase 10 -max_rate 100
+                        ==> increase calls by 10 until 100 cps is hit.
+
    -max_socket max  : Set the max number of sockets to open simultaneously.
                       This option is significant if you use one socket
                       per call. Once this limit is reached, traffic is
@@ -1769,6 +1781,10 @@ User0003;[authentication username=betty password=boop]</source>
                       Default value is 1.
 
    -base_cseq n     : Start value of [cseq] for each call.
+
+   -cid_str string  : Call ID string (default %u-%p@%s).
+                      %u=call_number, %s=ip_address, %p=process_number,
+                      %%=% (in any order).
 
    -auth_uri uri    : Force the value of the URI for authentication.
                       By default, the URI is composed of 
@@ -1905,9 +1921,13 @@ User0003;[authentication username=betty password=boop]</source>
                       is depending on the 3PCC role.
                       - When the first twin command is 'sendCmd' then
                       this is the address of the remote twin socket.
+                      SIPp will try to connect to this address:port to
+                      send the twin command (This instance must be started
+                      after all other 3PCC scenarii).
                       Example: 3PCC-C-A scenario.
                       - When the first twin command is 'recvCmd' then
-                      this is the address of the local twin socket.
+                      this is the address of the local twin socket. SIPp 
+                      will open this address:port to listen for twin command.
                       Example: 3PCC-C-B scenario.
 
    -nr              : Disable retransmission in UDP mode.
@@ -1917,22 +1937,38 @@ User0003;[authentication username=betty password=boop]</source>
                       Default is 5 for INVITE transactions and 7 for
                       others.
 
+   -recv_timeout nb : Global receive timeout in milliseconds.
+                      If the expected message is not received, the call
+                      times out and is aborted
+
+   -timeout nb      : Global timeout in seconds.
+                      If this option is set, SIPp quits after nb seconds
+
    -nd              : No Default. Disable all default behavior of SIPp
                       which are the following:
                       - On UDP retransmission timeout, abort the call by
                       sending a BYE or a CANCEL
+                      - On receive timeout with no ontimeout attribute, 
+                      abort the call by sending a BYE or a CANCEL
                       - On unexpected BYE send a 200 OK and close the call
                       - On unexpected CANCEL send a 200 OK and close the call
                       - On unexpected PING send a 200 OK and continue the call
                       - On any other unexpected message, abort the call by
                       sending a BYE or a CANCEL
 
-   -rsa host:port   : Set the remote sending address to host:port.
+   -rsa host[:port] : Set the remote sending address to host:port.
                       for sending the messages.
 
    -max_reconnect   : Set the the maximum number of reconnection.
 
-   -aa              : Enable the automatic answer for the INFO message.
+   -aa              : Enable automatic 200 OK answer for INFO and NOTIFY
+                      messages.
+
+   -tdmmap map      : Generate and handle a table of TDM circuits.
+                      A circuit must be available for the call to be placed.
+                      Format: -tdmmap {0-3}{99}{5-8}{1-31}
+
+   -xyz string      : Any other parameter used in SIP messages as [xyz].
 
 Signal handling:
 
