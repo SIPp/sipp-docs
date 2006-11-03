@@ -1436,6 +1436,31 @@ User0003;[authentication username=betty password=boop]</source>
                 one IP/UDP socket is opened for each new call between SIPp and the remote.</p>
                 <note>This mode is generally used for emulating user agents calling a SIP server.</note>
             </section>
+            <section><title>UDP with one socket per IP address</title>
+                <p>In UDP with one socket per IP address mode (<code>-t ui</code> command line parameter),
+                one IP/UDP socket is opened for each IP address given in the <a href="#inffile">inf file</a>.</p>
+                <p>In addition to the "-t ui" command line parameter, one must indicate which field in the
+                inf file is to be used as local IP address for this given call. Use "-ip_field &lt;nb&gt;"
+                to provide the field number.</p>
+                <p>There are two distinct cases to use this feature:</p>
+                <ul><li>Client side: when using -t ui for a client, SIPp will originate each call
+                with a different IP address, as provided in the inf file. In this case,
+                when your IP addresses are in field X of the inject file, 
+                then you have to use [fieldX] instead of [local_ip] in your UAC XML scenario file. </li>
+                <li>Server side: when using -t ui for a server, SIPp will bind itself
+                to all the IP addresses listed in the inf file instead of using 0.0.0.0. This
+                will have the effect SIPp will answer the request on the same IP on which 
+                it received the request. In order to have proper Contact and Via fields,
+                a keyword [server_ip] can be used and provides the IP address on
+                which a request was received. So when using this, you have to replace the [local_ip] in
+                your UAS XML scenario file by [server_ip].</li></ul>
+                <p>In the following diagram, the command line for a client scenario will look like: 
+                <code>./sipp -sf myscenario.xml -t ui -inf database.csv -ip_field 2 192.168.1.1</code><br/>
+                By doing so, each new call will come sequentially from IP 192.168.0.1, 192.168.0.2, 192.168.0.3, 192.168.0.1, ...<br/><br/>
+                <img alt="One originating IP per call" src="images/sipp-03.gif"></img></p>
+                <note>This mode is generally used for emulating user agents, using on IP address
+                per user agent and calling a SIP server.</note>
+            </section>
             <section><title>TCP mono socket</title>
                 <p>In TCP mono socket mode (<code>-t t1</code> command line parameter),
                 one IP/TCP socket is opened between SIPp and the remote. All calls
