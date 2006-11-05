@@ -86,6 +86,7 @@
               <li>curses or ncurses library</li>
               <li>For authentication and TLS support: OpenSSL >= 0.9.8</li>
               <li>For pcap play support: libpcap and libnet</li>
+              <li>For distributed pauses: <a href="http://www.gnu.org/software/gsl/">Gnu Scientific Libraries</a></li>
             </ul>
           </li>
           <li>You have four options to compile SIPp:
@@ -122,6 +123,9 @@
 </source></li>
 
             </ul>
+            <anchor id="gsl"/><note>To enable <a href="http://www.gnu.org/software/gsl/">GSL</a> at compile time, 
+            you must install GSL and its include files, as well as un-comment 
+            the lines in the global.mk file of SIPp distribution. Then, re-compile SIPp.</note>
           </li>
           <li>On Windows, SIPp is provided both with the source and the pre-compiled 
           executable. Just execute the installer to have SIPp installed.
@@ -530,17 +534,15 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <tr>
                     <td><anchor id="start_rtd"/></td>
                     <td>start_rtd</td>
-                    <td>Specifies the message on which SIPp starts the "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
-                    It is used to compute time between message exchanges. 
-                    By default, start_rtd is set on the first message of the scenario.</td>
-                    <td><code>&lt;send start_rtd="true"&gt;</code>: the timer will start when the enclosed message is sent.</td>
+                    <td>Starts one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                    (see <a href="#Response+times">statistics section</a>).</td>
+                    <td><code>&lt;send start_rtd="2"&gt;</code>: the timer number 2 will start when the message is sent.</td>
                 </tr>            
                 <tr>
                     <td><anchor id="rtd"/></td>
                     <td>rtd</td>
-                    <td>Specifies the message on which SIPp stops the "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
-                    By default, rtd is set on the last message of the scenario.</td>
-                    <td><code>&lt;send rtd="true"&gt;</code>: the timer will stop when the enclosed message is sent.</td>
+                    <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
+                    <td><code>&lt;send rtd="2"&gt;</code>: the timer number 2 will stop when the message is sent.</td>
                 </tr>            
                 <tr>
                     <td></td>
@@ -605,6 +607,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
 </source></td>
                 </tr>
                 <tr>
+                    <td></td>
+                    <td>counter</td>
+                    <td>Increments the counter given as parameter when the message is sent. A total of 5 counter can be used.
+                    The counter are saved in the <a href="#Available+counters">statistic file</a>.</td>
+                    <td><code>&lt;send counter="1"&gt;</code>: Increments counter #1 when the message is sent.</td>
+                </tr>            
+                <tr>
                     <td><anchor id="recv"/><strong>&lt;recv&gt;</strong></td>
                     <td>response</td>
                     <td>Indicates what SIP message code is expected.</td>
@@ -648,17 +657,15 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <tr>
                     <td></td>
                     <td>start_rtd</td>
-                    <td>Specifies the message on which SIPp starts the "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
-                    It is used to compute time between message exchanges. 
-                    By default, start_rtd is set on the first message of the scenario.</td>
-                    <td><code>&lt;recv start_rtd="true"&gt;</code>: the timer will start when the enclosed message is sent.</td>
+                    <td>Starts one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                    (see <a href="#Response+times">statistics section</a>).</td>
+                    <td><code>&lt;recv start_rtd="4"&gt;</code>: the timer number 4 will start when the message is received.</td>
                 </tr>            
                 <tr>
                     <td></td>
                     <td>rtd</td>
-                    <td>Specifies the message on which SIPp stops the "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
-                    By default, rtd is set on the last message of the scenario.</td>
-                    <td><code>&lt;recv rtd="true"&gt;</code>: the timer will stop when the enclosed message is sent.</td>
+                    <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
+                    <td><code>&lt;recv rtd="4"&gt;</code>: the timer number 4 will stop when the message is received.</td>
                 </tr>            
                 <tr>
                     <td></td>
@@ -714,6 +721,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
 ]]></source></td>
                 </tr>
                 <tr>
+                    <td></td>
+                    <td>counter</td>
+                    <td>Increments the counter given as parameter when the message is received. A total of 5 counter can be used.
+                    The counter are saved in the <a href="#Available+counters">statistic file</a>.</td>
+                    <td><code>&lt;recv counter="1"&gt;</code>: Increments counter #1 when the message is received.</td>
+                </tr>            
+                <tr>
                     <td><strong>&lt;pause&gt;</strong></td>
                     <td>milliseconds</td>
                     <td>Specify the pause delay, in milliseconds. When this delay is not set, the value of the <code>-d</code> command
@@ -723,14 +737,41 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <tr>
                     <td></td>
                     <td>min</td>
-                    <td>Indicates a minimum value for a pause. A random pause is executed between min and max values.</td>
+                    <td>Indicates a minimum value for a pause. A random pause is executed between min and max values, using a uniform distribution.</td>
                     <td><code>&lt;pause min="2000" max="5000"/&gt;</code> for pauses between 2 and 5 seconds.</td>
                 </tr>            
                 <tr>
                     <td></td>
                     <td>max</td>
-                    <td>Indicates a maximum value for a pause. A random pause is executed between min and max values.</td>
+                    <td>Indicates a maximum value for a pause. A random pause is executed between min and max values, using a uniform distribution..</td>
                     <td><code>&lt;pause min="2000" max="5000"/&gt;</code> for pauses between 2 and 5 seconds.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>normal</td>
+                    <td>If true, use a normal distribution pause with a mean and standard deviation (if <a href="#gsl">GSL</a> is available at compile time).</td>
+                    <td><code>&lt;pause normal="true" mean="60000" stdev="15000"/&gt;</code> provides a normal pause with a mean of 60 seconds (i.e. 60,000 ms) and a standard deviation of 15 seconds.  The mean and standard deviation are specified as integer milliseconds.
+                    The distribution will look like:<br/>
+                    <img alt="Normal pause distribution" src="images/dist_normal.gif"></img></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>lognormal</td>
+                    <td>If true, the pause is specified in terms of the mean and standard deviation of the normal distribution that is exponentiated. (if <a href="#gsl">GSL</a> is available at compile time).</td>
+                    <td><code>&lt;pause lognormal="true" mean="12.28" stdev="1" /&gt;</code> creates a distribution's whose natural logarithm has a mean of 12.28 and a
+  standard deviation of 1.  The mean and standard deviation are specified as
+  double values (in milliseconds).
+                    The distribution will look like:<br/>
+                    <img alt="Log normal pause distribution" src="images/dist_lognormal.gif"></img></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>exponential</td>
+                    <td>If true, the pause is specified using an exponential distribution, with an integer mean. (if <a href="#gsl">GSL</a> is available at compile time).</td>
+                    <td><code>&lt;pause exponential="true" mean="900000"/&gt;</code> creates an exponentially distributed pause with a mean of 15 minutes.
+                                        The distribution will look like:<br/>
+                    <img alt="Normal pause distribution" src="images/dist_exponential.gif"></img>
+                    </td>
                 </tr>            
                 <tr>
                     <td></td>
@@ -756,6 +797,19 @@ echo "q" >/dev/udp/127.0.0.1/8889
   </action>
 </nop>]]>
 </source></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>start_rtd</td>
+                    <td>Starts one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                     (see <a href="#Response+times">statistics section</a>).</td>
+                    <td><code>&lt;nop start_rtd="1"&gt;</code>: the timer number 1 starts when nop is executed.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>rtd</td>
+                    <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
+                    <td><code>&lt;nop rtd="1"&gt;</code>: the timer number 1 will stops when nop is executed.</td>
                 </tr>            
                 <tr>
                     <td><anchor id="sendCmd"/><strong>&lt;sendCmd&gt;</strong></td>
@@ -1559,6 +1613,16 @@ User0003;[authentication username=betty password=boop]</source>
             this exit code by using "<code>echo ?</code>" command.</p>
         </section>
         <section><title>Statistics</title>
+            <section><title>Response times</title>
+                 <p>Response times can be gathered and reported. SIPp has 5 timers 
+                 (the number is set at compile time) used to compute time between 
+                 two SIPp commands (send, recv or nop). You can start a timer
+                 by using the <a href="#start_rtd">start_rtd</a> attribute
+                 and stop it using the <a href="#rtd">rtd</a> attribute.</p>
+                 <p>You can view the value of those timers in the SIPp interface
+                 by pressing 3, 6, 7, 8 or 9. You can also save the values 
+                 in a CSV file using the -trace_stat option (see below).</p>
+            </section>
             <section><title>Available counters</title>
                 <p>The <code>-trace_stat</code> option dumps all statistics in
                 the scenario_name_pid.csv file. The dump starts with one header line
@@ -1628,11 +1692,7 @@ User0003;[authentication username=betty password=boop]</source>
     Currently, implemented for 'PING' message only.</li>
     </ul>
     <p>In addition, two other statistics are gathered:</p>
-    <ul>
-    <li>ResponseTime: this is the timer between two send or recv
-    commands that have the <a href="#start_rtd">start_rtd</a> or
-    <a href="#rtd">rtd</a> attributes. This is used to measure the time 
-    between two messages.</li>
+    <ul><li>ResponseTime (see previous section)</li>
     <li>CallLength: this is the time of the duration of an entire call.</li>
     </ul>
     <p>Both ResponseTime and CallLength statistics can be tuned using <a href="#resptimerep">ResponseTimeRepartition</a>
@@ -2132,7 +2192,7 @@ Example:
         <p>Of course, we welcome contributions! If you created a feature 
         for SIPp, please send the "diff" output 
         (<code>diff -bruN old_sipp_directory new_sipp_directory</code>)
-        so that it can be integrated in SIPp.</p>
+        on the <a href="http://lists.sourceforge.net/lists/listinfo/sipp-users">SIPp mailing list</a>, so that we can review and possibly integrate it in SIPp.</p>
     </section>
   </body>
 </document>
