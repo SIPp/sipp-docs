@@ -995,7 +995,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><strong>[auto_media_port]</strong></td>
                     <td>-</td>
                     <td>Only for pcap. To make audio and video ports begin from the value of <strong>-mp</strong> parameter, 
-                        and change for each call using a periodical system, modulo 10000 (which limits to 10000 concurrent RTP sessions for pcap_play </td>
+                        and change for each call using a periodical system, modulo 10000 (which limits to 10000 concurrent RTP sessions for pcap_play) </td>
                 </tr>
                 <tr>
                     <td><strong>[last_*]</strong></td>
@@ -2051,6 +2051,8 @@ User0003;[authentication username=betty password=boop]</source>
                       for sending the messages.
 
    -max_reconnect   : Set the the maximum number of reconnection.
+
+   -pause_msg_ign   : Ignore the messages received during a pause.
 
    -aa              : Enable automatic 200 OK answer for INFO and NOTIFY
                       messages.
