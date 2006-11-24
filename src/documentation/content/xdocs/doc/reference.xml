@@ -1307,7 +1307,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                           </ul>
                           <note>The action is non-blocking. SIPp will start a light-weight thread to play the file 
                           and the scenario with continue immediately. If needed, you will need to add a pause
-                          to wait for the end of the pcap play.</note>
+                          to wait for the end of the pcap play.</note></p>
                   <p>Example that plays a pre-recorded RTP stream:</p>
                   <source><![CDATA[<nop>
   <action>

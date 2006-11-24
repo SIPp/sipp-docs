@@ -16,10 +16,10 @@ See http://xml.apache.org/forrest/linking.html for more info
 
 <site label="SIPp" href="" xmlns="http://apache.org/forrest/linkmap/1.0" tab="">
 
-  <about label="About">
+  <about label="Home">
     <index label="Index" href="index.html" description="Welcome to SIPp"/>
     <!-- <changes label="Changes" href="changes.html" description="History of Changes" /> -->
-    <todo label="Todo" href="todo.html"  description="Todo List" />
+    <!--<todo label="Todo" href="todo.html"  description="Todo List" />-->
     <!--<all_site label="Full site in HTML" href="site.html"/>    
     <all_sitePDF label="Full site in PDF" href="site.pdf"/>-->
   </about>
