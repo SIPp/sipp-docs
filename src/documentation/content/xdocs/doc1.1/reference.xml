@@ -1950,6 +1950,8 @@ User0003;[authentication username=betty password=boop]</source>
 
    -stf file_name   : Set the file name to use to dump statistics
 
+   -stat_delimiter string : Set the delimiter for the statistics file
+
    -trace_err       : Trace all unexpected messages in
                       <scenario file name>_<pid>_errors.log.
 
@@ -2056,6 +2058,10 @@ User0003;[authentication username=betty password=boop]</source>
 
    -max_reconnect   : Set the the maximum number of reconnection.
 
+   -reconnect_close true/false: Should calls be closed on reconnect?
+
+   -reconnect_sleep int : How long to sleep between the close and reconnect?
+
    -aa              : Enable automatic 200 OK answer for INFO and NOTIFY
                       messages.
 
@@ -2096,6 +2102,7 @@ Example:
      ./sipp -sn uas
    On the same host, run sipp with embedded client (uac) scenario
      ./sipp -sn uac 127.0.0.1
+
 
 ]]>
           </source>
