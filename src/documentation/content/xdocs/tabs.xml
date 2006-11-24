@@ -15,8 +15,7 @@
   -->
 
   <tab id="home" label="Home" dir="" indexfile="index.html"/>
-  <tab id="doc" label="Documentation v1.0" dir="doc" indexfile="index.html"/>
-  <tab id="doc1" label="Documentation v1.1" dir="doc1.1" indexfile="index.html"/>
+  <tab id="doc" label="Documentation" dir="doc" indexfile="index.html"/>
   <!-- Add new tabs here, eg:
   <tab label="How-Tos" dir="community/howto/"/>
   <tab label="XML Site" dir="xml-site/"/>

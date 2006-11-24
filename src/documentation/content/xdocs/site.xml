@@ -24,18 +24,12 @@ See http://xml.apache.org/forrest/linking.html for more info
     <all_sitePDF label="Full site in PDF" href="site.pdf"/>-->
   </about>
 
-  <doc label="Doc 1.0" href="doc/" tab="doc">
+  <doc label="Doc" href="doc/" tab="doc">
      <refdoc label='Ref doc [html]' href='reference.html' />
      <refdoc_PDF label="Ref doc [pdf]" href="reference.pdf"/>
      <howto label='FAQ' href='faq.html' />
      <license label='License' href='license.html' />
   </doc>
-  <doc1 label="Doc 1.1" href="doc1.1/" tab="doc1">
-     <refdoc1 label='Ref doc [html]' href='reference.html' />
-     <refdoc_PDF1 label="Ref doc [pdf]" href="reference.pdf"/>
-     <howto1 label='FAQ' href='faq.html' />
-     <license label='License' href='license.html' />
-  </doc1>
 
   <download label="Download">
      <dev label='Unstable' href='ext:download_unstable' />

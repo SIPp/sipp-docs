@@ -6,10 +6,11 @@
 color: #000000;
 }
 .syntax1 {
-color: #cc0000;
+color: #666666;
+font-style: italic;
 }
 .syntax2 {
-color: #ff8400;
+color: #ff9900;
 }
 .syntax3 {
 color: #6600cc;
@@ -18,39 +19,40 @@ color: #6600cc;
 color: #cc6600;
 }
 .syntax5 {
-color: #ff0000;
+color: #ff00ff;
 }
 .syntax6 {
-color: #9966ff;
-}
-.syntax7 {
-background: #ffffcc;
-color: #ff0066;
-}
-.syntax8 {
-color: #006699;
+color: #000099;
 font-weight: bold;
 }
+.syntax7 {
+color: #ff0000;
+font-weight: bold;
+font-style: italic;
+}
+.syntax8 {
+color: #000000;
+}
 .syntax9 {
-color: #009966;
+color: #000066;
 font-weight: bold;
 }
 .syntax10 {
-color: #0099ff;
-font-weight: bold;
+color: #990000;
 }
 .syntax11 {
 color: #66ccff;
 font-weight: bold;
 }
 .syntax12 {
-color: #02b902;
+color: #000000;
+font-style: italic;
 }
 .syntax13 {
-color: #ff00cc;
+color: #000099;
 }
 .syntax14 {
-color: #cc00cc;
+color: #0000ff;
 }
 .syntax15 {
 color: #9900cc;
@@ -59,19 +61,18 @@ color: #9900cc;
 color: #6600cc;
 }
 .syntax17 {
-color: #0000ff;
+color: #009999;
 }
 .syntax18 {
 color: #000000;
-font-weight: bold;
 }
 .gutter {
-background: #dbdbdb;
+background: #efefef;
 color: #000000;
 }
 .gutterH {
-background: #dbdbdb;
-color: #990066;
+background: #efefef;
+color: #000066;
 }
 -->
 </STYLE>
@@ -129,7 +130,7 @@ color: #990066;
 <SPAN CLASS="gutterH">  50:</SPAN>    <SPAN CLASS="syntax9">&lt;![CDATA[</SPAN>
 <SPAN CLASS="gutter">  51:</SPAN>
 <SPAN CLASS="gutter">  52:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">INVITE</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sip:[service]@[remote_ip]:[remote_port]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0</SPAN>
-<SPAN CLASS="gutter">  53:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Via:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0/[transport]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]:[local_port]</SPAN>
+<SPAN CLASS="gutter">  53:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Via:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0/[transport]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]:[local_port];branch=[branch]</SPAN>
 <SPAN CLASS="gutter">  54:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">From:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sipp</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:sipp@[local_ip]:[local_port]&gt;;tag=[call_number]</SPAN>
 <SPAN CLASS="gutterH">  55:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">To:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sut</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:[service]@[remote_ip]:[remote_port]&gt;</SPAN>
 <SPAN CLASS="gutter">  56:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Call-ID:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[call_id]</SPAN>
@@ -157,7 +158,7 @@ color: #990066;
 <SPAN CLASS="gutter">  78:</SPAN>    <SPAN CLASS="syntax9">&lt;![CDATA[</SPAN>
 <SPAN CLASS="gutter">  79:</SPAN>
 <SPAN CLASS="gutterH">  80:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">ACK</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sip:[service]@[remote_ip]:[remote_port]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0</SPAN>
-<SPAN CLASS="gutter">  81:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Via:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0/[transport]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]:[local_port]</SPAN>
+<SPAN CLASS="gutter">  81:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Via:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0/[transport]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]:[local_port];branch=[branch]</SPAN>
 <SPAN CLASS="gutter">  82:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">From:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sipp</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:sipp@[local_ip]:[local_port]&gt;;tag=[call_number]</SPAN>
 <SPAN CLASS="gutter">  83:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">To:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sut</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:[service]@[remote_ip]:[remote_port]&gt;[peer_tag_param]</SPAN>
 <SPAN CLASS="gutter">  84:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Call-ID:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[call_id]</SPAN>
@@ -186,7 +187,7 @@ color: #990066;
 <SPAN CLASS="gutter"> 107:</SPAN>    <SPAN CLASS="syntax9">&lt;![CDATA[</SPAN>
 <SPAN CLASS="gutter"> 108:</SPAN>
 <SPAN CLASS="gutter"> 109:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">BYE</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sip:[service]@[remote_ip]:[remote_port]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0</SPAN>
-<SPAN CLASS="gutterH"> 110:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Via:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0/[transport]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]:[local_port]</SPAN>
+<SPAN CLASS="gutterH"> 110:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Via:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0/[transport]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]:[local_port];branch=[branch]</SPAN>
 <SPAN CLASS="gutter"> 111:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">From:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sipp</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:sipp@[local_ip]:[local_port]&gt;;tag=[call_number]</SPAN>
 <SPAN CLASS="gutter"> 112:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">To:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">sut</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:[service]@[remote_ip]:[remote_port]&gt;[peer_tag_param]</SPAN>
 <SPAN CLASS="gutter"> 113:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Call-ID:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[call_id]</SPAN>

@@ -6,10 +6,11 @@
 color: #000000;
 }
 .syntax1 {
-color: #cc0000;
+color: #666666;
+font-style: italic;
 }
 .syntax2 {
-color: #ff8400;
+color: #ff9900;
 }
 .syntax3 {
 color: #6600cc;
@@ -18,39 +19,40 @@ color: #6600cc;
 color: #cc6600;
 }
 .syntax5 {
-color: #ff0000;
+color: #ff00ff;
 }
 .syntax6 {
-color: #9966ff;
-}
-.syntax7 {
-background: #ffffcc;
-color: #ff0066;
-}
-.syntax8 {
-color: #006699;
+color: #000099;
 font-weight: bold;
 }
+.syntax7 {
+color: #ff0000;
+font-weight: bold;
+font-style: italic;
+}
+.syntax8 {
+color: #000000;
+}
 .syntax9 {
-color: #009966;
+color: #000066;
 font-weight: bold;
 }
 .syntax10 {
-color: #0099ff;
-font-weight: bold;
+color: #990000;
 }
 .syntax11 {
 color: #66ccff;
 font-weight: bold;
 }
 .syntax12 {
-color: #02b902;
+color: #000000;
+font-style: italic;
 }
 .syntax13 {
-color: #ff00cc;
+color: #000099;
 }
 .syntax14 {
-color: #cc00cc;
+color: #0000ff;
 }
 .syntax15 {
 color: #9900cc;
@@ -59,19 +61,18 @@ color: #9900cc;
 color: #6600cc;
 }
 .syntax17 {
-color: #0000ff;
+color: #009999;
 }
 .syntax18 {
 color: #000000;
-font-weight: bold;
 }
 .gutter {
-background: #dbdbdb;
+background: #efefef;
 color: #000000;
 }
 .gutterH {
-background: #dbdbdb;
-color: #990066;
+background: #efefef;
+color: #000066;
 }
 -->
 </STYLE>
@@ -130,13 +131,13 @@ color: #990066;
 <SPAN CLASS="gutter">  51:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_CSeq:]</SPAN>
 <SPAN CLASS="gutter">  52:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Contact:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:[local_ip]:[local_port];transport=[transport]&gt;</SPAN>
 <SPAN CLASS="gutter">  53:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Content-Type:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">application/sdp</SPAN>
-<SPAN CLASS="gutter">  54:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Content-Length:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">136</SPAN>
+<SPAN CLASS="gutter">  54:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Content-Length:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[len]</SPAN>
 <SPAN CLASS="gutterH">  55:</SPAN>
 <SPAN CLASS="gutter">  56:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">v=0</SPAN>
-<SPAN CLASS="gutter">  57:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">o=user1</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">53655765</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">2353687637</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">IN</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">IP4</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">127.0.0.1</SPAN>
+<SPAN CLASS="gutter">  57:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">o=user1</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">53655765</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">2353687637</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">IN</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">IP[local_ip_type]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[local_ip]</SPAN>
 <SPAN CLASS="gutter">  58:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">s=-</SPAN>
-<SPAN CLASS="gutter">  59:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">t=0</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">0</SPAN>
-<SPAN CLASS="gutterH">  60:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">c=IN</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">IP4</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[media_ip]</SPAN>
+<SPAN CLASS="gutter">  59:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">c=IN</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">IP[media_ip_type]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[media_ip]</SPAN>
+<SPAN CLASS="gutterH">  60:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">t=0</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">0</SPAN>
 <SPAN CLASS="gutter">  61:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">m=audio</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[media_port]</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">RTP/AVP</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">0</SPAN>
 <SPAN CLASS="gutter">  62:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">a=rtpmap:0</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">PCMU/8000</SPAN>
 <SPAN CLASS="gutter">  63:</SPAN>
@@ -155,7 +156,7 @@ color: #990066;
 <SPAN CLASS="gutter">  76:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">SIP/2.0</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">200</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">OK</SPAN>
 <SPAN CLASS="gutter">  77:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_Via:]</SPAN>
 <SPAN CLASS="gutter">  78:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_From:]</SPAN>
-<SPAN CLASS="gutter">  79:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_To:];tag=[call_number]</SPAN>
+<SPAN CLASS="gutter">  79:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_To:]</SPAN>
 <SPAN CLASS="gutterH">  80:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_Call-ID:]</SPAN>
 <SPAN CLASS="gutter">  81:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">[last_CSeq:]</SPAN>
 <SPAN CLASS="gutter">  82:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">Contact:</SPAN><SPAN CLASS="syntax2"> </SPAN><SPAN CLASS="syntax2">&lt;sip:[local_ip]:[local_port];transport=[transport]&gt;</SPAN>
@@ -169,7 +170,6 @@ color: #990066;
 <SPAN CLASS="gutterH">  90:</SPAN>  <SPAN CLASS="syntax17">&lt;</SPAN><SPAN CLASS="syntax17">pause</SPAN><SPAN CLASS="syntax17"> </SPAN><SPAN CLASS="syntax17">milliseconds</SPAN><SPAN CLASS="syntax17">=</SPAN><SPAN CLASS="syntax13">&quot;</SPAN><SPAN CLASS="syntax13">2000</SPAN><SPAN CLASS="syntax13">&quot;</SPAN><SPAN CLASS="syntax17">/</SPAN><SPAN CLASS="syntax17">&gt;</SPAN>
 <SPAN CLASS="gutter">  91:</SPAN>
 <SPAN CLASS="gutter">  92:</SPAN><SPAN CLASS="syntax17">&lt;</SPAN><SPAN CLASS="syntax17">/</SPAN><SPAN CLASS="syntax17">scenario</SPAN><SPAN CLASS="syntax17">&gt;</SPAN>
-<SPAN CLASS="gutter">  93:</SPAN>
 </PRE></BODY>
 </HTML>
 
