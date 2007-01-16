@@ -734,6 +734,17 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><code>&lt;recv counter="1"&gt;</code>: Increments counter #1 when the message is received.</td>
                 </tr>            
                 <tr>
+                    <td></td>
+                    <td>regexp_match</td>
+                    <td>Boolean. Indicates if 'request' or 'response' is given as a regular expression. If so, the recv
+		    command will match against the regular expression. This allows to catch several cases
+		    in the same receive command.
+		    </td>
+                    <td>Example of a recv command that matches MESSAGE or PUBLISH or SUBSCRIBE requests:<br/>
+		    <source>&lt;recv request="MESSAGE|PUBLISH|SUBSCRIBE" crlf="true" regexp_match="true"&gt;
+&lt;/recv&gt;</source></td>
+                </tr>            
+                <tr>
                     <td><strong>&lt;pause&gt;</strong></td>
                     <td>milliseconds</td>
                     <td>Specify the pause delay, in milliseconds. When this delay is not set, the value of the <code>-d</code> command
