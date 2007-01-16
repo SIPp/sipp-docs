@@ -736,7 +736,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <tr>
                     <td></td>
                     <td>regexp_match</td>
-                    <td>Boolean. Indicates if 'request' or 'response' is given as a regular expression. If so, the recv
+                    <td>Boolean. Indicates if 'request' ('response' is not available) is given as a regular expression. If so, the recv
 		    command will match against the regular expression. This allows to catch several cases
 		    in the same receive command.
 		    </td>
