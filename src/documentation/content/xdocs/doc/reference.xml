@@ -431,6 +431,47 @@ nkthread : 4096</source>
                 </ul>
             </section>
         </section>
+        <anchor id="ThreePCCExtended" /><section>
+              <title>3PCC Extended</title>
+              <p>An extension of the 3pcc mode is implemented in sipp.
+               This feature allows n twin sipp instances to communicate each other,
+               each one of them being connected to a remote host.</p>
+               <p>The sipp instance which initiates the call is launched in "master" mode. 
+               The others are launched in "slave" mode. Twin sipp instances have names,
+               given in the command line (for example, s1, s2...sn for the slaves and m for the master) 
+               Correspondances between instances names and their addresses must be stored in a file, in the following format:</p> 
+<source>
+  s1;127.0.0.1:8080
+  s2;127.0.0.1:7080
+  m;127.0.0.1:6080
+</source> 
+               <p>Each twin sipp instance must access a different copy of this file.</p>
+               <p><a href="#sendCmd">sendCmd</a> and <a href="#recvCmd">recvCmd</a> have additional attributes:</p>
+<source>&lt;sendCmd dest="s1"&gt;
+  &lt;![CDATA[
+    Call-ID: [call_id]
+    From: m
+    [$1]
+
+   ]]&gt;
+&lt;/sendCmd&gt;
+</source>
+                 <p>Will send a command to the "s1" peer instance, which can be either master or slave,
+                    depending on the command line argument, which must be consistent with the scenario:
+                    a slave instance cannot have a sendCmd action before having any recvCmd.
+                    Note that the message must contain a "From" field, filled with the name of the sender. </p>
+<source>&lt;recvCmd src="m"&gt;
+  &lt;action
+     &lt;ereg regexp="Content-Type:.*"
+           search_in="msg"
+           assign_to="2"/&gt;
+  &lt;/action&gt;
+&lt;/recvCmd&gt;
+</source>
+                <p>Indicates that the twin command is expected to be received from the "m" peer instance.</p>
+                <p>Note that the master must be the launched at last.</p>
+                <p>There is no integrated scenarios for the 3pcc extended mode, but you can easily adapt those from 3pcc.</p>
+                </section>
         <anchor id="traffic_control" /><section><title>Traffic control</title>
         <p>SIPp generates SIP traffic according to the scenario specified. You
         can control the number of calls (scenario) that are started per second.
@@ -831,7 +872,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <tr>
                     <td><anchor id="sendCmd"/><strong>&lt;sendCmd&gt;</strong></td>
                     <td>&lt;![CDATA[]]&gt;</td>
-                    <td>Content to be sent to the twin <a href="#ThreePCC">3PCC</a> SIPp instance. The Call-ID must be included in the CDATA.</td>
+                    <td>Content to be sent to the twin <a href="#ThreePCC">3PCC</a> SIPp instance. The Call-ID must be included in the CDATA. In 3pcc extended mode, the From must be included to. </td>
                     <td><source>&lt;sendCmd&gt;
   &lt;![CDATA[
     Call-ID: [call_id]
@@ -839,7 +880,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
 
    ]]&gt;
 &lt;/sendCmd&gt;</source></td>
-                </tr>            
+                </tr> 
+                <tr>
+                    <td></td>
+                    <td>dest</td>
+                    <td>3pcc extended mode only: the twin sipp instance which the command will be sent to</td>
+                    <td><code>&lt;sendCmd dest="s1"&gt;</code>: the command will be sent to the "s1" twin instance</td>
+                </tr>           
                 <tr>
                     <td><anchor id="recvCmd"/><strong>&lt;recvCmd&gt;</strong></td>
                     <td>action</td>
@@ -851,7 +898,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
            assign_to="2"/&gt;
   &lt;/action&gt;
 &lt;/recvCmd&gt;</source></td>
-                </tr>            
+                </tr> 
+                <tr>
+                    <td></td>
+                    <td>src</td>
+                    <td>3pcc extended mode only: indicate the twin sipp instance which the command is expected to be received from </td>
+                    <td><code>&lt;recvCmd src = "s1"&gt;</code>: the command will be expected to be received from the "s1" twin instance</td>
+                </tr>           
                 <tr>
                     <td><strong><![CDATA[<label>]]></strong></td>
                     <td>id</td>
@@ -1904,7 +1957,7 @@ User0003;[authentication username=betty password=boop]</source>
                       This option is significant if you use one socket
                       per call. Once this limit is reached, traffic is
                       distributed over the sockets already opened.
-                      Default value is 50000.
+                      Default value is 50000.          
 
    -timer_resol     : Set the timer resolution in milliseconds.
                       This option has an impact on timers precision.
@@ -2072,6 +2125,13 @@ User0003;[authentication username=betty password=boop]</source>
                       this is the address of the local twin socket. SIPp 
                       will open this address:port to listen for twin command.
                       Example: 3PCC-C-B scenario.
+
+   -master          : 3pcc extended mode: indicates the name of the twin sipp instance (if master)
+   
+   -slave           : 3pcc extended mode: indicates the name of the twin sipp instance (if slave)
+
+   -slave_cfg       : 3pcc extended mode: indicates the file where the master and slave addresses are stored. This option
+                      must be set in the command line before the -sf option
 
    -nr              : Disable retransmission in UDP mode.
 
