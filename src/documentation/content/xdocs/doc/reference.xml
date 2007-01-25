@@ -439,7 +439,8 @@ nkthread : 4096</source>
                <p>The sipp instance which initiates the call is launched in "master" mode. 
                The others are launched in "slave" mode. Twin sipp instances have names,
                given in the command line (for example, s1, s2...sn for the slaves and m for the master) 
-               Correspondances between instances names and their addresses must be stored in a file, in the following format:</p> 
+               Correspondances between instances names and their addresses must be stored in a file (provided by -slave_cfg command line
+	       argument), in the following format:</p> 
 <source>
   s1;127.0.0.1:8080
   s2;127.0.0.1:7080
@@ -471,6 +472,11 @@ nkthread : 4096</source>
                 <p>Indicates that the twin command is expected to be received from the "m" peer instance.</p>
                 <p>Note that the master must be the launched at last.</p>
                 <p>There is no integrated scenarios for the 3pcc extended mode, but you can easily adapt those from 3pcc.</p>
+		<p><b>Example:</b> the following drawing illustrate the entire procedure. The arrows that are
+		shown between SIPp master and slaves depict only the synchronization commands exchanged between
+		the different SIPp instances. The SIP message exchange takes place as usual.<br/><br/>
+		<img alt="Master / slave feature" src="images/master_slave.png"></img>
+		</p>
                 </section>
         <anchor id="traffic_control" /><section><title>Traffic control</title>
         <p>SIPp generates SIP traffic according to the scenario specified. You
@@ -2126,11 +2132,14 @@ User0003;[authentication username=betty password=boop]</source>
                       will open this address:port to listen for twin command.
                       Example: 3PCC-C-B scenario.
 
-   -master          : 3pcc extended mode: indicates the name of the twin sipp instance (if master)
+   -master          : 3pcc extended mode: indicates the name of the twin sipp 
+                      instance (if master)
    
-   -slave           : 3pcc extended mode: indicates the name of the twin sipp instance (if slave)
+   -slave           : 3pcc extended mode: indicates the name of the twin sipp 
+                      instance (if slave)
 
-   -slave_cfg       : 3pcc extended mode: indicates the file where the master and slave addresses are stored. This option
+   -slave_cfg       : 3pcc extended mode: indicates the file where the master 
+                      and slave addresses are stored. This option
                       must be set in the command line before the -sf option
 
    -nr              : Disable retransmission in UDP mode.
