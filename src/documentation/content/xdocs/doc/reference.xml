@@ -509,6 +509,8 @@ nkthread : 4096</source>
         <p>To <strong>quit</strong> SIPp, press the 'q' key. 
         SIPp will stop placing new calls and wait until all current calls go to their end.
         SIPp will then exit.</p>
+        <p>You can also force SIPp to <strong>quit</strong> immediatly by pressing the 'Q' key. 
+        Current calls will be terminated by sending a BYE message.</p>
         <note><strong>TIP:</strong> you can place a defined number of calls and
         have SIPp exit when this is done. Use the <code>-m</code> option on the
         command line.</note>
