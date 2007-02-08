@@ -525,7 +525,7 @@ nkthread : 4096</source>
             remote control SIPp to lower the load, pause the traffic, ...</li>
           </ul>
           <p>Each SIPp instance is listening to a UDP socket. It 
-          starts to listen to port 8888 and each following SIPp instance (up to 10)
+          starts to listen to port 8888 and each following SIPp instance (up to 60)
           will listen to base_port + 1 (8889, 8890, ...).</p>
           <p>It is then possible to control SIPp like this:</p>
           <source>echo p >/dev/udp/x.y.z.t/8888 -> put SIPp in pause state (p key)
