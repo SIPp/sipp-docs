@@ -2190,9 +2190,7 @@ User0003;[authentication username=betty password=boop]</source>
                       A circuit must be available for the call to be placed.
                       Format: -tdmmap {0-3}{99}{5-8}{1-31}
 
-   -xyz string      : Any other parameter used in SIP messages as [xyz].
-
-   -key value       : Set the generic parameter named "key" to "value".
+   -key keyword value : Set the generic parameter named "keyword" to "value".
 
 Signal handling:
 
