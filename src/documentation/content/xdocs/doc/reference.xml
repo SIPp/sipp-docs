@@ -2192,6 +2192,8 @@ User0003;[authentication username=betty password=boop]</source>
 
    -xyz string      : Any other parameter used in SIP messages as [xyz].
 
+   -key value       : Set the generic parameter named "key" to "value".
+
 Signal handling:
 
    SIPp can be controlled using posix signals. The following signals
