@@ -1279,6 +1279,24 @@ echo "q" >/dev/udp/127.0.0.1/8889
                           search_in is equal to hdr.</td>
                       </tr>
                       <tr>
+                          <td>case_indep</td>
+                          <td>false</td>
+                          <td>To look for a header ignoring case . Only used when 
+                          the search_in tag is set to hdr. </td>
+                      </tr>
+                      <tr>
+                          <td>occurence</td>
+                          <td>1</td>
+                          <td>To find the nth occurence of a header. Only used when 
+                          the search_in tag is set to hdr.</td>
+                      </tr>
+                      <tr>
+                          <td>start_line</td>
+                          <td>false</td>
+                          <td>To look only at start of line. Only used when 
+                          the search_in tag is set to hdr.</td>
+                      </tr>
+                      <tr>
                           <td>check_it</td>
                           <td>false</td>
                           <td>if set to true, the call is marked as failed if 
