@@ -778,6 +778,15 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 </tr>
                 <tr>
                     <td></td>
+                    <td>chance</td>
+                    <td>In combination with "test", probability to actually branch to another part
+		    of the scenario. Chance can have a value between 0 (never) and 1 (always). 
+		    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td><source><![CDATA[  <recv response="403" optional="true" next="5" test="3" chance="0.90">
+  </recv>]]></source>90% chance to go to label "5" if variable "3" is set.</td>
+                </tr>            
+                <tr>
+                    <td></td>
                     <td>counter</td>
                     <td>Increments the counter given as parameter when the message is received. A total of 5 counter can be used.
                     The counter are saved in the <a href="#Available+counters">statistic file</a>.</td>
@@ -1437,30 +1446,44 @@ Fred;sipphone94</source>
                 <p><img src="images/sipp-02.gif" alt="Field injection" /></p>
                 <p>Think of the possibilities of this feature. They are huge.</p>
             </section>
-            <anchor id="branching" /><section><title>Conditional branching in scenarios</title>
-              <p>It is possible to execute a scenario in a non-linear
-              way. You can jump from one part of the scenario to another for example 
-              when a message is received or if a call variable is set.</p>
-              <p>You define a label (in the xml) as <code><![CDATA[<label id="n"/>]]></code>
-              Where n is a number between 1 and 19 (we can easily have more if needed). 
-              The label commands go anywhere in the main scenario between other commands.
-              To any action command (send, receive, pause, etc.) you add a next="n"
-              parameter, where n matches the id of a label. <strong>When it has done the 
-              command</strong> it continues the scenario from that label. This part is
-              useful with optional receives like 403 messages, because it allows 
-              you to go to a different bit of script to reply to it and then 
-              rejoin at the BYE (or wherever or not).</p>
-              <p>Alternatively, if you add a <strong>test="m"</strong> parameter to the next, 
-              it goes to the label only if variable [$m] is set. This allows you 
-              to look for some string in a received packet and alter the 
-              flow either on that or a later part of the script.</p>
-              <warning>If you add special cases at the end, don’t forget to put 
-              a label at the real end and jump to it at the end of the normal flow.</warning>
-              <p><strong>Example:</strong></p>
-              <p>The following example corresponds to the embedded '<a href="#scenario_branch">branchc</a>' (client side) scenario.
-              It has to run against the embedded '<a href="#scenario_branch">branchs</a>' (server side) scenario.<br/>
-              <img alt="Conditional branching example" src="images/branching_01.gif"></img><br/>
-              <img alt="Conditional branching example" src="images/branching_02.gif"></img></p>
+            <anchor id="branching" /><section><title>Conditional branching</title>
+	      <section><title>Conditional branching in scenarios</title>
+		      <p>It is possible to execute a scenario in a non-linear
+		      way. You can jump from one part of the scenario to another for example 
+		      when a message is received or if a call variable is set.</p>
+		      <p>You define a label (in the xml) as <code><![CDATA[<label id="n"/>]]></code>
+		      Where n is a number between 1 and 19 (we can easily have more if needed). 
+		      The label commands go anywhere in the main scenario between other commands.
+		      To any action command (send, receive, pause, etc.) you add a next="n"
+		      parameter, where n matches the id of a label. <strong>When it has done the 
+		      command</strong> it continues the scenario from that label. This part is
+		      useful with optional receives like 403 messages, because it allows 
+		      you to go to a different bit of script to reply to it and then 
+		      rejoin at the BYE (or wherever or not).</p>
+		      <p>Alternatively, if you add a <strong>test="m"</strong> parameter to the next, 
+		      it goes to the label only if variable [$m] is set. This allows you 
+		      to look for some string in a received packet and alter the 
+		      flow either on that or a later part of the script.</p>
+		      <warning>If you add special cases at the end, don’t forget to put 
+		      a label at the real end and jump to it at the end of the normal flow.</warning>
+		      <p><strong>Example:</strong></p>
+		      <p>The following example corresponds to the embedded '<a href="#scenario_branch">branchc</a>' (client side) scenario.
+		      It has to run against the embedded '<a href="#scenario_branch">branchs</a>' (server side) scenario.<br/>
+		      <img alt="Conditional branching example" src="images/branching_01.gif"></img><br/>
+		      <img alt="Conditional branching example" src="images/branching_02.gif"></img></p>
+              </section>
+	      <section><title>Randomness in conditional branching</title>
+	        <p>To have SIPp behave somewhat more like a "normal" SIP client being used by a human, 
+		it is possible to use "statistical branching". 
+		Wherever you can have a conditional branch on a variable being set (test="4"), 
+		you can also branch based on a statistical decision using the attribute 
+		"chance" (e.g. chance="0.90"). Chance can have a value between 0 (never) 
+		and 1 (always). "test" and "chance" can be combined, i.e. only 
+		branching when the test succeeds and the chance is good.</p>
+		<p>With this, you can have a variable reaction in a given scenario 
+		(e.g.. answer the call or reject with busy), or run around in a
+		loop (e.g. registrations) and break out of it after some random number of iterations.</p>
+              </section>
             </section>
             <anchor id="authentication"/><section><title>SIP authentication</title>
               <p>SIPp supports SIP authentication. Two authentication algorithm are supported: Digest/MD5 ("algorithm="MD5"")
