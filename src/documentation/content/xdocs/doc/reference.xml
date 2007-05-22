@@ -817,6 +817,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><code>&lt;pause variable="1" /&gt;</code> pauses for the number of milliseconds specified by call variable 1.</td>
                 </tr>
                 <tr>
+		    <anchor id="pause_distributions" />
                     <td></td>
                     <td>distribution</td>
                     <td>Indicates which statistical distribution to use to determine the length of the pause.  Without GSL, you may use <code>uniform</code> or <code>fixed</code>.  With GSL, normal, exponential, gamma, lambda, lognormal, negbin, (negative binomial), pareto, and weibull are available.  Depending on the distribution you select, you must also supply distribution specific parameters.</td>
@@ -866,6 +867,12 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>You can put a "next" in a pause to go to another part of the script when you are done with the pause. 
                     See <a href="#branching">conditional branching</a> section for more info.</td>
                     <td>Example to jump to label "7" after pausing 4 seconds:<source><![CDATA[<pause milliseconds="4000" next="7"/>]]></source></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>sanity_check</td>
+                    <td>By default, statistically distributed pauses are sanity checked to ensure that their 99th percentile values are less than INT_MAX.  Setting <strong>sanity_check</strong> to false disables this behavior.</td>
+                    <td><code>&lt;pause distribution="lognormal" mean="10" stdev="10" sanity_check="false"/&gt;</code> disables sanity checking of the lognormal distribution.</td>
                 </tr>
                 <tr>
                     <td><anchor id="nop"/><strong>&lt;nop&gt;</strong></td>
@@ -1159,6 +1166,20 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>Provides the CSeq value of the last request received. This value can be incremented (e.g. [cseq+1] adds 1 to
                         the CSeq value of the last request).</td>
                 </tr>
+                <tr>
+                    <td><strong>[clock_tick]</strong></td>
+                    <td>-</td>
+                    <td>Includes the internal SIPp clock tick value in the message.</td>
+                    <td>Includes the internal SIPp clock tick value in the message.</td>
+                </tr>
+                <tr>
+                    <td><strong>[fill]</strong></td>
+                    <td>-</td>
+                    <td>Injects filler characters into the message.  The length of the fill
+		    text is equal to the call variable stored in the
+		    <code>variable=N</code> parameter.  By default the text is a sequence
+		    of X's, but can be controlled with the <code>text="text"</code> parameter.</td>
+                </tr>
             </table>
             <p>Now that the INVITE message is sent, SIPp can wait for an answer by using the "<a href="#recv">recv</a>" command.</p>
 <source>  &lt;recv response="100"&gt; optional="true"
@@ -1420,6 +1441,41 @@ echo "q" >/dev/udp/127.0.0.1/8889
   </action>
 </nop>
 ]]></source>
+                  <anchor id="action_variables" /><section><title>Variable Manipulation</title>
+                  <p>Call variables may be treated as double precision floating point values.  The actions that modify double variables all write to the variable referenced by the <strong>assign_to</strong> parameter.  The <strong>&lt;assign&gt;</strong> action assigns a fixed value to a variable.  The <strong>&lt;sample&gt;</strong> action uses the same syntax as <a href="#pause_distributions">statistically distributed pauses</a> to statistically sample into a variable.</p>
+
+                  <p>For example, to assign the value 1.0 to $1 and sample from the normal distribution into $2:</p>
+                  <source><![CDATA[<nop>
+  <action>
+    <assign assign_to="1" value="1" />
+    <sample assign_to="2" distribution="normal" mean="0" stdev="1"/>
+  </action>
+</nop>
+]]></source>
+
+		  <p>Simple arithmetic is also possible using the <strong>&lt;add&gt;</strong>, <strong>&lt;subtract&gt;</strong>, <strong>&lt;multiply&gt;</strong>, and <strong>&lt;divide&gt;</strong> actions, which add, subtract, multiply, and divide the variable referened by <strong>assign_to</strong> by the value in <strong>value</strong>.
+For example, the following action modifies variable one as follows:</p>
+<source><![CDATA[<nop>
+  <action>
+    <assign assign_to="1" value="0" /> <!-- $1 == 0 -->
+    <add assign_to="1" value="2" /> <!-- $1 == 2 -->
+    <subtract assign_to="1" value="3" /> <!-- $1 == -1 -->
+    <multiply assign_to="1" value="4" /> <!-- $1 == -4 -->
+    <divide assign_to="1" value="5" /> <!-- $1 == -0.8 -->
+  </action>
+]]></source>
+
+                  </section>
+                  <anchor id="action_test" /><section><title>Variable Testing</title>
+                  <p>Variable testing allows you to construct loops and control structures using call variables.  THe <strong>test</strong> action takes four arguments: <strong>variable</strong> which is the variable that to <strong>compare</strong> against <strong>value</strong>, and <strong>assign_to</strong> which is a boolean call variable that the result of the test is stored in.  Compare may be one of the following tests: <strong>equal</strong>, <strong>not_equal</strong>, <strong>greater_than</strong>, <strong>less_than</strong>, <strong>greater_than_equal</strong>, or <strong>less_than_equal</strong>.</p>
+                  <p>Example that sets $2 to true if  $1 is less than 10:</p>
+                  <source><![CDATA[<nop>
+  <action>
+    <test assign_to="2" variable="1" compare="less_than" value="10" />
+  </action>
+</nop>
+]]></source>
+                  </section>
                   </section>
                 </section>
             </section>
@@ -1479,10 +1535,18 @@ To: sut user &lt;[field0 file="callee.csv"]&gt;
 		      useful with optional receives like 403 messages, because it allows 
 		      you to go to a different bit of script to reply to it and then 
 		      rejoin at the BYE (or wherever or not).</p>
+
 		      <p>Alternatively, if you add a <strong>test="m"</strong> parameter to the next, 
 		      it goes to the label only if variable [$m] is set. This allows you 
 		      to look for some string in a received packet and alter the 
-		      flow either on that or a later part of the script.</p>
+		      flow either on that or a later part of the script.  The
+		      evaluation of a test varies based on the type of call
+                      variable.  For regular expressions, at least one match must have been found;
+		      for boolean variables the value must be true; and for all others a value must
+		      have been set (currently this only applies to doubles).  For more complicated
+		      tests, see the <a href="#action_test">&lt;test&gt; action</a>.</p>
+
+
 		      <warning>If you add special cases at the end, don’t forget to put 
 		      a label at the real end and jump to it at the end of the normal flow.</warning>
 		      <p><strong>Example:</strong></p>
