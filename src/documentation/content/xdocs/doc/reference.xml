@@ -809,52 +809,57 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>Specify the pause delay, in milliseconds. When this delay is not set, the value of the <code>-d</code> command
                     line parameter is used.</td>
                     <td><code>&lt;pause milliseconds="5000"/&gt;</code>: pause the scenario for 5 seconds.</td>
-                </tr>            
+                </tr>
                 <tr>
                     <td></td>
-                    <td>min</td>
-                    <td>Indicates a minimum value for a pause. A random pause is executed between min and max values, using a uniform distribution.</td>
-                    <td><code>&lt;pause min="2000" max="5000"/&gt;</code> for pauses between 2 and 5 seconds.</td>
-                </tr>            
+                    <td>variable</td>
+                    <td>Indicates which call variable to use to determine the length of the pause.</td>
+                    <td><code>&lt;pause variable="1" /&gt;</code> pauses for the number of milliseconds specified by call variable 1.</td>
+                </tr>
                 <tr>
                     <td></td>
-                    <td>max</td>
-                    <td>Indicates a maximum value for a pause. A random pause is executed between min and max values, using a uniform distribution..</td>
-                    <td><code>&lt;pause min="2000" max="5000"/&gt;</code> for pauses between 2 and 5 seconds.</td>
-                </tr>            
-                <tr>
-                    <td></td>
-                    <td>normal</td>
-                    <td>If true, use a normal distribution pause with a mean and standard deviation (if <a href="#gsl">GSL</a> is available at compile time).</td>
-                    <td><code>&lt;pause normal="true" mean="60000" stdev="15000"/&gt;</code> provides a normal pause with a mean of 60 seconds (i.e. 60,000 ms) and a standard deviation of 15 seconds.  The mean and standard deviation are specified as integer milliseconds.
-                    The distribution will look like:<br/>
-                    <img alt="Normal pause distribution" src="images/dist_normal.gif"></img></td>
-                </tr>            
-                <tr>
-                    <td></td>
-                    <td>lognormal</td>
-                    <td>If true, the pause is specified in terms of the mean and standard deviation of the normal distribution that is exponentiated. (if <a href="#gsl">GSL</a> is available at compile time).</td>
-                    <td><code>&lt;pause lognormal="true" mean="12.28" stdev="1" /&gt;</code> creates a distribution's whose natural logarithm has a mean of 12.28 and a
+                    <td>distribution</td>
+                    <td>Indicates which statistical distribution to use to determine the length of the pause.  Without GSL, you may use <code>uniform</code> or <code>fixed</code>.  With GSL, normal, exponential, gamma, lambda, lognormal, negbin, (negative binomial), pareto, and weibull are available.  Depending on the distribution you select, you must also supply distribution specific parameters.</td>
+                    <td>
+			The following examples show the various types of distributed pauses:
+
+			<ul>
+			<li><code>&lt;pause distribution="fixed" value="1000" /&gt;</code> pauses for 1 second.</li>
+			<li><code>&lt;pause distribution="uniform" min="2000" max="5000"/&gt;</code> pauses between 2 and 5 seconds.</li>
+			</ul>
+
+			The remaining distributions require GSL.  In general The
+			parameter names were chosen to be as consistent with
+			Wikipedia's distribution description pages.
+			<ul>
+			<li><code>&lt;pause distribution="normal" mean="60000" stdev="15000"/&gt;</code> provides a normal pause with a mean of 60 seconds (i.e. 60,000 ms) and a standard deviation of 15 seconds.  The mean and standard deviation are specified as integer milliseconds.  The distribution will look like:<br/>
+			<img alt="Normal pause distribution" src="images/dist_normal.gif"></img>
+			</li>
+			<li><code>&lt;pause distribution="lognormal" mean="12.28" stdev="1" /&gt;</code> creates a distribution's whose natural logarithm has a mean of 12.28 and a
   standard deviation of 1.  The mean and standard deviation are specified as
-  double values (in milliseconds).
-                    The distribution will look like:<br/>
-                    <img alt="Log normal pause distribution" src="images/dist_lognormal.gif"></img></td>
-                </tr>            
-                <tr>
-                    <td></td>
-                    <td>exponential</td>
-                    <td>If true, the pause is specified using an exponential distribution, with an integer mean. (if <a href="#gsl">GSL</a> is available at compile time).</td>
-                    <td><code>&lt;pause exponential="true" mean="900000"/&gt;</code> creates an exponentially distributed pause with a mean of 15 minutes.
-                                        The distribution will look like:<br/>
-                    <img alt="Normal pause distribution" src="images/dist_exponential.gif"></img>
+  double values (in milliseconds).  The distribution will look like:<br/>
+			<img alt="Log normal pause distribution" src="images/dist_lognormal.gif"></img></li>
+
+                        <li><code>&lt;pause distribution="exponential" mean="900000"/&gt;</code> creates an exponentially distributed pause with a mean of 15 minutes.  The distribution will look like:<br/>
+                        <img alt="Normal pause distribution" src="images/dist_exponential.gif"></img></li>
+
+                        <li><code>&lt;pause distribution="weibull" lambda="3" k ="4"/&gt;</code> creates a Weibull distribution with a scale of 3 and a shape of 4 (see <a href="http://en.wikipedia.org/wiki/Weibull">Weibull on Wikipedia</a> for a description of the distribution).</li>
+
+                        <li><code>&lt;pause distribution="pareto" k="1" x_m="2"/&gt;</code> creates a Pareto distribution with k and x<sub>m</sub> of 1 and 2, respectively (see <a href="http://en.wikipedia.org/wiki/Pareto_distribution">Pareto on Wikipedia</a> for a description of the distribution).</li>
+
+                        <li><code>&lt;pause distribution="gamma" k="3" theta="2"/&gt;</code> creates a Gamma distribution with k and theta of 9 and 2, respectively (see <a href="http://en.wikipedia.org/wiki/Gamma_distribution">Gamma on Wikipedia</a> for a description of the distribution).</li>
+
+                        <li><code>&lt;pause distribution="negbin" p="0.1" n="2"/&gt;</code> creates a Negative binomial distribution with p and n of 0.1 and 2, respectively (see <a href="http://en.wikipedia.org/wiki/Negative_binomial_distribution">Negative Binomial on Wikipedia</a> for a description of the distribution).</li>
+			</ul>
+
                     </td>
-                </tr>            
+                </tr>
                 <tr>
                     <td></td>
                     <td>crlf</td>
                     <td>Displays an empty line <strong>after</strong> the arrow for the message in main SIPp screen.</td>
                     <td><code>&lt;pause crlf="true"&gt;</code></td>
-                </tr>            
+                </tr>
                 <tr>
                     <td></td>
                     <td>next</td>
@@ -1421,10 +1426,10 @@ echo "q" >/dev/udp/127.0.0.1/8889
             <anchor id="inffile" /><section><title>Injecting values from an external CSV during calls</title>
                 <p>You can use "<code>-inf file_name</code>" as a command line parameter
                 to input values into the scenarios. The first line of the file should
-                say whether the data is to be read in sequence (SEQUENTIAL) or random
-                (RANDOM) order. Each line corresponds to one call and has one or more
-                ';' delimited data fields and they can be referred as [field0], [field1], ... in the
-                xml scenario file. Example:</p>
+                say whether the data is to be read in sequence (SEQUENTIAL), random
+                order (RANDOM),  or in a user based manner (USER). Each line corresponds
+		to one call and has one or more ';' delimited data fields and they can be
+		referred as [field0], [field1], ... in the xml scenario file. Example:</p>
 <source>SEQUENTIAL
 #This line will be ignored
 Sarah;sipphone32
@@ -1445,6 +1450,20 @@ Fred;sipphone94</source>
                 <p>As a picture says more than 1000 words, here is one:</p>
                 <p><img src="images/sipp-02.gif" alt="Field injection" /></p>
                 <p>Think of the possibilities of this feature. They are huge.</p>
+		<p>It is possible to use more than one injection file, and is
+		necessary when you want to select different types of data in different
+		ways.  For example, when running a user-based benchmark, you may have
+		a caller.csv with "USER" as the first line and a callee.csv
+		with "RANDOM" as the first line.  To specify which CSV file is
+		used, add the file= parameter to the keyword.  For example:</p>
+		<source>
+INVITE sip:[field0 file="callee.csv"] SIP/2.0
+From: sipp user &lt;[field0 file="caller.csv"]&gt;;tag=[pid]SIPpTag00[call_number]
+To: sut user &lt;[field0 file="callee.csv"]&gt;
+...</source>
+		<p>Will select the destination user from callee.csv and the sending
+		user from caller.csv.  If no file parameter is specified, then the
+		first input file on the command line is used by default.</p>
             </section>
             <anchor id="branching" /><section><title>Conditional branching</title>
 	      <section><title>Conditional branching in scenarios</title>
