@@ -1942,296 +1942,298 @@ User0003;[authentication username=betty password=boop]</source>
 
    -v               : Display version and copyright information.
 
-   -bg              : Launch SIPp in background mode.
+   -aa              : Enable automatic 200 OK answer for INFO, UPDATE and
+                      NOTIFY messages.
 
-   -p local_port    : Set the local port number. Default is a
-                      random free port chosen by the system.
-
-   -buff_size buff_size: Set the send and receive buffer size.
-
-   -i local_ip      : Set the local IP address for 'Contact:',
-                      'Via:', and 'From:' headers. Default is
-                      primary host IP address.
-
-   -bind_local      : Bind socket to local IP address, i.e. the local IP
-                      address is used as the source IP address.
-                      If SIPp runs in server mode it will only listen on the
-                      local IP address instead of all IP addresses.
-
-   -inf file_name   : Inject values from an external CSV file during calls
-                      into the scenarios.
-                      First line of this file say whether the data is 
-                      to be read in sequence (SEQUENTIAL) or random 
-                      (RANDOM) order.
-                      Each line corresponds to one call and has one or 
-                      more ';' delimited data fields. Those fields can be 
-                      referred as [field0], [field1], ... in the xml 
-                      scenario file.
-
-   -d duration      : Controls the length (in milliseconds) of
-                      calls. More precisely, this controls
-                      the duration of 'pause' instructions in
-                      the scenario, if they do not have a
-                      'milliseconds' section. Default value is 0.
-
-   -r rate (cps)    : Set the call rate (in calls per seconds).
-                      This value can be changed during test by
-                      pressing '+','_','*' or '/'. Default is 10.
-                      pressing '+' key to increase call rate by 1,
-                      pressing '-' key to decrease call rate by 1,
-                      pressing '*' key to increase call rate by 10,
-                      pressing '/' key to decrease call rate by 10.
-                      If the -rp option is used, the call rate is
-                      calculated with the period in ms given 
-                      by the user.
-
-   -rp period (ms)  : Specify the rate period in milliseconds for the call
-                      rate.
-                      Default is 1 second.
-                      This allows you to have n calls every m milliseconds 
-                      (by using -r n -rp m).
-                      Example: -r 7 -rp 2000 ==> 7 calls every 2 seconds.
-
-   -rate_increase   : Specify the rate increase every -fd seconds
-                      This allows you to increase the load for each
-                      independent logging period
-                      Example: -rate_increase 10 -fd 10 
-                        ==> increase calls by 10 every 10 seconds.
-
-   -rate_max        : If -rate_increase is set, then quit after the rate
-                      reaches this value.
-                      Example: -rate_increase 10 -max_rate 100
-                        ==> increase calls by 10 until 100 cps is hit.
-
-   -max_socket max  : Set the max number of sockets to open simultaneously.
-                      This option is significant if you use one socket
-                      per call. Once this limit is reached, traffic is
-                      distributed over the sockets already opened.
-                      Default value is 50000.          
-
-   -timer_resol     : Set the timer resolution in milliseconds.
-                      This option has an impact on timers precision.
-                      Small values allow more precise scheduling but
-                      impacts CPU usage.
-                      If the compression is on, the value is set to 50ms.
-                      The default value is 200ms.
-
-   -max_recv_loops  : Set the maximum number of messages received read per
-                      cycle. Increase this value for high traffic level.
-                      The default value is 1000.
-
-   -up_nb           : Set the number of updates of the internal clock during
-                      the reading of received messages.
-                      Default value is 1.
-
-   -base_cseq n     : Start value of [cseq] for each call.
-
-   -cid_str string  : Call ID string (default %u-%p@%s).
-                      %u=call_number, %s=ip_address, %p=process_number,
-                      %%=% (in any order).
-
-   -auth_uri uri    : Force the value of the URI for authentication.
-                      By default, the URI is composed of 
+   -auth_uri        : Force the value of the URI for authentication.
+                      By default, the URI is composed of
                       remote_ip:remote_port.
 
-   -sf filename     : Loads an alternate xml scenario file.
-                      To learn more about XML scenario syntax,
-                      use the -sd option to dump embedded 
-                      scenarios. They contain all the necessary
-                      help.
+   -base_cseq       : Start value of [cseq] for each call.
 
-   -sn name         : Use a default scenario (embedded in
-                      the sipp executable). If this option is omitted,
-                      the Standard SipStone UAC scenario is loaded.
-                      Available values in this version:
+   -bg              : Launch SIPp in background mode.
 
-                        'uac'      : Standard SipStone UAC (default).
-                        'uac_pcap' : Standard SipStone UAC with pcap
-                                     play (RTP)
-                        'uas'      : Simple UAS responder.
-                        'regexp'   : Standard SipStone UAC - with
-                                     regexp and variables.
-                        'branchc'  : Branching and conditional
-                                     branching in scenarios - client.
-                        'branchs'  : Branching and conditional
-                                     branching in scenarios - server.
+   -bind_local      : Bind socket to local IP address, i.e. the local IP
+                      address is used as the source IP address.  If SIPp runs
+                      in server mode it will only listen on the local IP
+                      address instead of all IP addresses.
 
-                      Default 3pcc scanerios (see -3pcc option):
+   -buff_size       : Set the send and receive buffer size.
 
-                        '3pcc-C-A' : Controller A side (must be started
-                                     after all other 3pcc scenarios)
-                        '3pcc-C-B' : Controller B side.
-                        '3pcc-A'   : A side.
-                        '3pcc-B'   : B side.
-   -ip_field nr     : Set which field from the injection file contains the
-                      IP address from which the client will send its
-                      messages.
+   -cid_str         : Call ID string (default %u-%p@%s).  %u=call_number,
+                      %s=ip_address, %p=process_number, %%=% (in any order).
+
+   -cp              : Set the local control port number. Default is 8888.
+
+   -d               : Controls the length of calls. More precisely, this
+                      controls the duration of 'pause' instructions in the
+                      scenario, if they do not have a 'milliseconds' section.
+                      Default value is 0 and default unit is milliseconds.
+
+   -f               : Set the statistics report frequency on screen. Default is
+                      1 and default unit is seconds.
+
+   -fd              : Set the statistics dump log report frequency. Default is
+                      60 and default unit is seconds.
+
+   -i               : Set the local IP address for 'Contact:','Via:', and
+                      'From:' headers. Default is primary host IP address.
+                      
+
+   -inf             : Inject values from an external CSV file during calls into
+                      the scenarios.
+                      First line of this file say whether the data is to be
+                      read in sequence (SEQUENTIAL) or random (RANDOM) order.
+                      Each line corresponds to one call and has one or more
+                      ';' delimited data fields. Those fields can be referred
+                      as [field0], [field1], ... in the xml scenario file.
+
+   -ip_field        : Set which field from the injection file contains the IP
+                      address from which the client will send its messages.
                       If this option is omitted and the '-t ui' option is
                       present, then field 0 is assumed.
                       Use this option together with '-t ui'
 
-   -sd name         : Dumps a default scenario (embeded in
-                      the sipp executable)
-
-   -t [u1|un|ui|t1|tn|l1|ln] : Set the transport mode:
-
-                        u1: UDP with one socket (default),
-                        un: UDP with one socket per call,
-                        ui: UDP with one socket per IP address
-                            The IP addresses must be defined in the
-                            injection file.
-                        t1: TCP with one socket,
-                        tn: TCP with one socket per call,
-                        l1: TLS with one socket,
-                        ln: TLS with one socket per call.
-
-   -trace_msg       : Displays sent and received SIP messages in
-                      <scenario file name>_<pid>_messages.log
-
-   -trace_screen    : Dump statistic screens in the 
-                      <scenario_name>_<pid>_screens.log file when
-                      quitting SIPp. Useful to get a final status report
-                      in background mode (-bg option).
-
-   -trace_timeout   : Displays call ids for calls with timeouts in
-                      <scenario file name>_<pid>_timeout.log
-
-   -trace_stat      : Dumps all statistics in <scenario_name>_<pid>.csv
-                      file. Use the '-h stat' option for a detailed
-                      description of the statistics file content.
-
-   -stf file_name   : Set the file name to use to dump statistics
-
-   -stat_delimiter string : Set the delimiter for the statistics file
-
-   -trace_err       : Trace all unexpected messages in
-                      <scenario file name>_<pid>_errors.log.
-
-   -trace_logs      : Allow tracing of <log> actions in
-                      <scenario file name>_<pid>_logs.log.
-
-   -trace_rtt       : Allow tracing of all response times in
-                      <scenario file name>_<pid>_rtt.csv.
-
-   -rtt_freq freq   : freq is mandatory. Dump response times 
-                      every freq calls in the log file defined 
-                      by -trace_rtt. Default value is 200.
-
-   -s service_name  : Set the username part of the resquest URI.
-                      Default is 'service'.
-
-   -ap password     : Set the password for authentication challenges.
-                      Default is 'password'
-
-   -tls_cert name   : Set the name for TLS Certificate file.
-                      Default is 'cacert.pem'
-
-   -tls_key name    : Set the name for TLS Private Key file.
-                      Default is 'cakey.pem'
-
-   -tls_crl name    : Set the name for Certificate Revocation List file.
-                      If not specified, X509 CRL is not activated.
-
-   -f frequency     : Set the statistics report frequency on screen
-                      (in seconds). Default is 1.
-
-   -fd frequency    : Set the statistics dump log report frequency
-                      (in seconds). Default is 60.
-
-   -l calls_limit   : Set the maximum number of simultaneous
-                      calls. Once this limit is reached, traffic
-                      is decreased until the number of open calls
-                      goes down. Default:
-
+   -l               : Set the maximum number of simultaneous calls. Once this
+                      limit is reached, traffic is decreased until the number
+                      of open calls goes down. Default:
                         (3 * call_duration (s) * rate).
 
-   -m calls         : Stop the test and exit when 'calls' calls are
-                      processed.
+   -lost            : Set the number of packets to lose by default (scenario
+                      specifications override this value).
 
-   -rtp_echo        : Enable RTP echo. RTP/UDP packets received
-                      on port defined by -mp are echoed to their
-                      sender.
-                      RTP/UDP packets coming on this port + 2
-                      are also echoed to their sender (used for
-                      sound and video echo).
+   -m               : Stop the test and exit when 'calls' calls are processed
 
-   -mp media_port   : Set the local RTP echo port number. Default
-                      is 6000.
+   -mi              : Set the local media IP address
 
-   -mi local_rtp_ip : Set the local media IP address.
+   -master          : 3pcc extended mode: indicates the master number
 
-   -mb buf_size     : Set the RTP echo buffer size (default: 2048).
+   -max_recv_loops  : Set the maximum number of messages received read per
+                      cycle. Increase this value for high traffic level.  The
+                      default value is 1000.
 
-   -3pcc ip:port    : Launch the tool in 3pcc mode ("Third Party
-                      call control"). The passed ip address
-                      is depending on the 3PCC role.
-                      - When the first twin command is 'sendCmd' then
-                      this is the address of the remote twin socket.
-                      SIPp will try to connect to this address:port to
-                      send the twin command (This instance must be started
-                      after all other 3PCC scenarii).
-                      Example: 3PCC-C-A scenario.
-                      - When the first twin command is 'recvCmd' then
-                      this is the address of the local twin socket. SIPp 
-                      will open this address:port to listen for twin command.
-                      Example: 3PCC-C-B scenario.
+   -max_reconnect   : Set the the maximum number of reconnection.
 
-   -master          : 3pcc extended mode: indicates the name of the twin sipp 
-                      instance (if master)
-   
-   -slave           : 3pcc extended mode: indicates the name of the twin sipp 
-                      instance (if slave)
-
-   -slave_cfg       : 3pcc extended mode: indicates the file where the master 
-                      and slave addresses are stored. This option
-                      must be set in the command line before the -sf option
-
-   -nr              : Disable retransmission in UDP mode.
-
-   -max_retrans     : Maximum number of UDP retransmissions before call
-                      ends on timeout.
-                      Default is 5 for INVITE transactions and 7 for
+   -max_retrans     : Maximum number of UDP retransmissions before call ends on
+                      timeout.  Default is 5 for INVITE transactions and 7 for
                       others.
 
-   -recv_timeout nb : Global receive timeout in milliseconds.
-                      If the expected message is not received, the call
-                      times out and is aborted
+   -max_invite_retrans: Maximum number of UDP retransmissions for invite
+                      transactions before call ends on timeout.
 
-   -timeout nb      : Global timeout in seconds.
-                      If this option is set, SIPp quits after nb seconds
+   -max_non_invite_retrans: Maximum number of UDP retransmissions for non-invite
+                      transactions before call ends on timeout.
 
-   -nd              : No Default. Disable all default behavior of SIPp
-                      which are the following:
+   -max_socket      : Set the max number of sockets to open simultaneously.
+                      This option is significant if you use one socket per
+                      call. Once this limit is reached, traffic is distributed
+                      over the sockets already opened. Default value is 50000
+
+   -mb              : Set the RTP echo buffer size (default: 2048).
+
+   -mp              : Set the local RTP echo port number. Default is 6000.
+
+   -nd              : No Default. Disable all default behavior of SIPp which
+                      are the following:
                       - On UDP retransmission timeout, abort the call by
-                      sending a BYE or a CANCEL
-                      - On receive timeout with no ontimeout attribute, 
-                      abort the call by sending a BYE or a CANCEL
+                        sending a BYE or a CANCEL
+                      - On receive timeout with no ontimeout attribute, abort
+                        the call by sending a BYE or a CANCEL
                       - On unexpected BYE send a 200 OK and close the call
                       - On unexpected CANCEL send a 200 OK and close the call
                       - On unexpected PING send a 200 OK and continue the call
                       - On any other unexpected message, abort the call by
-                      sending a BYE or a CANCEL
+                        sending a BYE or a CANCEL
+                      
 
-   -pause_msg_ign   : Ignore the messages received during a pause defined
-                      in the scenario
+   -nr              : Disable retransmission in UDP mode.
 
-   -rsa host[:port] : Set the remote sending address to host:port.
-                      for sending the messages.
+   -p               : Set the local port number.  Default is a random free port
+                      chosen by the system.
 
-   -max_reconnect   : Set the the maximum number of reconnection.
+   -pause_msg_ign   : Ignore the messages received during a pause defined in
+                      the scenario 
 
-   -reconnect_close true/false: Should calls be closed on reconnect?
+   -r               : Set the call rate (in calls per seconds).  This value can
+                      bechanged during test by pressing '+','_','*' or '/'.
+                      Default is 10.
+                      pressing '+' key to increase call rate by 1,
+                      pressing '-' key to decrease call rate by 1,
+                      pressing '*' key to increase call rate by 10,
+                      pressing '/' key to decrease call rate by 10.
+                      If the -rp option is used, the call rate is calculated
+                      with the period in ms given by the user.
 
-   -reconnect_sleep int : How long to sleep between the close and reconnect?
+   -rp              : Specify the rate period for the call rate.  Default is 1
+                      second and default unit is milliseconds.  This allows
+                      you to have n calls every m milliseconds (by using -r n
+                      -rp m).
+                      Example: -r 7 -rp 2000 ==> 7 calls every 2 seconds.
+                               -r 10 -rp 5s => 10 calls every 5 seconds.
 
-   -aa              : Enable automatic 200 OK answer for INFO and NOTIFY
-                      messages.
+   -rate_increase   : Specify the rate increase every -fd units (default is
+                      seconds).  This allows you to increase the load for each
+                      independent logging period.
+                      Example: -rate_increase 10 -fd 10s
+                        ==> increase calls by 10 every 10 seconds.
 
-   -tdmmap map      : Generate and handle a table of TDM circuits.
+   -rate_max        : If -rate_increase is set, then quit after the rate
+                      reaches this value.
+                      Example: -rate_increase 10 -rate_max 100
+                        ==> increase calls by 10 until 100 cps is hit.
+
+   -recv_timeout    : Global receive timeout. Default unit is milliseconds. If
+                      the expected message is not received, the call times out
+                      and is aborted.
+
+   -send_timeout    : Global send timeout. Default unit is milliseconds. If a
+                      message is not sent (due to congestion), the call times
+                      out and is aborted.
+
+   -reconnect_close : Should calls be closed on reconnect?
+
+   -reconnect_sleep : How long to sleep between the close and reconnect?
+
+   -rsa             : Set the remote sending address to host:port for sending
+                      the messages.
+
+   -rtp_echo        : Enable RTP echo. RTP/UDP packets received on port defined
+                      by -mp are echoed to their sender.
+                      RTP/UDP packets coming on this port + 2 are also echoed
+                      to their sender (used for sound and video echo).
+
+   -rtt_freq        : freq is mandatory. Dump response times every freq calls
+                      in the log file defined by -trace_rtt. Default value is
+                      200.
+
+   -s               : Set the username part of the resquest URI. Default is
+                      'service'.
+
+   -sd              : Dumps a default scenario (embeded in the sipp executable)
+
+   -sf              : Loads an alternate xml scenario file.  To learn more
+                      about XML scenario syntax, use the -sd option to dump
+                      embedded scenarios. They contain all the necessary help.
+
+   -slave           : 3pcc extended mode: indicates the slave number
+
+   -slave_cfg       : 3pcc extended mode: indicates the file where the master
+                      and slave addresses are stored
+
+   -sn              : Use a default scenario (embedded in the sipp executable).
+                      If this option is omitted, the Standard SipStone UAC
+                      scenario is loaded.
+                      Available values in this version:
+                      
+                      - 'uac'      : Standard SipStone UAC (default).
+                      - 'uas'      : Simple UAS responder.
+                      - 'regexp'   : Standard SipStone UAC - with regexp and
+                        variables.
+                      - 'branchc'  : Branching and conditional branching in
+                        scenarios - client.
+                      - 'branchs'  : Branching and conditional branching in
+                        scenarios - server.
+                      
+                      Default 3pcc scenarios (see -3pcc option):
+                      
+                      - '3pcc-C-A' : Controller A side (must be started after
+                        all other 3pcc scenarios)
+                      - '3pcc-C-B' : Controller B side.
+                      - '3pcc-A'   : A side.
+                      - '3pcc-B'   : B side.
+                      
+
+   -stat_delimiter  : Set the delimiter for the statistics file
+
+   -stf             : Set the file name to use to dump statistics
+
+   -t               : Set the transport mode:
+                      - u1: UDP with one socket (default),
+                      - un: UDP with one socket per call,
+                      - ui: UDP with one socket per IP address The IP
+                        addresses must be defined in the injection file.
+                      - t1: TCP with one socket,
+                      - tn: TCP with one socket per call,
+                      - l1: TLS with one socket,
+                      - ln: TLS with one socket per call,
+                      - c1: u1 + compression (only if compression plugin
+                        loaded),
+                      - cn: un + compression (only if compression plugin
+                        loaded).
+                      
+
+   -timeout         : Global timeout. Default unit is seconds.  If this option
+                      is set, SIPp quits after nb units (-timeout 20s quits
+                      after 20 seconds).
+
+   -timer_resol     : Set the timer resolution. Default unit is milliseconds. 
+                      This option has an impact on timers precision.Small
+                      values allow more precise scheduling but impacts CPU
+                      usage.If the compression is on, the value is set to
+                      50ms. The default value is 10ms.
+
+   -trace_msg       : Displays sent and received SIP messages in <scenario file
+                      name>_<pid>_messages.log
+
+   -trace_shortmsg  : Displays sent and received SIP messages as CSV in
+                      <scenario file name>_<pid>_shortmessages.log
+
+   -trace_screen    : Dump statistic screens in the
+                      <scenario_name>_<pid>_cenaris.log file when quitting
+                      SIPp. Useful to get a final status report in background
+                      mode (-bg option).
+
+   -trace_err       : Trace all unexpected messages in <scenario file
+                      name>_<pid>_errors.log.
+
+   -trace_timeout   : Displays call ids for calls with timeouts in <scenario
+                      file name>_<pid>_timeout.log
+
+   -trace_stat      : Dumps all statistics in <scenario_name>_<pid>.csv file.
+                      Use the '-h stat' option for a detailed description of
+                      the statistics file content.
+
+   -trace_rtt       : Allow tracing of all response times in <scenario file
+                      name>_<pid>_rtt.csv.
+
+   -trace_logs      : Allow tracing of <log> actions in <scenario file
+                      name>_<pid>_logs.log.
+
+   -users           : Instead of starting calls at a fixed rate, begin 'users'
+                      calls at startup, and keep the number of calls constant.
+
+   -ap              : Set the password for authentication challenges. Default
+                      is 'password
+
+   -tls_cert        : Set the name for TLS Certificate file. Default is
+                      'cacert.pem
+
+   -tls_key         : Set the name for TLS Private Key file. Default is
+                      'cakey.pem'
+
+   -tls_crl         : Set the name for Certificate Revocation List file. If not
+                      specified, X509 CRL is not activated.
+
+   -3pcc            : Launch the tool in 3pcc mode ("Third Party call
+                      control"). The passed ip address is depending on the
+                      3PCC role.
+                      - When the first twin command is 'sendCmd' then this is
+                        the address of the remote twin socket.  SIPp will try to
+                        connect to this address:port to send the twin command
+                        (This instance must be started after all other 3PCC
+                        scenarii).
+                          Example: 3PCC-C-A scenario.
+                      - When the first twin command is 'recvCmd' then this is
+                        the address of the local twin socket. SIPp will open
+                        this address:port to listen for twin command.
+                          Example: 3PCC-C-B scenario.
+
+   -tdmmap          : Generate and handle a table of TDM circuits.
                       A circuit must be available for the call to be placed.
                       Format: -tdmmap {0-3}{99}{5-8}{1-31}
 
-   -key keyword value : Set the generic parameter named "keyword" to "value".
+   -key             : keyword value
+                      Set the generic parameter named "keyword" to "value".
 
 Signal handling:
 
@@ -2264,7 +2266,6 @@ Example:
      ./sipp -sn uas
    On the same host, run sipp with embedded client (uac) scenario
      ./sipp -sn uac 127.0.0.1
-
 
 ]]>
           </source>
