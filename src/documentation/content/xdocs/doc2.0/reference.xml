@@ -876,7 +876,16 @@ echo "q" >/dev/udp/127.0.0.1/8889
                                         The distribution will look like:<br/>
                     <img alt="Normal pause distribution" src="images/dist_exponential.gif"></img>
                     </td>
-                </tr>            
+                </tr> 
+                <tr>
+                    <td></td>
+                    <td>Weibull</td>
+                    <td>If true, the pause is specified using a Weibull distribution, with integer scale and shape. (if <a href="#gsl">GSL</a> is available at compile time).</td>
+                    <td><code>&lt;pause weibull="true" lambda="3" k ="4"/&gt;</code> creates an Weibull distributed pause with scale of 3 and a shape of 4.(See <a href="http://en.wikipedia.org/wiki/Weibull">Weibull on Wikipedia</a> 
+                                        for an explanation of the distribution.)
+                        
+                    </td>
+                </tr>           
                 <tr>
                     <td></td>
                     <td>crlf</td>
@@ -1238,6 +1247,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
             <p>Creating your own SIPp scenarios is not a big deal. 
             If you want to see other examples, use the <code>-sd</code> parameter
             on the command line to display embedded scenarios.</p>
+            <p>Note that SIPp now supports short form headers (e.g "Call-id:" can be replaced by "i:").</p>
             </section>
             <section><title>Structure of server (UAS like) XML scenarios</title>
             <p>A server scenario is a scenario that starts with a "<a href="#recv">recv</a>" command. 
@@ -2053,6 +2063,9 @@ User0003;[authentication username=betty password=boop]</source>
                       Default value is 1.
 
    -base_cseq n     : Start value of [cseq] for each call.
+   
+   -lost            : Set the number of packets to lose by default (scenario
+                      specifications override this value).
 
    -cid_str string  : Call ID string (default %u-%p@%s).
                       %u=call_number, %s=ip_address, %p=process_number,
@@ -2252,7 +2265,7 @@ User0003;[authentication username=betty password=boop]</source>
 
    -reconnect_sleep int : How long to sleep between the close and reconnect?
 
-   -aa              : Enable automatic 200 OK answer for INFO and NOTIFY
+   -aa              : Enable automatic 200 OK answer for INFO, UPDATE and NOTIFY
                       messages.
 
    -tdmmap map      : Generate and handle a table of TDM circuits.
