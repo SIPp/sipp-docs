@@ -685,8 +685,9 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td></td>
                     <td>optional</td>
                     <td>Indicates if the message to receive is optional. In case of an optional
-                    message and if the message is actually received, it is not seen as a unexpected message.</td>
-                    <td><code>&lt;recv response="100" optional="true"&gt;</code>: The 100 SIP message can be received without 
+                    message and if the message is actually received, it is not seen as a unexpected message.
+                    When an unexpected message is received, Sipp looks if this message matches an optional message defined in the previous step of the scenario.<br/>
+                    If optional is set to "global", Sipp will look every previous steps of the scenario.</td><td><code>&lt;recv response="100" optional="true"&gt;</code>: The 100 SIP message can be received without 
                     being considered as "unexpected".</td>
                 </tr>            
                 <tr>
@@ -728,6 +729,20 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>lost</td>
                     <td>Emulate packet lost. The value is specified as a percentage.</td>
                     <td><code>&lt;recv lost="10"&gt;</code>: 10% of the message received are thrown away.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>timeout</td>
+                    <td>Specify a timeout while waiting for a message. If the message is not received, the call is aborted, unless an ontimeout label is defined. </td>
+                    <td><code>&lt;recv timeout="100000"&gt;</code></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>ontimeout</td>
+                    <td>Specify a label to jump to if the timeout popped before the message to be received.</td>
+                    <td>Example to jump to label "5" when not receiving a 100 message after 100 seconds:<source><![CDATA[  <recv response="100" timeout="100000" ontimeout="5">
+  </recv>
+]]></source></td>
                 </tr>
                 <tr>
                     <td></td>
@@ -1153,7 +1168,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><strong>[branch]</strong></td>
                     <td>-</td>
                     <td>Provide a branch value which is a concatenation of magic cookie 
-                    (z9hG4bK) + call number + message index in scenario.</td>
+                    (z9hG4bK) + call number + message index in scenario.<br/> An offset (like [branch-N]) can be appended if you need to have the same branch value as a previous message.</td>
                 </tr>
                 <tr>
                     <td><strong>[msg_index]</strong></td>
