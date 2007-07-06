@@ -1437,6 +1437,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
       </action>
    </recv>]]></source>
                   </section>
+                  </section>
                   <section><title>PCAP (media) commands</title>
                   <p><strong>PCAP play</strong> commands (specified using play_pcap_audio / play_pcap_video attributes) 
                     allow you to send a pre-recorded RTP stream using the <a href="http://www.tcpdump.org/pcap3_man.html">pcap library</a>.
@@ -1456,19 +1457,45 @@ echo "q" >/dev/udp/127.0.0.1/8889
   </action>
 </nop>
 ]]></source>
+
+		  </section>
+
                   <anchor id="action_variables" /><section><title>Variable Manipulation</title>
-                  <p>Call variables may be treated as double precision floating point values.  The actions that modify double variables all write to the variable referenced by the <strong>assign_to</strong> parameter.  The <strong>&lt;assign&gt;</strong> action assigns a fixed value to a variable.  The <strong>&lt;sample&gt;</strong> action uses the same syntax as <a href="#pause_distributions">statistically distributed pauses</a> to statistically sample into a variable.</p>
+		<p>You may also perform simple arithmetic (add, subtract,
+		multiply, divide) on floating point values.  The "assign_to" attribute contains
+		the first operand, and is also the destination of the resulting value.
+		The second operand is either an immediate value or stored in a variable, represented by
+		the "value" and "variable" attributes, respectively.</p>
+
+
+
+                  <p>SIPp supports call variables that take on double-precision floating values.
+		  The actions that modify double variables all write to the
+		  variable referenced by the <strong>assign_to</strong> parameter.  
+		  These variables can be assigned using one of three actions:
+		  assign, sample, or todouble.  For assign, the
+		  double precision value is stored in the "value" parameter.  The sample action assigns
+		  values based on statistical distributions, and uses the same
+		  parameters as a <a href="#pause_distributions">statistically distributed
+		  pauses</a>.  Finally, the todouble command converts the variable referenced by the
+		  "variable" attribute to a double before assigning it.</p>
+
 
                   <p>For example, to assign the value 1.0 to $1 and sample from the normal distribution into $2:</p>
                   <source><![CDATA[<nop>
   <action>
     <assign assign_to="1" value="1" />
     <sample assign_to="2" distribution="normal" mean="0" stdev="1"/>
+    <!-- Stores the first field in the injection file into string variable $3.
+         You may also use regular expressions to store string variables. -->
+    <assignstr assign_to="3" value="[field0]" />
+    <!-- Converts the string value in $3 to a double-precision value stored in $4. -->
+    <todouble assign_to="4" variable="3" />
   </action>
 </nop>
 ]]></source>
 
-		  <p>Simple arithmetic is also possible using the <strong>&lt;add&gt;</strong>, <strong>&lt;subtract&gt;</strong>, <strong>&lt;multiply&gt;</strong>, and <strong>&lt;divide&gt;</strong> actions, which add, subtract, multiply, and divide the variable referened by <strong>assign_to</strong> by the value in <strong>value</strong>.
+		  <p>Simple arithmetic is also possible using the <strong>&lt;add&gt;</strong>, <strong>&lt;subtract&gt;</strong>, <strong>&lt;multiply&gt;</strong>, and <strong>&lt;divide&gt;</strong> actions, which add, subtract, multiply, and divide the variable referenced by <strong>assign_to</strong> by the value in <strong>value</strong>.
 For example, the following action modifies variable one as follows:</p>
 <source><![CDATA[<nop>
   <action>
@@ -1479,8 +1506,32 @@ For example, the following action modifies variable one as follows:</p>
     <divide assign_to="1" value="5" /> <!-- $1 == -0.8 -->
   </action>
 ]]></source>
+		<p>Rather than using fixed values, you may also retrieve the second operand from a variable, using the <strong>&lt;variable&gt;</strong> parameter.  For example:</p>
+		<source><![CDATA[<nop>
+  <action>
+	 <!-- Multiplies $1 by itself -->
+	 <multiply assign_to="1" variable="1" />
+	 <!-- Divides $1 by $2, Note that $2 must not be zero -->
+	 <multiply assign_to="1" variable="2" />
+     </action>
+   </nop>]]></source>
 
                   </section>
+
+                  <anchor id="action_strings" /><section><title>String Variables </title>
+		<p>You can create string variables by using the <strong>&lt;assignstr&gt;</strong>
+		command, which accepts two parameters: <strong>assign_to</strong> and
+		<strong>value</strong>.  The value may contain any of the same substitutions
+		that a message can contain.  For example:</p>
+		<source><![CDATA[<nop>
+     <action>
+         <!-- Assign the value in field0 of the CSV file to a $1. -->
+	 <assignstr assign_to="1" value="[field0]" />
+     </action>
+   </nop>]]></source>
+		</section>
+
+
                   <anchor id="action_test" /><section><title>Variable Testing</title>
                   <p>Variable testing allows you to construct loops and control structures using call variables.  THe <strong>test</strong> action takes four arguments: <strong>variable</strong> which is the variable that to <strong>compare</strong> against <strong>value</strong>, and <strong>assign_to</strong> which is a boolean call variable that the result of the test is stored in.  Compare may be one of the following tests: <strong>equal</strong>, <strong>not_equal</strong>, <strong>greater_than</strong>, <strong>less_than</strong>, <strong>greater_than_equal</strong>, or <strong>less_than_equal</strong>.</p>
                   <p>Example that sets $2 to true if  $1 is less than 10:</p>
@@ -1491,8 +1542,6 @@ For example, the following action modifies variable one as follows:</p>
 </nop>
 ]]></source>
                   </section>
-                  </section>
-                </section>
             </section>
             <anchor id="inffile" /><section><title>Injecting values from an external CSV during calls</title>
                 <p>You can use "<code>-inf file_name</code>" as a command line parameter
