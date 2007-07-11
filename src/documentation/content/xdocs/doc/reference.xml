@@ -557,6 +557,8 @@ echo "q" >/dev/udp/127.0.0.1/8889
           <p>There is a mechanism implemented to stop SIPp smoothly. The command
           <code>kill -SIGUSR1 [SIPp_PID]</code> will instruct SIPp to stop placing
           any new calls and finish all ongoing calls before exiting.</p>
+          <p>When using the background mode, the main sipp instance stops and a child process will continue the job. Therefore,
+           the log files names will contain another PID than the actual sipp instance PID. </p>
         </section>
         <anchor id="xmlsyntax" /><section><title>Create your own XML scenarios</title>
             <p>Of course embedded scenarios will not be enough. So it's time to
@@ -1058,7 +1060,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 </tr>
                 <tr>
                     <td><strong>[local_port]</strong></td>
-                    <td>Random</td>
+                    <td>Chosen by the system</td>
                     <td>Will take the value of <strong>-p</strong> parameter.
                     You can add a computed offset [local_port+3] to this value.</td>
                 </tr>
@@ -2195,8 +2197,7 @@ User0003;[authentication username=betty password=boop]</source>
 
    -nr              : Disable retransmission in UDP mode.
 
-   -p               : Set the local port number.  Default is a random free port
-                      chosen by the system.
+   -p               : Set the local port number.  By default, the system tries to find a free port, starting at 5060.
 
    -pause_msg_ign   : Ignore the messages received during a pause defined in
                       the scenario 
@@ -2306,7 +2307,7 @@ User0003;[authentication username=betty password=boop]</source>
                       - c1: u1 + compression (only if compression plugin
                         loaded),
                       - cn: un + compression (only if compression plugin
-                        loaded).
+                        loaded). This plugin is not provided with sipp.
                       
 
    -timeout         : Global timeout. Default unit is seconds.  If this option
