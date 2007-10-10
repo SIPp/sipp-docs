@@ -36,6 +36,11 @@ See http://xml.apache.org/forrest/linking.html for more info
      <refdoc_PDF label="Ref doc 2.0 [pdf]" href="reference.pdf"/>
   </doc2>
 
+  <ims_bench label="IMS Bench" href="ims_bench/" tab="ims_bench">
+     <refdoc label='Ref doc [html]' href='reference.html' />
+     <refdoc_PDF label="Ref doc [pdf]" href="reference.pdf"/>
+  </ims_bench>
+
   <download label="Download">
      <dev label='Unstable' href='ext:download_unstable' />
      <cvs label='Stable' href='ext:download_stable' />

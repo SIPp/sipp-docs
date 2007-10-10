@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V1.2//EN" "http://apache.org/forrest/dtd/document-v12.dtd">
+<document> 
+  <header> 
+    <title>IMS Bench SIPp</title> 
+  </header>
+  <body> 
+      <p>This section is about a set of changes and additions to SIPp, contributed by Intel and
+      aimed at providing an open source implementation of the <b>IMS/NGN Performance Benchmark</b>,
+      ETSI specification TS 186 008.</p>
+
+        <ul>
+            <li><link href="intro.html">Introduction</link></li>
+            <li><link href="reference.html">Reference documentation</link></li>
+            <!-- li><link href="faq.html">FAQ</link></li -->
+        </ul>
+
+      <p>To learn more about what it is and what it can do, please read the
+      <link href="intro.html">Introduction</link>. To get a really quick feel for it,
+      here are a couple of example benchmark reports for hypothetical systems:</p>
+      <ul>
+       <li><a href="images/report_ims.mht">Example Report with a hypothetical IMS Core as SUT</a></li>
+       <li><a href="images/report_proxy.mht">Example Report with a hypothetical SIP proxy as SUT </a></li>
+      </ul>
+
+      <p>To learn how to use IMS Bench SIPp and how to create scenarios that take advantage of
+      the features it brings, please refer to the <link href="reference.html">Reference documentation</link>.</p>
+
+
+  </body>
+</document>

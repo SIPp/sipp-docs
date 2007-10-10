@@ -1,0 +1,2940 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>IMS Bench SIPp</title>
+    <subtitle>Reference Documentation</subtitle>
+    <authors>
+        <person name="Richard GAYRAUD [initial SIPp code]" email="richard_gayraud@users.sourceforge.net"/>
+        <person name="Olivier JACQUES [SIPp code/documentation]" email="ojacques@users.sourceforge.net"/>
+        <person name="Verbeiren (Intel) [IMS Bench]" email="dverbeir@users.sourceforge.net"/>
+        <person name="Philippe Lecluse (Intel) [IMS Bench]" email="plecluse@users.sourceforge.net"/>
+        <person name="Xavier Simonart (Intel) [IMS Bench]" email="xsimonar@users.sourceforge.net"/>
+        <person name="Many SIPp contributors [code]" email="none@email.com"/>
+    </authors>
+  </header> 
+  <body> 
+    <section><title>Foreword</title>
+      <p>IMS Bench SIPp is a performance testing and benchmarking toolset designed
+      to provide an implementation of a test system conforming to the
+      <b>IMS Performance Benchmark specification</b>, <b><i>ETSI TS&nbsp;186&nbsp;008</i></b>.
+      Please see the <a href="intro.html">Introduction</a> for more on what it can
+      and cannot do and what this ETSI specification is all about.</p>
+
+      <p>IMS Bench SIPp is based on a modified SIPp and still supports the original SIPp
+      scenario commands as well as a series of extra commands and parameters. This makes
+      it suitable not only to test IMS core networks, as targeted by the IMS/NGN Performance
+      Benchmark specification, but also standalone SIP proxies, SIP application servers,
+      B2BUAs, etc., whether they are IMS compliant or not.
+      And this can be done while still benefiting from the large-scale benchmarking
+      capabilities, the deep automation, and the report generation functionality of IMS
+      Bench SIPp.</p>
+
+      <p>In order to avoid duplication and to reduce the size of this documentation, the
+      reader is asked to refer to the standard SIPp documentation for the general principles
+      governing the scenario files. This reference documentation does however contain (or at
+      least tries to) an exhaustive list of scenario commands, arguments and actions.</p>
+
+    </section> <!-- Foreword -->
+
+    <section><title>Installation</title>
+
+      <section><title>Obtaining the source code</title>
+         <p>IMS Bench SIPp is released under the
+         <a href="http://www.gnu.org/copyleft/gpl.html">GNU GPL license</a>.
+         All the terms of the license apply.</p>
+
+         <p>The complete source tree containing all the components of IMS
+         Bench SIPp can be obtained from the Subversion repository at
+         sipp.svn.sourceforge.net/svnroot/sipp/sipp/branches/ims_bench. For example:</p>
+         <source>
+ svn co https://sipp.svn.sourceforge.net/svnroot/sipp/sipp/branches/ims_bench sipp_ims_bench
+         </source>
+      </section> <!-- Obtaining source code -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="installing" /><section><title>Pre-requisites</title>
+        <ul>
+         <li>
+          <p>In order to achieve around millisecond precision in scenario attempt
+          scheduling and in timing measurements, the underlying operating system
+          must provide sufficiently fined grained scheduling. On most Linux distributions,
+          this requires that the kernel be rebuilt with the kernel "Timer frequency" changed
+          to 1000 HZ. For example, on FC6:</p>
+          <source>
+ rpm -i kernel-2.6.18-1.2798.fc6.src.rpm
+ cd /usr/src/redhat/SPECS
+ rpmbuild -bp --target=i686 kernel-2.6.spec
+ cd /usr/src/redhat/BUILD/kernel-2.6.18/linux-2.6.18.i686
+ make menuconfig
+  Change:  
+     Processor type and features  ---&gt;
+       Timer frequency (1000 HZ)  ---&gt;
+     General setup  ---&gt; 
+       () Local version - append to kernel release  &lt;- set your own kernel prefix
+
+ make dep bzImage modules modules_install install
+
+ (modify /etc/grub.conf to point to this new kernel)</source></li>
+         <li>
+          <p>In order for the timing precision to remain when measuring a time difference
+          between two different physical systems, all systems that constitute the Test
+          System should be synchronized with a better precision than what the standard NTP
+          protocol achieves. A simple way of doing this is to use the Precision Time
+          Protocol (IEEE 1588) deamon , ptpd
+          (<a href="http://ptpd.sourceforge.net">ptpd.sourceforge.net</a>)</p>
+          <source>
+ svn co https://ptpd.svn.sourceforge.net/svnroot/ptpd ptpd 
+ make 
+ ptpd -g (client side)</source>
+         </li>
+         <li>
+          <p>Random number generation for the statistical distributions (scenario
+          arrival, pauses in scenarios) require the GSL library. It can be obtained
+          from <a href="http://www.gnu.org/software/gsl">http://www.gnu.org/software/gsl</a>
+          and compiled from sources. You may need to add the path to it (/usr/local/lib by default)
+          to the LD_LIBRARY_PATH environment variable.</p>
+          <source>
+ tar xvfz gsl-1.9.tar.gz
+ cd gsl-1.9/
+ configure
+ make 
+ make install</source>
+         </li>
+         <li>
+          <p>In order to be able to use the menu-driven benchmark configuration tool
+          and the report generation tool, the following components must be installed.</p>
+          <ul>
+           <li>Perl XML::Simple module - <a href="http://search.cpan.org/dist/XML-Simple/">http://search.cpan.org/dist/XML-Simple/</a>
+            <source>
+ perl -MCPAN -e shell
+ {reply with default answer... just select the local ftp server}
+ cpan&gt; install XML::Simple
+ cpan&gt; quit</source>
+           </li>
+           <li>Gnuplot 4.2 - <a href="http://gnuplot.sourceforge.net/">http://gnuplot.sourceforge.net/</a>
+            <source>
+ tar xvfz gnuplot-4.2.0.tar.gz
+ cd gnuplot-4.2.0
+ ./configure --without-x
+ make
+ make install</source>
+           </li>
+          </ul>
+         </li>
+         <li>Configure Virtual IPs
+          <p>In case you want your test systems to support large numbers of users, you'll probably
+          want to configure multiple virtual IP addresses on your network adapters.
+          The actual number of IP addresses to configure will depend on the transport
+          option you select: a single IP address per SIPp instance, in which case you need
+          many IP addresses as you'll run SIPp instances on a same physical system, or multiple
+          IP addresses per SIPp instance in which case you will want plenty of IP addresses.</p>
+
+          <p>There are at least two ways to configure virtual IP addresses:</p>
+          <ol>
+           <li>Through ifconfig command execution (probably from within a script)
+            <source> ifconfig eth0:0 192.168.1.76/24 up</source>
+           </li>
+           <li>or through the network adapter configuration files
+            (/etc/sysconfig/network-scripts/ifcfg-eth0:x), and applying the changes with
+            "service network restart"
+            <source>
+ DEVICE=eth0:0
+ BOOTPROTO=static
+ TYPE=Ethernet
+ IPV6INIT=no
+ HWADDR=00:15:17:01:E2:E2
+ IPADDR=192.168.1.76
+ NETMASK=255.255.255.0
+ NETWORK=192.168.1.0
+ ONBOOT=yes</source>
+           </li>
+          </ol>
+         </li>
+         <li> Modify System Limits (/etc/security/limits.conf) to allow SIPp process to open a large number of sockets, and add:
+          <source>
+ soft nofile  102400
+ hard nofile  409600</source>
+         </li>
+        </ul>
+      </section> <!-- Pre-requisites -->
+      <section><title>Building IMS Bench SIPp components</title>
+        <p>To build SIPp and the manager in the way appropriate for the benchmark,
+        perform the following make invocations:</p>
+        <source> cd sipp
+ make rmtl
+ make ossl
+ make mgr
+</source>
+        <p>Alternatively, the default make invocation (no argument) will build all
+        these components as well as cpum, the system resource monitoring component.
+        This might however not be what you need as the latter must be built on the
+        system where it needs to run, i.e. the SUT, which might not be compatible
+        with binaries built on your test systems.</p>
+
+        <p>To build <strong>cpum</strong> on the SUT, you will need the GNU development toolchain
+        on your SUT or on compatible development environment. You can then copy the
+        IMS Bench SIPp source tree and simply build cpum and its required dependencies:</p>
+        <source> make rmtl           (on the SUT)
+ make cpum           (&quot;)</source>
+      </section>  <!-- Building -->
+    </section> <!-- Installation -->
+
+    <section><title>Using IMS Bench SIPp</title>
+      <section><title>Configuration</title>
+        <p>When configuring the test system for a benchmark run, there are two possible
+        approaches:</p>
+        <ol>
+         <li>Use the <i>ims_bench.pl</i> perl script to enter the benchmark parameters using a
+         menu driven user interface and automatically generate all the necessary configuration
+         files and execution scripts</li>
+         <li>Configure all elements manually</li>
+        </ol>
+        <p>Obviously the first approach is the easiest but is somewhat limited to configuring
+        benchmark runs in close accordance to the TS&nbsp;186&nbsp;008 specification. As IMS Bench SIPp
+        is based on SIPp which was already very flexible and as the new features and new
+        components (Manager, CpuMem...) were designed in the same spirit, one may
+        configure quite a large variety of benchmark runs. When configuring manually however,
+        the benchmark parameters as specified in TS&nbsp;186&nbsp;008 do not appear as clearly anymore
+        since many of them are implemented using SIPp features that were not directly
+        implemented based on that specification. For this reason, the names don't match and
+        some parameters of the specification may be linked to multiple configuration bits in
+        the IMS Bench SIPp configuration.</p>
+
+        <anchor id="manager_config" /><section><title>Manager Configuration</title>
+         <p>The configuration file for the manager, manager.xml, is an XML file with one
+         global configuration section and one or more &quot;run&quot; sections.</p>
+
+         <p>If you used the <i>ims_bench</i> tool to configure your benchmark run, it
+         will have generated this file for you in a target directory. Otherwise, you can
+         start from the example manager.xml file provided in the source tree.</p>
+
+         <ul>
+          <li><strong><code>&lt;configuration&gt;</code> section</strong>
+           <p>This section of the manager configuration contains the global configuration
+           (independent of the individual &quot;runs&quot; defined in subsequent sections).</p>
+           <ul>
+            <li><strong>global parameters</strong>
+             <p>Each parameter entry is specified using the following syntax:
+             <code>&lt;param name=&quot;<i>name</i>&quot; value=&quot;<i>value</i>&quot;/&gt;</code></p>
+             <p>Possible parameters are described in the table below:</p>
+             <table>
+              <tr><td><b>number_test_system</b></td>
+               <td>Number of Test Systems that the manager will wait for before starting
+                the load generation. A value of 0 indicates that the manager should start
+                immediately with the number of SIPp instances connected at the time the
+                user presses the 'e' key. When the manager is used in full automatic mode
+                (<code>-e</code> command line flag), a non-0 value must be specified.</td></tr>
+              <tr><td><b>prep_offset</b></td>
+               <td>Time (in milliseconds) allocated for the preparation portion (usually
+                dedicated to the user reservation procedure) of a client-side scenario
+                before its real SIP scenario portion is expected to start (according to
+                the scenario initiation distribution). This is the scenario portion between
+                the start and the <code>&lt;sync&gt;</code> command of the scenario.
+                Once the scenario reaches its <code>&lt;sync&gt;</code> command, SIPp
+                will put it to sleep until the time the SIP scenario was scheduled to
+                start.<br/>
+                This parameter should be set to a value high enough to guarantee that
+                all scenarios can reach their <code>&lt;sync&gt;</code> command in
+                advance of their actual scheduled start time, but not too large in order
+                not to have too many <i>users</i> &quot;consumed&quot; by scenarios in
+                their preparation phases (risk of running out of users).</td></tr>
+              <tr><td><b>rand_seed</b></td>
+               <td>Initial seed value that will be distributed to all random number
+                generators in the complete test system to compute their own individual
+                seed value (this seed value is derived from the global
+                <code>rand_seed</code> value, the SIPp instance ID and the specific
+                random generator it is used for). This scheme guarantees that each
+                SIPp instance starts at a different place in the pseudo-random
+                sequences it uses and still allows re-generating almost exactly the
+                same load as for a previous run by assigning the same
+                <code>rand_seed</code> value.<br/>
+                A value of 0 tells the manager to generate the seed at random.
+                The actual rand_seed value used is always logged into the
+                report.xml file generated by the manager so that one can then later
+                force the rand_seed to this value to re-generate almost the exact
+                same load.</td></tr>
+              <tr><td><b>report</b></td>
+               <td>Report generation (1 = generate report; 0 = don't generate).
+                Must be set to 1 in order to be able to use the report generation
+                tool.</td></tr>
+              <tr><td><b>log</b></td>
+               <td>Manager logging (0 = disabled; 1 = enabled). The manager can
+                log details of its activities in a manager.log file. This includes
+                the same data as the manager screen output with the highest
+                verbosity.</td></tr>
+              <tr><td><b>transition_time</b></td>
+               <td>Transient time (in seconds) at the begining of each step
+                (change in the load applied to the SUT) during which scenario outcomes
+                are ignored when computing the IHS percentage (percentage of
+                Inadequately Handled Scenarios).</td></tr>
+              <tr><td><b>scenario_path</b></td>
+               <td>Path prefix where the scenario xml files are located.</td></tr>
+              <tr><td><b>max_time_offset</b></td>
+               <td>Maximum offest (in microseconds) allowed between each TS
+                and the manager (0 = not checked)</td></tr>
+             </table><br/>
+            </li>
+            <li><anchor id="scen_params" /><strong>Scenario Parameters</strong>
+             <p>This provides an extension of SIPp's <code>-key</code> command line
+             mechanism. It allows the manager to define the value of global generic
+             parameters that scenarios can refer to.</p>
+             <p>Example:
+             <code>&lt;scen_param name=&quot;RingTime&quot; value=&quot;5000&quot;/&gt;</code></p>
+             <p>Scenarios can then use this value, for example in a pause command:
+             <code>&lt;pause poisson=&quot;true&quot; mean=&quot;%RingTime&quot;/&gt;</code></p>
+             <p>The name can be any name that does not conflict with pre-defined scenario
+             keywords.</p>
+            </li>
+            <li><strong>Scenario List</strong>
+             <p>Each scenario that must be loaded is specified using the following syntax:
+             <code>&lt;scenario name=&quot;<i>name</i>&quot; max_ihs=&quot;<i>value</i>&quot;/&gt;</code></p>
+             <p>The <i>name</i> must represent an existing xml scenario file. <i>max_ihs</i> is
+             an optional attribute defining the maximum percentage of inadequately handled
+             scenario attempts allowed for this scenario (to be specified only for client side -
+             &quot;UAC-like&quot; - scenarios).</p>
+            </li>
+           </ul>
+           <p>Example of (partial) <code>&lt;configuration&gt;</code> section:</p>
+           <source>
+ &lt;configuration&gt;
+   &lt;param name=&quot;rand_seed&quot; value=&quot;0&quot;/&gt;
+   &lt;scen_param name=&quot;RingTime&quot; value=&quot;5000&quot;/&gt;
+   &lt;scenario name=&quot;ims_uac&quot; max_ihs=&quot;0.1&quot;/&gt;
+ &lt;/configuration&gt;</source>
+          </li>
+          <anchor id="manager_config_run" />
+          <li><strong><code>&lt;run&gt;</code> sections</strong>
+           <p>A <code>run</code> section defines a series of steps in the traffic time profile
+           (evolution of the traffic over time) as well as which traffic set to use
+           (percentage of each scenario). All steps of a run use the same traffic
+           parameters except the scenario attempt rate which increases from step to
+           step within a same run.</p>
+           <p>A configuration can have as many runs as
+           desired to make the scenario mix change over time, or to change other
+           parameters that are specific to a run. Runs are executed in sequence
+           in the same order as they appear in the manager config file.</p>
+           <p>The following arguments can be specified for any run:</p>
+           <table>
+            <tr><td><b>cps</b></td>
+             <td>Initial rate of scenario attempts (CPS) for this step
+             (Use 0 to define a &quot;pause&quot; step)</td></tr>
+            <tr><td><b>max_calls</b></td>
+             <td>Number of calls to generate for this step.
+              Generaly used only for a pre-registration phase where only SIP registration
+              scenarios are executed.</td></tr>
+            <tr><td><b>distribution</b></td>
+             <td>Distribution used for scenario initiation over time.
+              Possible values: &quot;constant&quot;, &quot;poisson&quot;</td></tr>
+            <tr><td><b>duration</b></td>
+             <td>Duration (in seconds) of a single step of the run.</td></tr>
+            <tr><td><b>step_increase</b></td>
+             <td>Load (scenario attempt rate) increase when moving to a next step
+              within the run.</td></tr>
+            <tr><td><b>num_steps</b></td>
+             <td>Number of steps in the runs.
+              <br/>0 = no increase (a single flat load)
+              <br/><i>n</i> = load is increased <i>n</i> times during the run.</td></tr>
+            <tr><td><b>report</b></td>
+             <td>This attribute has no impact on the run-time behavior of the test
+              system but is passed on to the report generation tool.
+              If set to &quot;no&quot;, the steps of the run will not appear as
+              distinct steps in the generated report and will not be listed in
+              summary tables, etc. This is typically the case for a run used to
+              warm up the SUT before the actual benchamrking phase starts.</td></tr>
+            <tr><td><b>sync_mode</b></td>
+             <td>If set to &quot;off&quot;, the SIPp instances will bypasses the
+              &quot;sync&quot; state of the scenarios. In this case, SIPp makes no
+              attempt to avoid that preparation part of the scenarios delays the
+              actual start of its SIP portion.
+              This is generaly used for a pre-registration phase only.
+              See also the <code>prep_offset</code> global parameter.</td></tr>
+            <tr><td><b>use_scen_max_ihs</b></td>
+             <td>If set to &quot;yes&quot; or not set (default), the <code>max_ihs</code>
+              value defined for each scenario is used as threshold value against which
+              the IHS percentage of the step is compared (on a per scenario basis) to
+              decide whether to stop the benchmark or to move on to a next step or run.<br/>
+              If set to &quot;no&quot;, the value specified under <code>max_global_ihs</code>
+              run parameter (see below) is used as threshold value for all scenarios and
+              the per scenario <code>max_ihs</code> threshold is ignored for this run.
+              This can be useful for example in warm-up runs done as part of the overall
+              benchmark execution (so it is always done the same way) and where a higher
+              number of failures can be accepted. These warm-up runs would then use a higher
+              IHS threshold than the subsequent &quot;real&quot; runs.</td></tr>
+            <tr><td><b>max_global_ihs</b></td>
+             <td>Maximum allowed percentage of IHS for the run, evaluated over all
+              scenarios executed regardless of their specific <code>max_ihs</code> value.
+              See also the <code>use_scen_max_ohs</code> parameter.</td></tr>
+            <tr><td><b>stats</b></td>
+             <td>Interval (in milliseconds) at which the manager requests counters from the
+              SIPp instances to evaluate the progress of the test and display it.</td></tr>
+           </table>
+           <p>The scenario mix is also part of the configuration of a run. The first run
+           must specify the ratio of each scenario. Subsequent run sections only need to
+           specify this if the scenario mix must be changed. Otherwise, the same ratios
+           as in the previous run are used.</p>
+           <p>Scenario ratios are specified using the following syntax:
+           <code>&lt;scenario name=&quot;<i>name</i>&quot; ratio=&quot;<i>value</i>&quot;/&gt;</code></p>
+           <p>Only the <i>client</i> scenarios (intiating side) should be specified.
+           The sum of the ratios of all scenarios must be equal to 100, including the
+           ratios that have been configured in earlier runs. This means that if a
+           specific scenario was executed in the previous run and should not be executed
+           anymore, one must explicitly set its ratio to 0 in the new run.</p>
+           <p>Example run section:</p>
+<source><![CDATA[
+<!-- Stir phase to warm up the SUT -->
+<run cps="40" duration="75" step_increase="20" num_steps="3" distribution="poisson" \
+     use_scen_max_ihs="no" max_global_ihs="1" stats="2000" report="no">
+  <scenario name="ims_reg"   ratio="2.5"/>
+  <scenario name="ims_uac"   ratio="50"/>
+  <scenario name="ims_dereg" ratio="2.5"/>
+  <scenario name="ims_msgc"  ratio="30"/>
+  <scenario name="ims_rereg" ratio="15"/>
+</run>
+]]>
+</source>
+          </li>
+         </ul>
+        </section> <!-- Manager Configuration -->
+
+      </section> <!-- Configuration -->
+
+      <section><title>Benchmark Execution</title>
+
+        <section><title>Running</title>
+        <p>In case you configured your test system using the <i>ims_bench</i> Perl
+        script, you will have received detailed instructions at time of exiting
+        the configuration tool. Please follow those instructions which will guide you
+        through the deployment of the components on the systems used for the test
+        and the starting of all components.</p>
+ 
+        <p>In all cases, the first step is to start the manager on the system that you
+        intend to use as central controller for the benchmark
+        <source>./manager [-f manager.xml]</source></p>
+
+        <p>It will then read its configuration file and wait for SIPp agents and
+        resource monitoring agents (cpum) to connect.</p>
+
+        <p>The next step consists in starting the SIPp instances. Each instance must be
+        started with the necessary options to make it use the IP address(es) you configured
+        for it, to connect back to the manager as remote control and to load the user
+        information for the users it will represent. The file containing the user data must
+        be present on the system where the SIPp instance runs. The scenario files however
+        are not needed locally since they will be sent over the network by the manager.<br/>
+        Each instance should also have its test system ID specified by means of the -i
+        option (although this is optional, it simplifies things a bit because SIPp will then
+        be able to use, in csv file names for example, this TS ID which is guaranteed to be
+        unique even across multiple systems, instead of the local process id).
+        The -trace_scen and -trace_retrans options are also required if you want to generate
+        a report for the run (usually the case).</p>
+
+        <p>Example (command to issue on one of the test systems to start one of the SIPp
+        instances):
+        <source>./sipp -id 1 -i 192.168.1.20 -user_inf ./ims_users_1.inf
+       -rmctrl 192.168.1.1:5000 192.168.1.100:5060
+       -trace_err -trace_cpumem -trace_scen -trace_retrans</source></p>
+
+        <p>If you used the <i>ims_bench</i> tool to prepare the benchmark configuration,
+        it will have created the necessary scripts for you and you can simply start those
+        on the test systems as you'll have been instructed by the tool.</p>
+
+        <p>If you have built the resource monitoring tool - cpum - for your system under test,
+        you should start it on the SUT now (unless it's already running from a previous run).
+        It will connect to the manager and report the SUT CPU and memory utilization data.
+        <source>./cpum 192.168.1.1:5000  (on the SUT)</source></p>
+
+        <p>You can watch on the console of the manager, the various systems connecting to it.
+        Once all components are started, you can start the actual execution by pressing the
+        'e' key in the manager console.</p>
+
+        <p>While the test system manager executes the runs according to its configuration,
+        it also monitors the percentage of inadequately handled scenarios (IHS) during
+        each step, and decides, based on the configured maximum value allowed for the
+        IHS percentage, whether to perform the next step, increasing the load on the SUT,
+        or not.</p>
+
+        <p>As the manager moves from step to step within a configured run and from one
+        run to the next, it writes these transitions to a report file it generates.
+        This report file, report.xml, also contains information about the test systems
+        used, the overall benchmark configuration, etc.</p>
+
+        <p>Once the IHS threshold has been exceeded, the manager instructs the SIPp
+        instances to stop applying load to the SUT and reports that the test is
+        finished. You can then press the 'q' key in the manager console. This
+        will stop all connected SIPp instances and the manager itself.</p>
+        </section> <!-- Running -->
+
+        <section><title>Gathering Results</title>
+
+        <p>As each SIPp instance dumps most of its statistics on the local system it
+        runs on (that's because sending it in real time to the manager could make the
+        manager a bottleneck in the system), if you used multiple physical systems to
+        execute the benchmark, you will need to gather together the csv files from
+        each SIPp instance. In addition, prior to running the report generation tool,
+        it is required to merge together the data from all the SIPp instances.<br/>
+        A simple script is provided that reads the manager report file to learn the
+        IP addresses of the test systems and the PID or TS ID of their SIPp instances,
+        then grabs the corresponding files using <i>scp</i> and merges them together:</p>
+
+        <source>./scripts/getResults.pl</source>
+
+        <p>In case you copied the files manually from the test systems, you can use
+        the same script to only perform the merging operation:</p>
+
+        <source>./scripts/getResults.pl -merge</source>
+
+        <p>This merging operation can take some time if the amount of data collected
+        was very large. It produces the following files:</p>
+        <ul>
+         <li>sipp.csv resulting from the merge of all sipp_TS&lt;ts_id&gt;_scen.csv
+          files</li>
+         <li>sipp_retrans.csv resulting from the merge of all
+         sipp_TS&lt;ts_id&gt;_retrans.csv files</li>
+        </ul>
+
+        <p><b>Note:</b> After the merge completes, you can delete the partial files by running
+        <source>./getResults.pl -clean</source>
+        But be sure the merge operation completed successfully (e.g. did not run out of
+        disk space!) as the original files will be deleted (but only on the local system,
+        not on the remote location where the SIPp instances actually executed - unless
+        it is the same machine and location).</p>
+
+        </section> <!-- Gathering results -->
+
+        <section><title>Screens and Keys</title>
+
+          <section><title>Manager</title>
+            <ul>
+              <li>Main keyboard keys:
+              <p><table>
+                <tr><th>Key</th><th>Description</th></tr>
+                <tr><td>#</td><td>Change the display verbosity level </td></tr>
+                <tr><td>e</td><td>Execute the benchmark</td></tr>
+                <tr><td>0-9,&lt;,&gt;,D,q</td><td>Keys are directly sent to all SIPp clients </td></tr>
+                <tr><td>T</td><td>Measure the time difference in micro seconds (Manual/Debug)</td></tr>
+                <tr><td>t</td><td>Request the Date Time Stamp in text format (Manual/Debug)</td></tr>
+                <tr><td>g</td><td>Request Counters (Manual/Debug)</td></tr>
+                <tr><td>r</td><td>Reset Clients (Manual/Debug)</td></tr>
+                <tr><td>l</td><td>Load Scenarios (Manual/Debug)</td></tr>
+                <tr><td>W/w</td><td>Request CPU (Manual/Debug)</td></tr>
+              </table></p>
+              </li>
+              <li>When starting, the manager displays a summary of the configuration and
+                the requested runs.
+                <p><img src="images/sipp_manager.jpg" alt="Manager Screen - Initial" /></p>
+              </li>
+              <li>After launching the benchmark execution (pressing 'e' key), the manager starts
+                executing the runs. The first run could for example consist in a pre-registration
+                phase where a certain percentage of the user population is registered with the SUT
+                before the actual benchmark run really starts. In this example, only the 
+                <i>ims_reg</i> scenario is active.
+                <p><img src="images/sipp_manager_prereg.jpg" alt="Manager Screen - Pre Registration" /></p>
+              </li>
+              <li>At run time, the manager displays global summary and the current percentage
+                of Inadequately Handled Scenarios for the step. If cpumem is connected, the cpu
+                utilization of the SUT(s) will be reported too.<br/>
+                <p><img src="images/sipp_manager_runtime.jpg" alt="Manager Screen - Runtime" /></p>
+              </li>
+            </ul>
+          </section> <!-- Screens/Manager -->
+
+          <section><title>CpuMem</title>
+            <ul>
+              <li>The following screen represents the CpuMem utility output.
+                <p><img src="images/sipp_cpumem.jpg" alt="CpuMem Screen" /></p>
+                <p>There is no runtime key. Press ctrl-c to exit the utility.</p>
+              </li>
+            </ul>
+          </section>
+
+          <section><title>SIPp</title>
+            <ul>
+              <li><strong>Main keyboard keys:</strong>
+              <p><table>
+                <tr><th>Key</th><th>Description</th></tr>
+                <tr><td>&lt;,&gt;</td><td>Select a particular scenario. Most data displayed on
+                 the screen is related to the currently selected scenario.</td></tr>
+                <tr><td>1</td><td>Switch to the 'Scenario' screen</td></tr>
+                <tr><td>2</td><td>Switch to the 'Statistics' screen</td></tr>
+                <tr><td>3</td><td>Switch to the 'Repartition' screen</td></tr>
+                <tr><td>4</td><td>Switch to the 'Variables' screen</td></tr>
+                <tr><td>5</td><td>Switch to the 'TDM map' screen</td></tr>
+                <tr><td>6,7,8,9,0</td><td>Switch to the corresponding 'Secondary repartition'
+                 screen ('6' for RTD 1, '7' for RTD 2, etc.)</td></tr>
+                <tr><td>D</td><td>Debug screen (dump internal variables)</td></tr>
+              </table></p>
+              </li>
+              <li><strong>Key '1'</strong>: Scenario screen.
+                It displays a call flow of the scenario as well as some important informations.
+                <ul>
+                  <li> Screen Layout
+<source>
+<i><b>&lt;TS_id&gt;</b></i>- <i><b>&lt;scenario_name&gt;</b></i>-<i><b>&lt;scen_slot&gt;</b></i>-   Scenario Screen    - [1-9]: Change Screen - <i><b>&lt;PID&gt;</b></i>
+</source>
+Client:
+<source>
+  Call-rate(length)     Port   Total-time  Total-calls  Remote-host
+   <i>[Desactivated]</i>(0 ms)/1.000s   5060      10.00 s            0  <i><b>&lt;sut_address&gt;</b></i>(UDP)
+  0 new calls during 1.000 s period      1 ms scheduler resolution
+  0 calls (limit 0)                      Peak was 0 calls, after 0 s
+  0 Running, 0 Paused, 0 Woken up, 0 Sync
+  0 out-of-call msg (discarded)
+  0 open sockets
+</source>
+Server:
+<source>
+  Port   Total-time  Total-calls  Transport
+  5060     695.00 s            0  UDP
+
+  0 new calls during 1.000 s period      1 ms scheduler resolution
+  0 calls                                Peak was 0 calls, after 0 s
+  0 Running, 0 Paused, 0 Woken up, 0 Sync
+  0 open sockets
+</source>
+                    <p>The following screenshots give examples with some of the scenarios
+                    included with IMS Bench SIPp.</p>
+                  </li>
+                  <li>IMS Registration Scenario<p>
+                   <img src="images/sipp_reg.jpg" alt="Registration scenario screen" /></p></li>
+                  <li>IMS UAC Scenario<p>
+                   <img src="images/sipp_uac.jpg" alt="UAC scenario screen" /></p></li>
+                  <li>IMS Messaging (Client) Scenario<p>
+                   <img src="images/sipp_msgc.jpg" alt="Messaging (Client) Scenario" /></p></li>
+                  <li>IMS UAS Scenario<p>
+                   <img src="images/sipp_uas.jpg" alt="UAS scenario screen" /></p></li>
+                </ul>
+              </li>
+              <li><anchor id="stat_screen" /><strong>Key '2'</strong>: Statistics screen.
+               It displays the main statistics counters. The "Cumulative" column gathers
+               all statistics, since SIPp has been launched. The "Periodic" column gives the
+               statistic value for the period considered (specified by
+               <code>-f frequency</code> command line parameter).
+               <p><img src="images/sipp-04.jpg" alt="Statistics screen" /></p>
+              </li>
+              <li><strong>Key '3'</strong>: Repartition screen.
+               It displays the distribution of response time and call length, as
+               specified in the scenario.
+               <p><img src="images/sipp-05.jpg" alt="Repartition screen" /></p></li>
+              <li><strong>Key '4'</strong>: Variables screen.
+               It displays information on actions in scenario as well as scenario
+               variable information.<br/>
+                <ul>
+                  <li>IMS Registration scenario<br/>
+                   <p><img src="images/sipp_action_rereg.jpg" alt="Variables screen " /></p></li>
+                  <li>IMS UAC scenario<br/>
+                   <p><img src="images/sipp_action_uac.jpg" alt="Variables screen " /></p></li>
+                </ul>
+              </li>
+            </ul>
+          </section>  <!-- Screens/SIPp -->
+        </section>  <!-- Screens -->
+
+      </section> <!-- Benchmark Execution -->
+
+      <section><title>Generating Reports</title>
+
+      <p>A perl script, <i>doReport.pl</i>, can be used to generate a report in MHT format
+      (Multipurpose Internet Mail Extension HTML - RFC 2557), containing graphs and statistics
+      about the test.</p>
+
+      <p>Note: As of this writing, the Mozilla Firefox browser did not support this format
+      out of the box. Microsoft Internet Explorer 6 supports it natively. Although the MHT
+      format is very convenient to group the HTML and picture files, one can also view
+      the HTML directly as long as the picture files remain at the same relative paths.</p>
+
+      <p>This tool takes as input data from the following sources:</p>
+      <ul>
+       <li>SIPp metrics data contained in the merged csv files (resulting from the
+       usage of the getResults.pl script (scenario attempts, outcome, timings).</li>
+       <li>CPU and memory utilization data gathered from the cpum resource monitoring
+       tool running on the System Under Test and on the test systems</li>
+       <li>general information about the run (step start times, scenario attempt rate,...)
+       from the file generated by the manager during the benchmark run (report.xml)</li>
+       <li>metric related information (name, mapping with csv file...) from the XML
+       scenario files.</li>
+      </ul>
+
+      <p>The report is made up of multiple sections. The first section, the summary, is only
+      configurable as far as the static text included is concerned and is otherwise built
+      automatically by the tool. The subsequent sections contain graphs and statistics
+      tables representing measurements like Scenario Attempts per Second (SAPS), response
+      times, CPU utilization, etc. Those are configurable. See below for details on the
+      report configuration.</p>
+
+        <section><title>Configuring the Report Content</title>
+
+       <p>The configuration for the report generation tool is located in the reportConfig.xml
+       file (default - can be overwritten on the command line). It tells the tool which
+       graphs must be plotted, gives descriptions and titles for these graphs and also contains
+       some general parameters.</p>
+
+       <p>The reportConfig.xml file included in the source tree allows you to generate
+       a report matching the requirements of the ETSI TS&nbsp;186&nbsp;008 specification (within
+       the existing limitations of the current IMS Bench SIPp implementation).
+       You only need to modify this file if you intend to change what data is reported
+       (for example you added new scenarios for a new use case) or the way the data
+       is presented (type of graph, legend, description...).</p>
+
+          <section><title>General parameters</title>
+        <table>
+         <tr><td><b>DisplayFailureStep</b></td>
+          <td>Set to 0 to prevent the failure step from appearing in time based graphs.
+          This is usually set to 1.</td></tr>
+         <tr><td><b>DisplayFailureStepHistograms</b></td>
+          <td>Set to 1 to show the Failure Step in the Histograms. This is usually set
+          to 0, as failure steps usually contain very few data and tend to render the
+          other histograms unreadable.</td></tr>
+         <tr><td><b>DisplayConstantHistograms</b></td>
+          <td>Set to 1 to display constant steps in histograms. This is usually 0, as
+          otherwise histograms for other steps often become unreadable.</td></tr>
+         <tr><td><b>size &rarr; x</b> and <b>size &rarr; y</b></td>
+          <td>Horizontal and vertical size of the graphs</td></tr>
+        </table>
+          </section>
+
+          <section><title>Graphs</title>
+        <p>All measurements can be represented as time based graphs and/or as
+        histograms.</p>
+
+        <p>Time based graphs usually have the time as X-coordinate, the measure
+        as Y1-coordinate and SAPS as Y2-coordinate. The SAPS (scenario attempts per
+        second) in such graphs can be calculated for the whole system (default),
+        per use case (use case attempts per seconds, for example grouping together
+        REGISTER, DE-REGISTER and RE-REGISTER scenarios) or per scenario
+        (only REGISTER scenarios per second for example).</p>
+
+        <p>Each graph is configured within a &lt;measure&gt; section in the report
+        configuration. As already mentioned, a measure can be evaluated for the
+        whole system (default), in which case the &lt;measure&gt; section should
+        appear at the top-level (within &lt;config&gt; section). But the measure
+        can also be done per use case, in which case the &lt;measure&gt; section
+        should appear within the corresponding &lt;use_case&gt; section.<br/>
+        Finally, the measure can also be done per scenario, in which case the
+        &lt;measure&gt; section must appear within a &lt;scenario&gt; section.<br/>
+        Use case names and scenario names are the names referenced in the scenario
+        XML files. Check out the provided default reportConfig.xml file for
+        examples.</p>
+
+        <p>The following parameters describing the way to present the measurement
+        may appear within a &lt;measure&gt; section: (parameters in <i>italic</i>
+        are optional):</p>
+
+        <table>
+         <tr><td><b>Title</b></td><td>Title of the Graph, as it will appear in the report</td></tr>
+         <tr><td><b>Description</b></td><td>Description of the data being measured to be displayed
+          in the report</td></tr>
+         <tr><td><b>Source</b></td><td>The Source can be either one of the following keyword :
+          <ul>
+           <li>SAPS - Session attemps per seconds</li>
+           <li>ALL-SIPP-CPU - CPU of all SIPp (one graph per system where SIPp
+            instances are running)</li>
+           <li>ALL-SIPP-MEM - Memory of all SIPp (one graph per system where SIPp
+            instances are running)</li>
+           <li>Ratio - Not a graph but just a way to measure the actual ratio of
+            appearance of the various scenarios and have it displayed in the
+            summary table.</li>
+           <li>IHS - Inadequately handled scenarios per seconds</li>
+           <li>DELAY-SAPS - Delay between two scenario attempts</li>
+           <li>RETRANSMIT - Number of Retransmits per seconds</li>
+           <li><i>&lt;metric_name&gt;</i> - PX_TRT-REG1 or any of the metric defined in
+            the XML scenario files</li>
+          </ul></td></tr>
+         <tr><td><b>AxeX</b></td><td>Description of X axis</td></tr>
+         <tr><td><b>AxeY</b></td><td>Description of Y axis</td></tr>
+         <tr><td><b>Ignore</b></td><td>If set, no graph is generated for the measurement
+          (easy way to add/remove graphs without actually removing them from the
+          reportConfig.xml file)</td></tr>
+         <tr><td><b>UnitX</b></td><td>Scaling factor along the X axis. For instance, time is
+          reported in the csv files as milliseconds, while it makes more sense to display it
+          as seconds in the report; hence, UnitX would be 1000.</td></tr>
+         <tr><td><b>UnitY</b></td>
+          <td>Scaling factor along the Y axis (same as UnitX, but for Y-coordinate).
+          For instance, response times in csv files are in micro-seconds, while
+          milliseconds would be more appropriate for most graphs; UnitY would then
+          be 1000.</td></tr>
+         <tr><td><b>LegendY</b></td>
+          <td>The legend to associate with the plot of the measurement.</td></tr>
+         <tr><td><b>InSummary</b></td><td>If present, the data (mean value over each step)
+          is also included in the summary table at the beginning of the report. The
+          parameter value is used as heading in the summary table.</td></tr>
+         <tr><td><b>Logscale</b></td><td>If set, the graph is logarithmic and the value of this
+          parameter is used as minimum value to display.</td></tr>
+         <tr><td><b>DistAndHistoUnit</b></td>
+          <td>Grouping Unit for DistrBasedGraph and ProbaBasedGraph graphs. Metrics
+          related data from csv files (timestamps) are in microseconds, but when making
+          histograms, it is probably desired to group data as otherwise there would be
+          too few measurements at the exact same value to build a meaningful histogram.
+          If set to 100 for instance, it means that histogram unit will be 100
+          micro-seconds and all data will be rounded up to 100 micro-seconds.
+          If, at the same, time UnitY is set to 1000 (milli-seconds), the
+          resulting histogram will have 10 points (1000/100) for each milliseconds.</td></tr>
+        </table>
+
+        <p>Measurements can be plotted in different forms. All forms can be used for
+        all measurements, but some forms are more appropriate than others for some
+        measurements. The type of graph for measurement is specified by including
+        one of the following parameters within the &lt;measure&gt; section.</p>
+
+        <table>
+         <caption>Types of graphs</caption>
+         <tr><td><b>MeanBasedGraph</b></td><td>In the 'MeanBasedGraph' format, the
+          measurements are presented as mean per second. This is useful for metrics for
+          instance.</td></tr>
+         <tr><td><b>TimeBasedGraph</b></td><td>In the 'TimeBasedGraph' graph format, the raw
+          measurement data is plotted. Obviously, this graph can be used for any
+          measurements like CPU, memory, retransmit per second (which, by definition,
+          are already per second, and for which calculating a mean per second would not
+          bring anything).<br/>
+          It can also be used for plotting delay between two scenarios for instance
+          (because the mean per second does not have that much sense in this case).</td></tr>
+         <tr><td><b>DistrBasedGraph</b></td><td>In the 'DistrBasedGraph' graph format, data
+          are shown in the form of an histogram. This graph can be used for instance for
+          plotting SAPS (allowing to verify that the generated load follows the expected
+          random distribution), or other metrics for which it is interesting to see the
+          way the values are distributed.</td></tr>
+         <tr><td><b>ProbaBasedGraph</b></td><td>This type of graph shows the probability of a
+          measure to be higher than a certain value. Mathematically speaking, it is
+          1 - integral (histogram). It is very helpful as it can be used to deduce
+          various percentile values.</td></tr>
+        </table>
+
+        <p>Each of the four graph types can have sub-parameters:</p>
+
+        <table>
+         <tr><th colSpan="2">For all graph types</th></tr>
+         <tr><td><b>Description</b></td>
+          <td>Specific description for the graph</td></tr>
+         <tr><td><b>bezier</b></td>
+          <td>If set to 1, a bezier curve is included on the graph.
+          This is usually useful for Time- and Mean- based graphs.</td></tr>
+         <tr><td><b>Theoretical</b></td>
+          <td>If set, a theoretical curve is plotted in addition
+          to the actual measurement. Supported values are 'Poisson' and 'Expo'.<br/>
+          This is helpful in comparing Poisson or Exponential distributions to their
+          expected theoretical curve.</td></tr>
+         <tr><th colSpan="2">For Mean- and Time- based graph types</th></tr>
+         <tr><td><b>Source</b></td>
+          <td>If specified within a Mean- or Time- based graph section,
+          this indicates the source of a second data set to be plotted on the same
+          graph as the primary one (multi-plot graphs). The parameter can take the
+          same values as described above when used for the primary graph
+          (at the &lt;measure&gt; level).</td></tr>
+         <tr><td><b>AxeY</b></td>
+          <td>For a multi-plot graph, specifies the text to show along the second
+          Y axis (for the data coming from the second source).</td></tr>
+         <tr><td><b>LegendY</b></td>
+          <td>For a multi-plot graph, specifies the text to use as legend associated
+          with the second plot.</td></tr>
+        </table>
+
+          </section> <!-- Graphs -->
+        </section> <!-- Configuring the Report -->
+
+        <section><title>Executing doReport.pl</title>
+        <p>The help screen of doReport.pl shows the command line options it supports:</p>
+        <source>
+ Syntax: doReport.pl [-r &lt;report_file&gt;] [-c &lt;report_config_file&gt;]
+                     [-i &lt;ims_bench_file&gt;] [-F&lt;0|1&gt;]
+
+ -r specifies the raw benchmark report file (default: report.xml) resulting
+    from the run you want to generate a graphical report for.
+ -c specifies the configuration file for this script (default: reportConfig.xml)
+ -b specifies an optional benchmark info HTML fargment file to include as
+    introduction in the report (a default generic sentence is otherwise provided)
+ -i specifies the ims_bench config file (in case the benchmark run was
+    configured using the ims_bench script), containing IMS benchmark parameters.
+ -F specifies whether gnuplot should be forked (to benefit from multiple CPU
+    cores). -F0 disables the forking (default: enabled)
+ -? to get this help.
+        </source>
+
+        <p>doReport.pl expects to find the csv data files, the report.xml file
+        and the scenario files in the current directory.
+        You can however execute it from anywhere where you have these files
+        present as it will look for its own files
+        (reportConfig.xml unless specified through -c command line option, some
+        small picture files, etc.) at the path present in the command line.<br/>
+        It is therefore common to execute it from the same location where you
+        ran the manager during the benchmark run (the ims_bench_xyz
+        directory in case the benchmark run was prepared by the ims_bench tool).
+        <br/>For example:</p>
+        <source>../scripts/doReport.pl -i ims_bench.xml</source>
+
+        <p>You can however overwrite the reportConfig.xml file as well as
+        the logo file (logo.png - displayed in the top left corner of reports)
+        by putting your own versions of these files in the current directory.
+        doReport.pl first looks for them in the current directory and then
+        at the same location where the script itself resides.</p>
+
+        </section>
+
+      </section> <!-- Generating Report -->
+    </section> <!-- Using IMS Bench SIPp -->
+
+    <section><title>Concepts and Features</title>
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="multi_scenario" /><section><title>Multi-scenario mode</title>
+        <p><comment>NEW!</comment>A key feature in IMS Bench SIPp is its support for
+        multiple scenarios within a single SIPp instance. Multiple scenarios
+        are uploaded by the manager to the SIPp instance(s) and each call is
+        executing one of the scenarios.</p>
+
+        <p>Scenarios can be classified as either client-side or server-side.
+        A client-side scenario is a scenario that starts by initiating
+        a SIP transaction or a non-SIP message exchange with a partner
+        SIPp instance (usually in a preparation phase of the scenario where
+        scenario and user reservation is performed).<br/>
+        A server-side scenario is one that starts by the reception of
+        the first message of a SIP transaction or the reception of a 
+        message from a partner SIPp instance.</p>
+
+        <p>Client-side scenarios are initiated by the SIPp instances
+        according to the scenario initiation scheduling (e.g. Poisson
+        distribution of the delays between two consecutive scenarios)
+        and start executing their sequence immediately. The exact
+        scenario to execute from the list of client-side scenarios loaded
+        is selected at random according to the configured relative
+        occurrences of the scenarios in the scenario mix.
+        <br/>In the benchmark configuration, client-side scenarios are
+        identified by the fact that they have a <code>ratio</code>
+        attribute that specifies their relative occurrence in a specific
+        run section of the benchmark configuration (See also
+        <a href="#manager_config_run">Manager Configuration - &lt;run&gt; sections</a>).</p>
+
+        <p>In IMS Bench SIPp, server-side scenarios are only instantiated
+        when receiving, from a partner SIPp instance executing a client-side
+        scenario, a request for preparing execution of a specific
+        server-side scenario. The client-side scenario is therefore the
+        controlling side and a server-side scenario always has at least
+        one associated client-side scenario that will trigger
+        its invocation. If a server-side scenario has no client-side
+        counterpart in the benchmark configuration, it will never be 
+        executed.</p>
+
+        <p>A client-side scenario <i>Si</i> running on SIPp instance <i>X</i> requests
+        a partner SIPp instance <i>Y</i> (association made at random for
+        the duration of the call) to instantiate the server-side
+        scenario <i>Si'</i> by sending a non-SIP <code>req_user</code> message
+        to <i>Y</i>, telling it the ID of the server-side scenario to
+        instantiate as well as the SIP URI of the emulated user at <i>X</i>
+        from whom the first SIP message of the actual SIP scenario
+        portion will come (SIP From header). SIPp instance <i>Y</i> will then
+        be ready to receive this first SIP message and will match it,
+        based on the received From header, with the call instantiated
+        for the server-side scenario <i>Si'</i>. SIPp instance <i>Y</i> will then
+        update its internal SIP CallId map so that it can, from then
+        on, directly dispatch subsequent messages for the same call
+        to the corresponding call running the <i>Si'</i> scenarion.</p>
+
+        <p><strong>Note:</strong> This fairly complex mechanism was
+        designed to allow multiple SIPp instances to place calls between
+        them through a System Under Test that could potentially modify
+        the SIP CallId between both call legs. This is typically the
+        case with SUTs behaving as a B2BUAs. IMS Bench SIPp should
+        work in the situation just the same way as it works with 
+        SUTs that simply proxy the calls leaving the CallId
+        unmodified. It also provides for a very realistic
+        test system where a specific test system agent (SIPp instance)
+        from the setup not only places calls towards itself but also
+        to all other test system agents. Otherwise, users represented
+        by a SIPp instance <i>X</i> would only call (or interact with) other
+        users also represented by SIPp instance <i>X</i>.</p>
+
+        <warning>
+         <p>This user and scenario reservation procedure requires that the
+         user at the server-side be only reserved for one single inbound scenario
+         at a time because otherwise, there would be a risk that another call from
+         the same originating user at the client-side arrives at approximately the
+         same time and that they get matched against the incorrect reserved scenario.</p>
+         <p>For example, user A executing a messaging scenario <i>Si</i> and a calling scenario
+         <i>Sj</i> towards the same user B at almost the exact same time could end up in
+         server-side scenario <i>Si'</i> (counterpart of <i>Si</i>) being associated with the
+         CallId of the calling scenario and vice-versa. This would obvisouly lead to
+         failures because the expected messages at the server-side are different
+         for both scenarios. And this failure would be due to the test system only.
+         One must therefore carefully design the scenarios so the user is locked between
+         the time it is reserved and the time the association with the SIP CallId
+         is made (i.e. when the first SIP message is received at the server-side).</p>
+        </warning>
+ 
+
+      </section>
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="user_centric" /><section><title>User oriented mode</title>
+        <p>Also quite central to IMS Bench SIPp for its implementation of
+        the IMS Performance Benchmark is its user oriented mode.
+        It is triggered by the usage of the <code>-user_inf</code> command
+        line parameter which specifies a file containing data for the SIP
+        users that the SIPp instance will represent in its interactions with
+        the SUT.</p>
+
+        <p>The way this is implemented is very simple and relies on the
+        following basic elements:</p>
+        <ol>
+         <li>SIPp maintains user entities that contain static data fields,
+          and variables</li>
+         <li>SIPp also maintains a set of user pools into which users
+          are placed. The actual meaning of these pools is really
+          defined by the way the scenarios use them but they are
+          meant to loosely represent user state.</li>
+         <li>New actions allow XML scenarios to assign a user from a
+          specific pool to a call (scenario instance) and to move the
+          currently assigned user to a different pool.
+          <br/>This effectively gives a meaning
+          to each pool. For example, a registration scenario will always
+          pick users from a pool that represents the not-registered
+          users, and upon successfull registration will move them
+          to the pool of registered users. A successful calling
+          scenario would then pick users from the pool of registered
+          users, etc.</li>
+         <li>Similarly to call variables, values resulting for example
+          from regular expression matching can be assigned to user
+          variables of the user currently assigned to the call. The
+          interest of user variables vs call variables is that they
+          preserve their value between multiple scenario invocations.
+          For example, the Service-Route header returned during a
+          registration can be stored in a user variable in then
+          later injected as Route header in the INVITE a calling
+          scenario creates.</li>
+        </ol>
+
+        <p>In addition, IMS Bench SIPp will assign a different combination
+        of IP address and UDP port number to each user that it represents.
+        This makes the traffic more realistic. Depending on the transport
+        mode used, it will distribute the users on the configured IP addresses
+        and then on the available ports on that address
+        (see also <link href="#transports">SIPp Transport Modes</link>).</p>
+      </section>
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="Time Metrics" /><section><title>Time Metrics</title>
+
+        <p>SIPp supports starting timers and stopping timers. It also supports
+        specifying timeouts on &lt;recv&gt; commands. However, the
+        original SIPp did not provide a way to verify that a
+        measured time (called Response Time Duration, RTD) is within
+        an allowed range for the scenario to be considered as correctly
+        handled unless it exactly matched a receive timeout.
+        IMS Bench SIPp provides such a mechanism by which a call can be
+        marked as inadequately handled if one of the measured RTD exceeds
+        a predefined maximum value, even though the scenario executed
+        correctly from the sequence and SIP protocol point of view.</p>
+
+        <p>This is then reflected in statistics as well as in the percentage
+        of inadequately handled scenarios that the IMS Bench manager
+        determines at run-time when deciding whether to move to a next
+        step in the load profile or not.</p>
+
+        <p>In IMS Bench SIPp, the timing measurements that must be collected
+        in the scenario CSV result file (when using the <code>-trace_scen</code>
+        option) and that can be checked against a specified maximum value are
+        called &quot;metrics&quot;.</p>
+
+        <p>These metrics are defined within the scenario file in a <comment>new</comment>
+        &lt;info&gt; section, as in the following example:</p>
+<source><![CDATA[
+  <info>
+   <metric ref="PX_TRT-REG1" rtd="1" max="2000"/>
+   <metric ref="PX_TRT-REG2" rtd="2" max="4000"/>
+  </info>
+]]></source>
+
+        <p>The above example defines two time metrics to be checked against
+        corresponding maximum values. For each metric, the RTD (SIPp timer) into
+        which it will be computed by the scenario is specified as well as the
+        maximum accepted value.</p>
+
+        <p>The checks are done at the end of the scenario execution (if successful
+        from a message sequence and protocol timeouts point of view), and in case
+        a maximum value is exceeded, the call is marked as failed.</p>
+
+        <p>The metric name specified in the <code>ref</code> attribute is not used
+        by SIPp itself but by the report generation tool. It makes the link between
+        the time metric name (for example as defined in a benchmark specification)
+        and the RTD used to measure it within the SIPp scenario.</p>
+
+        <p>In the example above, the first metric is declared to be computed in
+        RTD 1 and is not allowed to exceed 2000 milliseconds. The second one is
+        computed in RTD 2 and may not exceed 4000 ms. The RTD values result from the
+        usage of the <a href="#start_rtd">start_rtd</a> and <a href="#rtd">rtd</a>
+        attributes on &lt;send&gt; or &lt;recv&gt; commands, or from computations
+        performed on RTD values by <a href="#action_rtd">RTD related Actions</a>.</p>
+
+        <p>The &lt;metric&gt; elements also tell SIPp which rtd values to dump into
+        the scenario CSV result file when the <code>-trace_scen</code> command 
+        line option is used. Also note that the <code>max</code> attribute is
+        actually optional so that it's possible to dump an RTD to the scenario
+        CSV file even when it does not need to be checked against a maximum
+        value.</p>
+
+      </section>
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="traffic_control" /><section><title>Traffic control</title>
+        <p>In IMS Bench SIPp, the traffic is controlled by the benchmark manager
+        according to its configuration. The SIPp instances generate SIP traffic
+        (scenario mix, average number of new scenario attempts per second)
+        according to the instructions they receive from the manager.
+        The traditional keys used in the original SIPp to control the number of
+        calls started per second are disabled in IMS Bench SIPp mode.</p>
+
+        <p>You can still <strong>pause</strong> the traffic by pressing the 'p' key
+        and resume it by pressing 'p' again, 
+        but this will of course disturb your benchmark run.
+        SIPp will stop placing new calls and will continue executing the scenario of
+        already running calls.</p>
+
+        <p>In IMS Bench mode, SIPp normally quits when you press 'q' in the console
+        of the manager or when the manager exits.</p>
+        <p>The 'q' key is however still handled in the SIPp instance as well. If you press it,
+        SIPp will stop placing new calls and will wait until all current calls go to their end.
+        During this phase, <comment>(NEW!)</comment> SIPp will regularly look at all calls that are
+        executing a pause command and will shorten the duration of this pause so as to 
+        speed up the exit while still trying to complete all calls in their normal flow.
+        SIPp will then exit.</p>
+        <p>You can also force SIPp to <strong>quit</strong> immediatly by pressing the 'Q' key,
+        or by pressing the 'q' key again several times. 
+        Current calls will be terminated by sending a BYE or CANCEL message (depending if 
+        the calls have been established or not).</p>
+      </section>
+
+    </section> <!-- Concepts and Features -->
+
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+    <anchor id="xmlsyntax" /><section><title>Writing XML Scenarios</title>
+            <p>IMS Bench SIPp comes with a set of scenarios to execute the IMS/NGN Performance
+            Benchmark and some additional scenarios to use the IMS Bench SIPp test system
+            against simpler SIP servers. You might however need to adapt those to your needs or
+            write new scenarios for your particular testing or benchmarking needs.</p>
+
+            <p>A SIPp scenario is written in XML
+            (a DTD that may help you write SIPp
+            scenarios does exist and has been tested with jEdit - this is described in a later section).
+            A scenario will always start with:</p>
+            <source>&lt;?xml version="1.0" encoding="ISO-8859-1" ?&gt;
+&lt;scenario name="Some name"&gt;</source>
+            <p>And end with:</p>
+            <source>&lt;/scenario&gt;</source>
+            <p>Easy, huh? Ok, now let's see what can be put inside. You are not
+            obliged to read the whole table now! Just go in the next section for
+            an example.</p>
+            <table>
+                <caption>List of commands with their attributes</caption>
+                <tr>
+                    <th>Command</th>
+                    <th>Attribute(s)</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td><anchor id="send"/><strong>&lt;send&gt;</strong></td>
+                    <td>retrans</td>
+                    <td>Used for UDP transport only: it specifies the T1 timer value,
+                    as described in SIP RFC 3261, section 17.1.1.2.</td>
+                    <td><code>&lt;send retrans="500"&gt;</code>: will initiate T1 timer to 500 milliseconds (RFC3261 default).</td>
+                </tr>            
+                <tr>
+                    <td><anchor id="start_rtd"/></td>
+                    <td>start_rtd</td>
+                    <td>Starts one or more of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                    (see <a href="#Response+times">statistics section</a>).</td>
+                    <td><code>&lt;send start_rtd="2,3"&gt;</code>: the timers number 2 and 3 will start when the message is sent.</td>
+                </tr>            
+                <tr>
+                    <td><anchor id="rtd"/></td>
+                    <td>rtd</td>
+                    <td>Stops the listed "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
+                    <td><code>&lt;send rtd="2, 4"&gt;</code>: the timers number 2 and 4 will stop when the message is sent.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>crlf</td>
+                    <td>Displays an empty line <strong>after</strong> the arrow for the message in main SIPp screen.</td>
+                    <td><code>&lt;send crlf="true"&gt;</code></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>lost</td>
+                    <td>Emulate packet lost. The value is specified as a percentage.</td>
+                    <td><code>&lt;send lost="10"&gt;</code>: 10% of the message sent are actually not sent :).</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>next</td>
+                    <td>You can put a "next" in a send to go to another part of the script when you are done with sending the message. 
+                    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td>Example to jump to label "12" after sending an ACK:<source><![CDATA[  <send next="12">
+    <![CDATA[
+
+      ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: ...
+      From: ...
+      To: ...
+      Call-ID: ...
+      Cseq: ...
+      Contact: ...
+      Max-Forwards: ...
+      Subject: ...
+      Content-Length: 0
+
+    ]]>]]&gt;
+  &lt;/send&gt;
+</source></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>test</td>
+                    <td>You can put a "test" next to a "next" attribute to indicate
+                    that you only want to branch to the label specified with "next"
+                    if the variable specified in "test" is set (through <a href="#action_regexp">regexp</a>
+                    for example).
+                    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td>Example to jump to label "6" after sending an ACK only if
+                    variable 4 is set:<source><![CDATA[  <send next="6" test="4">
+    <![CDATA[
+
+      ACK sip:[service]@[remote_ip]:[remote_port] SIP/2.0
+      Via: ...
+      From: ...
+      To: ...
+      Call-ID: ...
+      Cseq: ...
+      Contact: ...
+      Max-Forwards: ...
+      Subject: ...
+      Content-Length: 0
+
+    ]]>]]&gt;
+  &lt;/send&gt;
+</source></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>counter</td>
+                    <td>Increments the counter given as parameter when the message is sent. A total of 5 counter can be used.
+                    The counter are saved in the <a href="#Available+counters">statistic file</a>.</td>
+                    <td><code>&lt;send counter="1"&gt;</code>: Increments counter #1 when the message is sent.</td>
+                </tr>            
+                <tr>
+                    <td><anchor id="recv"/><strong>&lt;recv&gt;</strong></td>
+                    <td>response</td>
+                    <td>Indicates what SIP message code is expected.</td>
+                    <td><code>&lt;recv response="200"&gt;</code>: SIPp will expect a SIP message with code "200".</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>request</td>
+                    <td>Indicates what SIP message request is expected.</td>
+                    <td><code>&lt;recv request="ACK"&gt;</code>: SIPp will expect an "ACK" SIP message.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>optional</td>
+                    <td>Indicates if the message to receive is optional. In case of an optional
+                    message and if the message is actually received, it is not seen as a unexpected message.</td>
+                    <td><code>&lt;recv response="100" optional="true"&gt;</code>: The 100 SIP message can be received without 
+                    being considered as "unexpected".</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>crlf</td>
+                    <td>Displays an empty line <strong>after</strong> the arrow for the message in main SIPp screen.</td>
+                    <td><code>&lt;recv crlf="true"&gt;</code></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>rrs</td>
+                    <td><strong>R</strong>ecord <strong>R</strong>oute <strong>S</strong>et. if this attribute is set to "true",
+                    then the "Record-Route:" header of the message received is stored and can be recalled using the <strong>[routes]</strong> keyword.</td>
+                    <td><code>&lt;recv response="100" rrs="true"&gt;</code>.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>auth</td>
+                    <td><a href="#authentication">Authentication</a>. if this attribute is set to "true",
+                    then the "Proxy-Authenticate:" header of the message received is stored and is used to build
+                    the <strong>[authentication]</strong> keyword.</td>
+                    <td><code>&lt;recv response="407" auth="true"&gt;</code>.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>start_rtd</td>
+                    <td>Starts one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                    (see <a href="#Response+times">statistics section</a>).</td>
+                    <td><code>&lt;recv start_rtd="4"&gt;</code>: the timer number 4 will start when the message is received.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>rtd</td>
+                    <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
+                    <td><code>&lt;recv rtd="4"&gt;</code>: the timer number 4 will stop when the message is received.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>lost</td>
+                    <td>Emulate packet lost. The value is specified as a percentage.</td>
+                    <td><code>&lt;recv lost="10"&gt;</code>: 10% of the message received are thrown away.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>action</td>
+                    <td>Specify an action when receiving the message. See  <a href="#actions">Actions section</a> for possible actions.</td>
+                    <td>Example of a "regular expression" action:<source>&lt;recv response="200"&gt;
+ &lt;action&gt;
+  &lt;ereg regexp="([0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]*"
+    search_in="msg"
+    check_it="true"
+    assign_to="1,2"/&gt;
+  &lt;/action&gt;
+ &lt;/recv&gt;</source></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>next</td>
+                    <td>You can put a "next" in an optional receive to go to another part of the script if you receive that message. 
+                    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td>Example to jump to label "5" when receiving a 403 message:<source><![CDATA[  <recv response="100"
+        optional="true">
+  </recv>
+  <recv response="180" optional="true">
+  </recv>
+  <recv response="403" optional="true" next="5">
+  </recv>
+  <recv response="200">
+  </recv>
+]]></source></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>test</td>
+                    <td>You can put a "test" in an optional receive to go to another part of the script if you receive that message
+                    only if the variable specified by "test" is set. 
+                    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td>Example to jump to label "5" when receiving a 403 message only if
+                    variable 3 is set:<source><![CDATA[  <recv response="100"
+        optional="true">
+  </recv>
+  <recv response="180" optional="true">
+  </recv>
+  <recv response="403" optional="true" next="5" test="3">
+  </recv>
+  <recv response="200">
+  </recv>
+]]></source></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>chance</td>
+                    <td>In combination with "test", probability to actually branch to another part
+		    of the scenario. Chance can have a value between 0 (never) and 1 (always). 
+		    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td><source><![CDATA[  <recv response="403" optional="true" next="5" test="3" chance="0.90">
+  </recv>]]></source>90% chance to go to label "5" if variable "3" is set.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>counter</td>
+                    <td>Increments the counter given as parameter when the message is received. A total of 5 counter can be used.
+                    The counter are saved in the <a href="#Available+counters">statistic file</a>.</td>
+                    <td><code>&lt;recv counter="1"&gt;</code>: Increments counter #1 when the message is received.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>regexp_match</td>
+                    <td>Boolean. Indicates if 'request' ('response' is not available) is given as a regular expression. If so, the recv
+		    command will match against the regular expression. This allows to catch several cases
+		    in the same receive command.
+		    </td>
+                    <td>Example of a recv command that matches MESSAGE or PUBLISH or SUBSCRIBE requests:<br/>
+		    <source>&lt;recv request="MESSAGE|PUBLISH|SUBSCRIBE" crlf="true" regexp_match="true"&gt;
+&lt;/recv&gt;</source></td>
+                </tr>            
+                <tr>
+                    <td><strong>&lt;pause&gt;</strong></td>
+                    <td>milliseconds</td>
+                    <td>Specify the pause delay, in milliseconds. When this delay is not set, the value of the <code>-d</code> command
+                    line parameter is used.</td>
+                    <td><code>&lt;pause milliseconds="5000"/&gt;</code>: pause the scenario for 5 seconds.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>variable</td>
+                    <td>Indicates which call variable to use to determine the length of the pause.</td>
+                    <td><code>&lt;pause variable="1" /&gt;</code> pauses for the number of milliseconds specified by call variable 1.</td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td>distribution</td>
+                  <td>Indicates which statistical distribution to use to determine the length of the pause.  Without GSL, you may use <code>uniform</code> or <code>fixed</code>.  With GSL, normal, exponential, gamma, lambda, lognormal, negbin, (negative binomial), pareto, and weibull are available.  Depending on the distribution you select, you must also supply distribution specific parameters.</td>
+                  <td>
+                    The following examples show the various types of distributed pauses:
+                    <ul>
+                    <li><code>&lt;pause distribution="fixed" value="1000" /&gt;</code> pauses for 1 second.</li>
+                    <li><code>&lt;pause distribution="uniform" min="2000" max="5000"/&gt;</code> pauses between 2 and 5 seconds.</li>
+                    </ul>
+                    The remaining distributions require GSL.  In general The
+                    parameter names were chosen to be as consistent with
+                    Wikipedia's distribution description pages.
+                    <ul>
+                      <li><code>&lt;pause distribution="normal" mean="60000" stdev="15000"/&gt;</code> provides a normal pause with a mean of 60 seconds (i.e. 60,000 ms) and a standard deviation of 15 seconds.  The mean and standard deviation are specified as integer milliseconds.  The distribution will look like:<br/>
+                        <img alt="Normal pause distribution" src="images/dist_normal.gif"></img></li>
+                      <li><code>&lt;pause distribution="lognormal" mean="12.28" stdev="1" /&gt;</code> creates a distribution's whose natural logarithm has a mean of 12.28 and a
+                        standard deviation of 1.  The mean and standard deviation are specified as
+                        double values (in milliseconds).  The distribution will look like:<br/>
+                        <img alt="Log normal pause distribution" src="images/dist_lognormal.gif"></img></li>
+                      <li><code>&lt;pause distribution="exponential" mean="900000"/&gt;</code> creates an exponentially distributed pause with a mean of 15 minutes.  The distribution will look like:<br/>
+                      <img alt="Normal pause distribution" src="images/dist_exponential.gif"></img></li>
+                      <li><code>&lt;pause distribution="weibull" lambda="3" k ="4"/&gt;</code> creates a Weibull distribution with a scale of 3 and a shape of 4 (see <a href="http://en.wikipedia.org/wiki/Weibull_distribution">Weibull on Wikipedia</a> for a description of the distribution).</li>
+                      <li><code>&lt;pause distribution="pareto" k="1" x_m="2"/&gt;</code> creates a Pareto distribution with k and x<sub>m</sub> of 1 and 2, respectively (see <a href="http://en.wikipedia.org/wiki/Pareto_distribution">Pareto on Wikipedia</a> for a description of the distribution).</li>
+                      <li><code>&lt;pause distribution="gamma" k="3" theta="2"/&gt;</code> creates a Gamma distribution with k and theta of 9 and 2, respectively (see <a href="http://en.wikipedia.org/wiki/Gamma_distribution">Gamma on Wikipedia</a> for a description of the distribution).</li>
+                      <li><code>&lt;pause distribution="negbin" p="0.1" n="2"/&gt;</code> creates a Negative binomial distribution with p and n of 0.1 and 2, respectively (see <a href="http://en.wikipedia.org/wiki/Negative_binomial_distribution">Negative Binomial on Wikipedia</a> for a description of the distribution).</li>
+                      <li><code>&lt;pause distribution="poisson" mean="60000"/&gt;</code> creates a Poisson distribution with a mean of 60s (see <a href="http://en.wikipedia.org/wiki/Poisson_distribution">Poisson distribution on Wikipedia</a> for a description of the distribution).</li>
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>crlf</td>
+                    <td>Displays an empty line <strong>after</strong> the arrow for the message in main SIPp screen.</td>
+                    <td><code>&lt;pause crlf="true"&gt;</code></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>next</td>
+                    <td>You can put a "next" in a pause to go to another part of the script when you are done with the pause. 
+                    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td>Example to jump to label "7" after pausing 4 seconds:<source><![CDATA[<pause milliseconds="4000" next="7"/>]]></source></td>
+                </tr>
+                <tr>
+                    <td><anchor id="nop"/><strong>&lt;nop&gt;</strong></td>
+                    <td>action</td>
+                    <td>The nop command doesn't do anything at SIP level. It is 
+                    only there to specify an action to execute. See  <a href="#actions">Actions section</a> for possible actions.</td>
+                    <td>Execute the play_pcap_audio/video action:<source><![CDATA[<nop>
+  <action>
+    <exec play_pcap_audio="pcap/g711a.pcap"/>
+  </action>
+</nop>]]>
+</source></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>start_rtd</td>
+                    <td>Starts one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                     (see <a href="#Response+times">statistics section</a>).</td>
+                    <td><code>&lt;nop start_rtd="1"&gt;</code>: the timer number 1 starts when nop is executed.</td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>rtd</td>
+                    <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
+                    <td><code>&lt;nop rtd="1"&gt;</code>: the timer number 1 will stops when nop is executed.</td>
+                </tr>            
+                <tr>
+                    <td><anchor id="sendCmd"/><strong>&lt;sendCmd&gt;</strong></td>
+                    <td>&lt;![CDATA[]]&gt;</td>
+                    <td>Content to be sent to the twin <a href="#ThreePCC">3PCC</a> SIPp instance. The Call-ID must be included in the CDATA. In 3pcc extended mode, the From must be included to. </td>
+                    <td><source>&lt;sendCmd&gt;
+  &lt;![CDATA[
+    Call-ID: [call_id]
+    [$1]
+
+   ]]&gt;
+&lt;/sendCmd&gt;</source></td>
+                </tr> 
+                <tr>
+                    <td></td>
+                    <td>dest</td>
+                    <td>3pcc extended mode only: the twin sipp instance which the command will be sent to</td>
+                    <td><code>&lt;sendCmd dest="s1"&gt;</code>: the command will be sent to the "s1" twin instance</td>
+                </tr>           
+                <tr>
+                    <td><anchor id="recvCmd"/><strong>&lt;recvCmd&gt;</strong></td>
+                    <td>action</td>
+                    <td>Specify an action when receiving the command. See  <a href="#actions">Actions section</a> for possible actions.</td>
+                    <td>Example of a "regular expression" to retrieve what has been send by a sendCmd command:<source>&lt;recvCmd&gt;
+  &lt;action&gt;
+     &lt;ereg regexp="Content-Type:.*"
+           search_in="msg"
+           assign_to="2"/&gt;
+  &lt;/action&gt;
+&lt;/recvCmd&gt;</source></td>
+                </tr> 
+                <tr>
+                    <td></td>
+                    <td>src</td>
+                    <td>3pcc extended mode only: indicate the twin sipp instance which the command is expected to be received from </td>
+                    <td><code>&lt;recvCmd src = "s1"&gt;</code>: the command will be expected to be received from the "s1" twin instance</td>
+                </tr>           
+                <tr>
+                    <td><strong><![CDATA[<label>]]></strong></td>
+                    <td>id</td>
+                    <td>A label is used when you want to branch to specific parts
+                    in your scenarios. The "id" attribute is an integer where the maximum value is 19.
+                    See <a href="#branching">conditional branching</a> section for more info.</td>
+                    <td>Example: set label number 13:<source><![CDATA[<label id="13"/>]]></source></td>
+                </tr>
+                <tr>
+                    <td><anchor id="resptimerep"/><strong>&lt;Response Time Repartition&gt;</strong></td>
+                    <td>value</td>
+                    <td>Specify the intervals, in milliseconds, used to distribute the values of response times.</td>
+                    <td><code>&lt;ResponseTimeRepartition value="10, 20,
+                    30"/&gt;</code>: response time values are distributed
+                    between 0 and 10ms, 10 and 20ms, 20 and 30ms, 30 and
+                    beyond.</td>
+                </tr>            
+                <tr>
+                    <td><anchor id="calllengthrep"/><strong>&lt;Call Length Repartition&gt;</strong></td>
+                    <td>value</td>
+                    <td>Specify the intervals, in milliseconds, used to distribute the values of the call length measures.</td>
+                    <td><code>&lt;CallLengthRepartition value="10, 20,
+                    30"/&gt;</code>: call length values are distributed between
+                    0 and 10ms, 10 and 20ms, 20 and 30ms, 30 and beyond.</td>
+                </tr>
+                <tr>
+                    <td><anchor id="sync"/><strong>&lt;sync&gt;</strong></td>
+                    <td>action</td>
+                    <td>As most scenarios have a preparation step (user reservation) that is
+                     not considered part of the actual scenario exercised and as this actual
+                     scenario must start at the time given by the statistical distribution of
+                     scenario attempts, scenario files (at least the initiating side) must
+                     contain a synchronization point where SIPp will wait until the time the
+                     actual scenario attempt must start.</td>
+                    <td>
+<source>
+&lt;sync crlf="true"&gt;
+ &lt;action&gt;
+  &lt;exec int_cmd="set_start_time"/&gt;
+ &lt;/action&gt;
+&lt;/sync&gt;
+</source><br/>
+                    Note that the manager configuration can disable this synchronization for
+                    some parts of the runs, for example in a step performing the
+                    pre-registration of users.
+                  </td>
+                </tr>
+                <tr>
+                    <td><anchor id="sendrmt"/><strong>&lt;sendRmt&gt;</strong></td>
+                    <td>type</td>
+                    <td>
+                      The command sends a (non-SIP) message to the partner SIPp instance. In case no partner has been assigned yet to the scenario, 
+                      a partner SIPp instance is selected at random (uniform) before sending the message.
+                     </td>
+                    <td>
+<source>
+&lt;sendRmt type="req_user"&gt;
+ &lt;param name="scenario" value="ims_uas"/&gt;
+ &lt;param name="from_uri" value="[field0]@[field1]"/&gt;
+ &lt;param name="call_id" value="[call_id]"/&gt;
+&lt;/sendRmt&gt;
+</source><br/>
+                  </td>
+                </tr>
+                <tr>
+                    <td><anchor id="recvrmt"/><strong>&lt;recvRmt&gt;</strong></td>
+                    <td>type</td>
+                    <td>
+                      The command waits for a message of the specified type to be received from the
+                      partner SIPp instance.<br/> 
+                      <p>Additionally, it can also be the first command of a receiving side scenario
+                      (e.g. the called party), in which case it must specify the <code>req_user</code>
+                      message type.<br/>
+                      A special behavior is implemented for this message type: when received, SIPp
+                      instantiates a new incoming call executing the scenario specified by the scenario
+                      parameter of the incoming <code>req_user</code> message, assigns it the
+                      sending SIPp instance as partner and then feeds the newly created call with the
+                      received message so that scenario execution immediately starts. </p>
+                     </td>
+                    <td>
+<source>
+&lt;recvRmt type="req_user"&gt;
+ &lt;action&gt;
+  &lt;assign_user pool="2"/&gt;
+  &lt;move_user pool="3"/&gt;
+&lt;/recvRmt&gt;
+</source><br/>
+                  </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>timeout</td>
+                    <td>
+                    Max time to wait for the message from partner (not valid for a &lt;recvRmt&gt; as first command in a scenario). 
+                     </td>
+                    <td>
+<source>
+&lt;recvRmt type="res_user" timeout="8000"&gt;
+ &lt;action&gt;
+   &lt;store_param param="user_name" assign_to="1"/&gt;
+ &lt;/action&gt;
+&lt;/recvRmt&gt;
+</source><br/>
+                  </td>
+                </tr>
+                
+            </table>
+            <anchor id="partner_msg_types" /><p>Partner Message Types (sendRmt and recvRmt)</p>
+            <table>
+            <tr><td>req_user</td><td>Requests user reservation.</td></tr>
+            <tr><td>res_user</td><td>Result of user resevation.</td></tr>
+            <tr><td>res_call_info</td>
+             <td>Typically sent at the end of a scenario, carries call information like RTDs and
+              timestamps measured at the partner SIPp (the approach is that all timing
+              measurements are gathered at one side of a scenario and dumped by that side - hence
+              they need to be sent from the partner in case they were measured there, or in
+              case the measurement is between events at different sides).</td></tr>
+            </table>
+
+            <p>There are not so many commands: send, recv, sendRmt, recvRmt,
+            pause, ResponseTimeRepartition and CallLengthRepartition. To make
+            things even clearer, nothing is better than an example...</p>
+      <section><title>Structure of client (UAC like) XML scenarios</title>
+            <p>A client scenario is a scenario that starts with a "send" command. So let's start:</p>
+            <source>&lt;scenario name="Basic Sipstone UAC"&gt;
+  &lt;send&gt;
+    &lt;![CDATA[
+    
+      INVITE sip:<strong>[service]</strong>@<strong>[remote_ip]</strong>:<strong>[remote_port]</strong> SIP/2.0
+      Via: SIP/2.0/<strong>[transport]</strong> <strong>[local_ip]</strong>:<strong>[local_port]</strong>
+      From: sipp &lt;sip:sipp@<strong>[local_ip]</strong>:<strong>[local_port]</strong>&gt;;tag=<strong>[call_number]</strong>
+      To: sut &lt;sip:<strong>[service]</strong>@<strong>[remote_ip]</strong>:<strong>[remote_port]</strong>&gt;
+      Call-ID: <strong>[call_id]</strong>
+      Cseq: 1 INVITE
+      Contact: sip:sipp@<strong>[local_ip]</strong>:<strong>[local_port]</strong>
+      Max-Forwards: 70
+      Subject: Performance Test
+      Content-Type: application/sdp
+      Content-Length: <strong>[len]</strong>
+
+      v=0
+      o=user1 53655765 2353687637 IN IP<strong>[local_ip_type]</strong> <strong>[local_ip]</strong>
+      s=-
+      t=0 0
+      c=IN IP<strong>[media_ip_type]</strong> <strong>[media_ip]</strong>
+      m=audio <strong>[media_port]</strong> RTP/AVP 0
+      a=rtpmap:0 PCMU/8000
+
+
+    ]]&gt;
+  &lt;/send&gt;</source>
+            <p>Inside the "send" command, you have to enclose your SIP message
+            between the "&lt;![CDATA" and the "]]&gt;" tags. Everything between
+            those tags is going to be sent toward the remote system. You may
+            have noticed that there are strange keywords in the SIP message,
+            like <strong>[service], [remote_ip], ...</strong>. Those keywords
+            are used to indicate to SIPp that it has to do something with
+            it.</p>
+            <p>Here is the list:</p>
+            <anchor id="keyword"/>
+            <table>
+                <caption>Keyword list</caption>
+                <tr>
+                    <th>Keyword</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><strong>[service]</strong></td>
+                    <td>service</td>
+                    <td>Service field, as passed in the <strong><code>-s service_name</code></strong></td>
+                </tr>
+                <tr>
+                    <td><strong>[remote_ip]</strong></td>
+                    <td>-</td>
+                    <td>Remote IP address, as passed on the command line.</td>
+                </tr>
+                <tr>
+                    <td><strong>[remote_port]</strong></td>
+                    <td>5060</td>
+                    <td>Remote IP port, as passed on the command line. You can 
+                    add a computed offset [remote_port+3] to this value.</td>
+                </tr>
+                <tr>
+                    <td><strong>[transport]</strong></td>
+                    <td>UDP</td>
+                    <td>Depending on the value of <strong>-t</strong> parameter, this will take the values "UDP" or "TCP".</td>
+                </tr>
+                <tr>
+                    <td><strong>[local_ip]</strong></td>
+                    <td>Primary host IP address</td>
+                    <td>Will take the value of <strong>-i</strong> parameter.</td>
+                </tr>
+                <tr>
+                    <td><strong>[local_ip_type]</strong></td>
+                    <td>-</td>
+                    <td>Depending on the address type of <strong>-i</strong> parameter (IPv4 or IPv6),
+                    local_ip_type will have value "4" for IPv4 and "6" for IPv6.</td>
+                </tr>
+                <tr>
+                    <td><strong>[local_port]</strong></td>
+                    <td>Random</td>
+                    <td>Will take the value of <strong>-p</strong> parameter.
+                    You can add a computed offset [local_port+3] to this value.</td>
+                </tr>
+                <tr>
+                    <td><strong>[len]</strong></td>
+                    <td>-</td>
+                    <td>Computed length of the SIP body. To be used in "Content-Length"
+                    header. You can add a computed offset [len+3] to this value.</td>
+                </tr>
+                <tr>
+                    <td><strong>[call_number]</strong></td>
+                    <td>-</td>
+                    <td>Index. The call_number starts from "1" and is incremented by 1 for each call.</td>
+                </tr>
+                <tr>
+                    <td><strong>[cseq]</strong></td>
+                    <td>-</td>
+                    <td>Generates automatically the CSeq number. The initial value is 1 by default. It
+                    can be changed by using the <code>-base_cseq</code> command line option.</td>
+                </tr>
+                <tr>
+                    <td><strong>[call_id]</strong></td>
+                    <td>-</td>
+                    <td>A call_id identifies a call and is generated by SIPp for each new call. <strong>In client mode, it is mandatory
+                    to use the value generated by SIPp in the "Call-ID" header.</strong> Otherwise, SIPp will not recognise
+                    the answer to the message sent as being part of an existing call.<br/>
+                    Note: [call_id] can be pre-pended with an arbitrary string using '///'.
+                    Example: Call-ID: ABCDEFGHIJ///[call_id] - it will still be recognized by SIPp as part of the same call.</td>
+                </tr>
+                <tr>
+                    <td><strong>[media_ip]</strong></td>
+                    <td>-</td>
+                    <td>Depending on the value of <strong>-mi</strong> parameter, it is the local IP address for RTP echo.</td>
+                </tr>
+                <tr>
+                    <td><strong>[media_ip_type]</strong></td>
+                    <td>-</td>
+                    <td>Depending on the address type of <strong>-mi</strong> parameter (IPv4 or IPv6),
+                    media_ip_type will have value "4" for IPv4 and "6" for IPv6. Useful to build the SDP independently
+                    of the media IP type.</td>
+                </tr>
+                <tr>
+                    <td><strong>[media_port]</strong></td>
+                    <td>-</td>
+                    <td>Depending on the value of <strong>-mp</strong> parameter, it set the local RTP echo port number. Default
+                      is none. RTP/UDP packets received on that port are echoed to their sender. You can 
+                    add a computed offset [media_port+3] to this value.</td>
+                </tr>
+                <tr>
+                    <td><strong>[auto_media_port]</strong></td>
+                    <td>-</td>
+                    <td>Only for pcap. To make audio and video ports begin from the value of <strong>-mp</strong> parameter, 
+                        and change for each call using a periodical system, modulo 10000 (which limits to 10000 concurrent RTP sessions for pcap_play) </td>
+                </tr>
+                <tr>
+                    <td><strong>[last_*]</strong></td>
+                    <td>-</td>
+                    <td>The '[last_*]' keyword is replaced automatically by the
+                    specified header if it was present in the last message
+                    received (except if it was a retransmission). If the header
+                    was not present or if no message has been received, the
+                    '[last_*]' keyword is discarded, and all bytes until the end
+                    of the line are also discarded. If the specified header was
+                    present several times in the message, all occurrences are
+                    concatenated (CRLF separated) to be used in place of the
+                    '[last_*]' keyword.</td>
+                </tr>
+                <tr>
+                    <td><strong>[field0-n]</strong></td>
+                    <td>-</td>
+                    <td>Used to inject values from an external CSV file or from
+                    static user data if a user is assigned to the call. See
+                    <a href="#inffile">"Injecting values from an external CSV
+                    during calls"</a> section.</td>
+                </tr>
+                <tr>
+                    <td><strong>[$n]</strong></td>
+                    <td>-</td>
+                    <td>Used to inject the value of call variable number n. See "<a href="#actions">Actions</a>" section</td>
+                </tr>
+                <tr>
+                    <td><strong>[authentication]</strong></td>
+                    <td>-</td>
+                    <td>Used to put the authentication header. This field can have parameters, in the following form: 
+                    [authentication username=myusername password=mypassword]. If no username is provided, 
+                    the value from -s command line parameter (service) is used.  If no password is provided, the value 
+                    from -ap command line parameter is used. See "<a href="#authentication">Authentication</a>" section</td>
+                </tr>
+                <tr>
+                    <td><strong>[pid]</strong></td>
+                    <td>-</td>
+                    <td>Provide the process ID (pid) of the main SIPp thread.</td>
+                </tr>
+                <tr>
+                    <td><strong>[routes]</strong></td>
+                    <td>-</td>
+                    <td>If the "rrs" attribute in a recv command is set to "true",
+                    then the "Record-Route:" header of the message received is stored 
+                    and can be recalled using the [routes] keyword</td>
+                </tr>
+                <tr>
+                    <td><strong>[next_url]</strong></td>
+                    <td>-</td>
+                    <td>If the "rrs" attribute in a recv command is set to "true",
+                    then the [next_url] contains the contents of the Contact header 
+                    (i.e within the '&lt;' and '&gt;' of Contact)</td>
+                </tr>
+                <tr>
+                    <td><strong>[branch]</strong></td>
+                    <td>-</td>
+                    <td>Provide a branch value which is a concatenation of magic cookie 
+                    (z9hG4bK) + call number + message index in scenario.</td>
+                </tr>
+                <tr>
+                    <td><strong>[msg_index]</strong></td>
+                    <td>-</td>
+                    <td>Provide the message number in the scenario.</td>
+                </tr>
+                <tr>
+                    <td><strong>[cseq]</strong></td>
+                    <td>-</td>
+                    <td>Provides the CSeq value of the last request received. This value can be incremented (e.g. [cseq+1] adds 1 to
+                        the CSeq value of the last request).</td>
+                </tr>
+                
+                <tr>
+                    <td><strong>[%&lt;<i>param</i>&gt;]</strong></td>
+                    <td>-</td>
+                    <td><comment>NEW!</comment>Use to inject a global generic parameters
+                     (see <code>-key</code> command line option and manager
+                     <a href="#scen_params">scenario parameters</a>).<br/>
+                     Example: <code>&lt;pause poisson="true" mean="%RingTime"/&gt;</code></td>
+                </tr>                
+                
+            </table>
+            <p>Now that the INVITE message is sent, SIPp can wait for an answer by using the "<a href="#recv">recv</a>" command.</p>
+<source>  &lt;recv response="100"&gt; optional="true"
+  &lt;/recv&gt;
+
+  &lt;recv response="180"&gt; optional="true"
+  &lt;/recv&gt;
+
+  &lt;recv response="200"&gt;
+  &lt;/recv&gt;</source>
+            <p>100 and 180 messages are optional, and 200 is mandatory. 
+            <strong>In a "recv" sequence, there must be one mandatory message</strong>.</p>
+            <p>Now, let's send the ACK:</p>
+<source>  &lt;send&gt;
+    &lt;![CDATA[
+
+      ACK sip:<strong>[service]</strong>@<strong>[remote_ip]</strong>:<strong>[remote_port]</strong> SIP/2.0
+      Via: SIP/2.0/<strong>[transport]</strong> <strong>[local_ip]</strong>:<strong>[local_port]</strong>
+      From: sipp &lt;sip:sipp@<strong>[local_ip]</strong>:<strong>[local_port]</strong>&gt;;tag=<strong>[call_number]</strong>
+      To: sut &lt;sip:<strong>[service]</strong>@<strong>[remote_ip]</strong>:<strong>[remote_port</strong>]&gt;<strong>[peer_tag_param]</strong>
+      Call-ID: <strong>[call_id]</strong>
+      Cseq: 1 ACK
+      Contact: sip:sipp@<strong>[local_ip]</strong>:<strong>[local_port]</strong>
+      Max-Forwards: 70
+      Subject: Performance Test
+      Content-Length: 0
+
+    ]]&gt;
+  &lt;/send&gt;</source>
+            <p>We can also insert a pause. The scenario will wait for 5 seconds at this point.</p>
+<source>  &lt;pause milliseconds="5000"/&gt;</source>
+            <p>And finish the call by sending a BYE and expecting the 200 OK:</p>
+<source>    &lt;send retrans="500"&gt;
+     &lt;![CDATA[
+
+      BYE sip:<strong>[service]</strong>@<strong>[remote_ip]</strong>:<strong>[remote_port]</strong> SIP/2.0
+      Via: SIP/2.0/<strong>[transport] [local_ip]</strong>:<strong>[local_port]</strong>
+      From: sipp  &lt;sip:sipp@<strong>[local_ip]</strong>:<strong>[local_port]</strong>&gt;;tag=<strong>[call_number]</strong>
+      To: sut  &lt;sip:<strong>[service]</strong>@<strong>[remote_ip]</strong>:<strong>[remote_port]</strong>&gt;<strong>[peer_tag_param]</strong>
+      Call-ID: <strong>[call_id]</strong>
+      Cseq: 2 BYE
+      Contact: sip:sipp@<strong>[local_ip]</strong>:<strong>[local_port]</strong>
+      Max-Forwards: 70
+      Subject: Performance Test
+      Content-Length: 0
+
+    ]]&gt;
+   &lt;/send&gt;
+
+   &lt;recv response="200"&gt;
+   &lt;/recv&gt;</source>
+            <p>And this is the end of the scenario:</p>
+<source>&lt;/scenario&gt;</source>
+            <p>Creating your own SIPp scenarios is not a big deal. 
+            If you want to see other examples, use the <code>-sd</code> parameter
+            on the command line to display embedded scenarios.</p>
+      </section>
+
+      <section><title>Structure of server (UAS like) XML scenarios</title>
+            <p>A server scenario is a scenario that starts with a "<a href="#recv">recv</a>" command. 
+            The syntax and the list of available commands is the same as for
+            "client" scenarios.</p>
+            <p>But you are more likely to use [last_*] keywords in those server
+            side scenarios. For example, a UAS example will look like:</p>
+<source>  &lt;recv request="INVITE"&gt;
+  &lt;/recv&gt;
+
+  &lt;send&gt;
+    &lt;![CDATA[
+
+      SIP/2.0 180 Ringing
+      <strong>[last_Via:]</strong>
+      <strong>[last_From:]</strong>
+      <strong>[last_To:]</strong>;tag=<strong>[call_number]</strong>
+      <strong>[last_Call-ID:]</strong>
+      <strong>[last_CSeq:]</strong>
+      Contact: &lt;sip:<strong>[local_ip]</strong>:<strong>[local_port]</strong>;transport=<strong>[transport]</strong>&gt;
+      Content-Length: 0
+
+    ]]&gt;
+  &lt;/send&gt;</source>
+            <p>The answering message, 180 Ringing in this case, is built
+            with the content of headers received in the INVITE message.</p>
+      </section>
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="actions" /><section><title>Actions</title>
+              <p>In a "<a href="#recv">recv</a>" or "<a href="#recvCmd">recvCmd</a>" command,
+              you have the possibility to execute an action.
+              Several actions are available:</p>
+              <ul>
+                <li><a href="#action_regexp">Regular expressions</a> (ereg)</li>
+                <li><a href="#action_log">Log something in aa log file</a> (log)</li>
+                <li><a href="#action_exec">Execute an external (system), internal (int_cmd) or 
+                pcap_play_audio/pcap_play_video command</a> (exec)</li>
+                <li><a href="#action_user">User-related Actions</a> (assign_user, move_user)</li>
+                <li><a href="#action_rtd">RTD-related Actions</a> (rtd_eval, rtd_store, rtd_op)</li>
+              </ul>
+        <anchor id="action_regexp" /><section><title>Regular expressions</title>
+                  <p>Using regular expressions in SIPp allows to</p>
+                  <ul>
+                     <li>Extract content of a SIP message or a SIP header and
+                     store it for future usage (called re-injection)</li>
+                     <li>Check that a part of a SIP message or of a header 
+                     is matching an expected expression</li>
+                  </ul>
+                  <p>Regular expressions used in SIPp are defined per 
+                  <a href="http://www.opengroup.org/onlinepubs/007908799/xbd/re.html">
+                  Posix Extended standard (POSIX 1003.2)</a>. If you want to
+                  learn how to write regular expressions, I will recommend 
+                  this <a href="http://analyser.oli.tudelft.nl/regex/index.html.en">
+                  regexp tutorial</a>.</p>
+                  <p>Here is the syntax of the regexp action:</p>
+                  <table>
+                      <caption>regexp action syntax</caption>
+                      <tr>
+                          <th>Keyword</th>
+                          <th>Default</th>
+                          <th>Description</th>
+                      </tr>
+                      <tr>
+                          <td>regexp</td>
+                          <td>None</td>
+                          <td>Contains the regexp to use for matching the 
+                          received message or header. MANDATORY.</td>
+                      </tr>
+                      <tr>
+                          <td>search_in</td>
+                          <td>msg</td>
+                          <td>can have 2 values: "msg" (try to match against 
+                          the entire message) or "hdr" (try to match against a specific SIP header).</td>
+                      </tr>
+                      <tr>
+                          <td>header</td>
+                          <td>None</td>
+                          <td>Header to try to match against. Only used when 
+                          the search_in tag is set to hdr. MANDATORY IF 
+                          search_in is equal to hdr.</td>
+                      </tr>
+                      <tr>
+                          <td>case_indep</td>
+                          <td>false</td>
+                          <td>To look for a header ignoring case . Only used when 
+                          the search_in tag is set to hdr. </td>
+                      </tr>
+                      <tr>
+                          <td>occurence</td>
+                          <td>1</td>
+                          <td>To find the nth occurrence of a header. Only used when 
+                          the search_in tag is set to hdr.</td>
+                      </tr>
+                      <tr>
+                          <td>start_line</td>
+                          <td>false</td>
+                          <td>To look only at start of line. Only used when 
+                          the search_in tag is set to hdr.</td>
+                      </tr>
+                      <tr>
+                          <td>check_it</td>
+                          <td>false</td>
+                          <td>if set to true, the call is marked as failed if 
+                          the regexp doesn't match.</td>
+                      </tr>
+                      <tr>
+                          <td>assign_to</td>
+                          <td>None</td>
+                          <td>contains the variable id (integer) or a list of 
+                          variable id which will be used to store the 
+                          result(s) of the matching process between the regexp 
+                          and the message. Those variables can be re-used at 
+                          a later time either by using '[$n]' in the scenario 
+                          to inject the value of the variable in the messages or
+                          by using the content of the variables for <a href="#branching">conditional 
+                          branching</a>.
+
+                          <p><comment>NEW!</comment>With the introduction by IMS
+                          Bench SIPp of the concept of users, it is now also possible
+                          to store results of regular expression matching into
+                          user variables. These variables can then be used just
+                          like call variables but, contrary to call variables,
+                          they preserve their value between subsequent calls
+                          associated with the same user. Assigning a value
+                          to a user variable requires that a user has previously
+                          been assigned to the call. To assign a result to a
+                          user variable <i>n</i>, the variable id must be
+                          specified as 'u<i>n</i>'.</p>
+
+                          <p>The first variable in the variable list of
+                          assign_to contains the entire regular
+                          expression matching. The following variables contain the
+                          sub-expressions matching. Example:</p>
+<source><![CDATA[<ereg regexp="o=([[:alnum:]]*) ([[:alnum:]]*) ([[:alnum:]]*)"
+            search_in="msg"
+            check_it=i"true"
+            assign_to="3,u3,u2,8"/>]]></source>
+                          If the SIP message contains the line
+                          <source>o=user1 53655765 2353687637 IN IP4 127.0.0.1</source>
+                          <strong>call</strong> variable 3 will contain "o=user1 53655765 2353687637",
+                          <strong>user</strong> variable 3 will contain "user1", 
+                          <strong>user</strong> variable 2 will contain "53655765"
+                          and <strong>call</strong> variable 8 will contain "2353687637".</td>
+                      </tr>
+                  </table>
+                  <p>Note that you can have several regular expressions
+                  in one action.</p>
+                  <p>The following example is used to:</p>
+                  <ul>
+                    <li>First action:
+                      <ul>
+                        <li>Extract the first IPv4 address of the received SIP message</li>
+                        <li>Check that we could actually extract this IP address (otherwise
+                        call will be marked as failed)</li>
+                        <li>Assign the extracted IP address to call variables 1
+                        and 2.</li>
+                      </ul>
+                    </li>
+                    <li>Second action:
+                      <ul>
+                        <li>Extract the Contact: header of the received SIP message</li>
+                        <li>Assign the extracted Contract: header to variable 6.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <source>
+&lt;recv response="200" start_rtd="true"&gt;
+  &lt;action&gt;
+    &lt;ereg regexp="([0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]*" search_in="msg" check_it="true" assign_to="1,2" /&gt; 
+    &lt;ereg regexp=".*" search_in="hdr" header="Contact:" check_it="true" assign_to="6" /&gt;
+  &lt;/action&gt;
+&lt;/recv&gt;
+</source>
+        </section>
+        <anchor id="action_log" /><section><title>Log a message</title>
+                  <p>The "log" action allows you to customize your traces. Messages
+                  are printed in the <![CDATA[<scenario file name>_<pid>_logs.log]]> file.
+                  Any <a href="#keyword">keyword</a> is expanded to reflect the value actually used.</p>
+                  <warning>Logs are generated only if -trace_logs option is set on
+                  the command line.</warning>
+                  <p>Example:</p>
+                  <source><![CDATA[   <recv request="INVITE" crlf="true" rrs="true">
+     <action>
+	 <ereg regexp=".*" search_in="hdr" header="Some-New-Header:" assign_to="1" />
+          <log message="From is [last_From]. Custom header is [$1]"/>
+     </action>
+   </recv>]]></source>
+        </section>
+        <anchor id="action_exec" /><section><title>Execute a command</title>
+                <p>The "exec" action allows you to execute "internal", "external",
+                "play_pcap_audio" or "play_pcap_video" commands.</p>
+          <section><title>Internal commands</title>
+                  <p><strong>Internal</strong> commands (specified using int_cmd attribute) are: </p>
+                  <table>
+                  <tr><th>Keyword</th><th>Description</th><th>Example</th></tr>
+                  <tr><td><code>stop_call</code><br/><code>stop_gracefully</code></td>
+                   <td>Similar to pressing 'q'</td>
+                   <td><source>&lt;exec int_cmd="stop_call"/&gt;</source></td></tr>
+                  <tr><td><code>stop_now</code></td>
+                   <td>Similar to pressing ctrl+C</td>
+                   <td><source>&lt;exec int_cmd="stop_now"/&gt;</source></td></tr>
+                  <tr><td><code>set_start_time</code></td>
+                   <td>Resets the time reference for the current call. This is used so
+                    as to ignore the user reservation procedure portion of a scenario, as
+                    it is not actually part of the SIP scenario being performed. 
+                    This action should therefore be performed at the point in the scenario
+                    file where the actual SIP scenario really starts.</td>
+                   <td><source>&lt;exec int_cmd="set_start_time"/&gt;</source></td></tr>
+                  <tr><td><code>set_target_ip</code></td>
+                   <td>Forces the target IP to the one of the partner SIPp (To be used in
+                    "loop-back" configuration, SIPp against SIPp without any SUT in
+                    between).</td>
+                   <td>
+                    <source>&lt;exec int_cmd="set_target_ip"/&gt;</source></td></tr>
+                  </table>
+                  <p>Example that stops the execution of the script on receiving a 603 response:</p>
+                  <source><![CDATA[   <recv response="603" optional="true">
+     <action>
+          <exec int_cmd="stop_now"/>
+      </action>
+   </recv>]]></source>
+          </section>
+
+          <section><title>External commands</title>
+                  <p><strong>External</strong> commands (specified using command attribute) are anything
+                  that can be executed on local host with a shell.</p>
+                  <p>Example that execute a system echo for every INVITE received:</p>
+                  <source><![CDATA[   <recv request="INVITE">
+     <action>
+          <exec command="echo [last_From] is the from header received >> from_list.log"/>
+      </action>
+   </recv>]]></source>
+          </section>
+          <section><title>PCAP (media) commands</title>
+                  <p><comment>UNTESTED!</comment>
+                  <strong>PCAP play</strong> commands to play pre-recorded RTP streams have not been
+                  modified in the IMS Bench SIPp but have also <b>not been regression tested</b> at all in this
+                  version. Please refer to the standard SIPp documentation for more about PCAP play
+                  functionality. And if you successfully use it with IMS Bench SIPp, let us know so we
+                  can update this section!</p>
+          </section>
+        </section>
+
+        <anchor id="action_user" /><section><title>User related Actions</title>
+                 <table>
+                  <tr><th>Keyword</th><th>Description</th><th>Example</th></tr>
+                  <tr><td><code>assign_user</code></td>
+                      <td>Picks a user at random from a specified user pool and assigns the user to
+                      the scenario instance (the call).
+                      <p>Once a user is assigned to the call, user variables can be used to store and
+                      retrieve data and the [field<i>n</i>] injection fields refer to the user static
+                      data as loaded from the user data file (<code>-user_inf</code> command line
+                      parameter)</p>
+                      <p><strong>Attributes:</strong>
+                      <ul>
+                       <li>pool - Pool id of the pool from which to select a user at random</li>
+                      </ul></p>
+                      </td>
+                      <td><source>&lt;assign_user pool="0" scheme="rand_uni"/&gt;</source></td></tr>
+                  <tr><td><code>move_user</code></td>
+                      <td>Moves the user currently assigned to the call into a specified user pool.
+                      <p><strong>Attributes:</strong>
+                      <ul>
+                       <li>pool - Pool id of the pool into which to move the user</li>
+                      </ul></p>
+                      </td>
+                      <td><source>&lt;move_user pool="4"/&gt;</source></td></tr>
+                </table>
+        </section><!-- User related Actions -->
+
+        <anchor id="action_rtd" /><section><title>RTD-related Actions</title>
+
+          <p>The actions listed in this section allow performing operations
+          on RTDs (Response Time Duration - i.e. SIPp scenario timers). In order
+          for IMS Bench SIPp to provide a scalable test system possibly consisting
+          of multiple SIPp instances distributed over multiple physical systems,
+          and also because of the need to measure time between an event happening
+          in the client-side scenario and another event happening at its partner
+          server-side scenario (for example the time for the INVITE to get from
+          the UAC, through the SUT, to the UAS), IMS Bench SIPp provides a mechanism,
+          based on actions, to compute RTDs based on timestamps from the local and
+          the partner SIPp scenarios. In addition, actions also allow
+          computing RTDs are the sum of or difference between two other (local or remote)
+          RTDs. This can be useful to compute the time metric of a complete call
+          setup but excluding the ring time (as the latter is user dependent and
+          does not relfect responsiveness of the SUT).</p>
+
+          <p>In the RTD actions listed below, whenever a remote rtd can be
+          used as argument, the action must be included in a &lt;recvRmt&gt;
+          command that receives a message from the parnter SIPp with the
+          necessary RTD value. Otherwise, this will cause a failure of the
+          test run.</p>
+
+          <p>These actions support a <code>timeout</code> attribute which
+          is then used as a maximum allowed value for the rtd value that the
+          action computes. In case the maximum is exceeded, the scenario is
+          aborted (while executing the action). Therefore, the <a href="#Time+Metrics">
+          Time Metrics</a> feature should usually be used instead of the
+          timeout argument unless checking for protocol timeouts.</p>
+
+          <table>
+           <tr><th>Action</th><th>Description</th><th>Example</th></tr>
+           <tr><td>rtd_eval</td>
+            <td>Computes an RTD from 2 timestamps. Usually, at least one of
+             them has been received from the partner SIPp.
+             <p><strong>Attributes:</strong>
+              <ul>
+               <li>rtd (M) - target local rtd that will hold the resulting duration</li>
+               <li>start (M) - local or remote rtd containing the first timestamp (remote
+               rtd is specified as "r1" for remote rtd[1])</li>
+               <li>stop (M) - local or remote rtd containing the second timestamp</li>
+               <li>timeout (O) - maximum value for the result. Call aborted if exceeded.</li>
+              </ul></p>
+             <p>After the action is executed, the target local rtd contains (stop - start).</p>
+            </td><td>
+<source><![CDATA[<recvRmt type="res_call_info" timeout="8000">
+  <action>
+    <rtd_eval rtd="2" start="2" stop="r2"/>
+  </action>
+</recvRmt>]]></source>
+             <p>This will look in the message received from the partner for a
+             parameter giving the start time (timestamp) of RTD 2 and use that to
+             compute the local RTD 2 as the difference between the local and remote
+             RTD 2 start times (used as timestamps).</p></td></tr>
+           <tr><td>rtd_op</td>
+            <td>Performs a simple computation (add or sub) on 2 RTDs. Each RTD argument
+             can be local or remote. The operation is performed on the values of the
+             specified RTDs (not on start_times/timestamps, only on already measured
+             durations).
+             <p><strong>Attributes:</strong>
+              <ul>
+               <li>rtd (M) - target local rtd that will hold the resulting duration</li>
+               <li>op (M) - operation to be performed: &quot;add&quot;, &quot;sub&quot;</li>
+               <li>rtd1 (M) - first operand</li>
+               <li>rtd2 (M) - second operand</li>
+               <li>timeout (O) - maximum value for the result. Call aborted if exceeded.</li>
+              </ul>
+             </p></td>
+            <td>
+<source><![CDATA[<action>
+  <rtd_op op="sub" rtd="1" rtd1="1" rtd2="5"/>
+</action>]]></source>
+             <p>Substracts RTD5 from RTD1 (both local) and stores the result into RTD 1.</p>
+            </td></tr>
+           <tr><td>rtd_store</td>
+            <td>Simply stores an RTD received from the partner into a local RTD for later
+             computation or as final scenario metric value.
+             <p><strong>Attributes:</strong>
+              <ul>
+               <li>rtd (M) - target local rtd that will hold the retreived remote rtd</li>
+               <li>rmt_rtd (M) - remote rtd to extract from the message received from the partner</li>
+               <li>timeout (O) - maximum value for rtd. Call aborted if exceeded.</li>
+              </ul></p></td><td>
+<source>
+<![CDATA[<recvRmt type="res_call_info" timeout="8000">
+  <action>
+    <rtd_store rtd="3" rmt_rtd="5"/>
+  </action>
+</recvRmt>]]></source>
+             <p>Stores the value of the remote RTD5 as received in the message from the
+             partner SIPp into local RTD3.</p>
+            </td></tr>
+          </table>
+        </section>
+      </section>  <!-- Actions -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="inffile" /><section><title>Injecting values from an external CSV during calls</title>
+
+                <p><comment>NEW!</comment>In addition to the standard value injection mechanism provided by SIPp,
+                IMS Bench SIPp supports a new, more user-centric mode of operation.
+                This is triggered by the use of the <code>-user_inf</code> command line
+                parameter. For the standard SIPp mode of operation, please refer to the
+                standard SIPp documentation.</p>
+
+                <p>When the <code>-user_inf</code> command line parameter is used
+                to specify a user data file, corresponding user entities are created
+                within SIPp and are each assigned a different IP and port combination.
+                Data from the specified file is also loaded into user specific data
+                fields which can then be used within the scenarios.</p>
+
+                <p>Similar to what happens in the standard SIPp case, the [field<i>n</i>]
+                keyword is replaced, in outgoing messages, by the <i>n</i>-th user data
+                field of the user currently associated with the call. This requires that
+                a user has previously been associated with the call by means of a
+                <code>&lt;assign_user&gt;</code> action.</p>
+
+                <p>The user data file has the following format:</p>
+                <ul>
+                 <li>Each line defines one user and is made up of semi-colon (';')
+                  delimited columns.</li>
+                 <li>The first column represents the ID of the user pool that the
+                  user will initially be placed in.</li>
+                 <li>Subsequent columns hold the static user data fields that
+                  scenarios can refer to using the [field<i>n</i>] keyword.</li>
+                </ul>
+
+                <p>Example:</p>
+<source>
+0;subs000000;ims.test;usim000000;sp1.ims.test;pass000000;data0_1
+0;subs000001;ims.test;usim000001;sp1.ims.test;pass000001;data1_1
+0;subs000002;ims.test;usim000002;sp1.ims.test;pass000002;data2_1
+0;subs000003;ims.test;usim000003;sp1.ims.test;pass000003;data3_1
+0;subs000004;ims.test;usim000004;sp1.ims.test;pass000004;data4_1
+...
+</source>
+                <p>In this example, all users are initially in pool 0 (for example, the pool
+                of not registered users). The meaning of the remaining fields
+                depends of what the scenario files do with them but in case of
+                the provided IMS Benchmark scenarios, the user data fields have
+                the following meaning:</p>
+                <ul>
+                 <li>username part of the public identity of the user</li>
+                 <li>domain part of the public identity of the user</li>
+                 <li>authentication username</li>
+                 <li>authentication realm</li>
+                 <li>authentication password (AKA Key value)</li>
+                 <li>example extra data - not used</li>
+                </ul>
+
+      </section>
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="branching" /><section><title>Conditional branching</title>
+        <section><title>Conditional branching in scenarios</title>
+		      <p>It is possible to execute a scenario in a non-linear
+		      way. You can jump from one part of the scenario to another for example 
+		      when a message is received or if a call variable is set.</p>
+		      <p>You define a label (in the xml) as <code><![CDATA[<label id="n"/>]]></code>
+		      Where n is a number between 1 and 19 (we can easily have more if needed). 
+		      The label commands go anywhere in the main scenario between other commands.
+		      To any action command (send, receive, pause, etc.) you add a next="n"
+		      parameter, where n matches the id of a label. <strong>When it has done the 
+		      command</strong> it continues the scenario from that label. This part is
+		      useful with optional receives like 403 messages, because it allows 
+		      you to go to a different bit of script to reply to it and then 
+		      rejoin at the BYE (or wherever or not).</p>
+		      <p>Alternatively, if you add a <strong>test="m"</strong> parameter to the next, 
+		      it goes to the label only if variable [$m] is set. This allows you 
+		      to look for some string in a received packet and alter the 
+		      flow either on that or a later part of the script.</p>
+		      <warning>If you add special cases at the end, don’t forget to put 
+		      a label at the real end and jump to it at the end of the normal flow.</warning>
+		      <p><strong>Example:</strong></p>
+		      <p>The following example corresponds to the embedded '<a href="#scenario_branch">branchc</a>' (client side) scenario.
+		      It has to run against the embedded '<a href="#scenario_branch">branchs</a>' (server side) scenario.<br/>
+		      <img alt="Conditional branching example" src="images/branching_01.gif"></img><br/>
+		      <img alt="Conditional branching example" src="images/branching_02.gif"></img></p>
+        </section>
+	<section><title>Randomness in conditional branching</title>
+	        <p>To have SIPp behave somewhat more like a "normal" SIP client being used by a human, 
+		it is possible to use "statistical branching". 
+		Wherever you can have a conditional branch on a variable being set (test="4"), 
+		you can also branch based on a statistical decision using the attribute 
+		"chance" (e.g. chance="0.90"). Chance can have a value between 0 (never) 
+		and 1 (always). "test" and "chance" can be combined, i.e. only 
+		branching when the test succeeds and the chance is good.</p>
+		<p>With this, you can have a variable reaction in a given scenario 
+		(e.g.. answer the call or reject with busy), or run around in a
+		loop (e.g. registrations) and break out of it after some random number of iterations.</p>
+        </section>
+      </section>  <!-- Banching -->
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+      <anchor id="authentication"/><section><title>SIP Authentication</title>
+              <p>Two authentication algorithms are supported: Digest/MD5 ("algorithm="MD5"")
+              and Digest/AKA ("algorithm="AKAv1-MD5"", as specified by 3GPP for IMS).</p>
+
+              <p><b>Note</b>: IMS Bench SIPp has authentication support enabled by default
+              at compile time (requiring OpenSSL libs
+              as described in the <a href="#installing">installation</a> section).</p>
+
+              <p>Doing authentication in scenarios is simple:
+              When receiving a 401 (Unauthorized) or a 407 (Proxy Authentication
+              Required), you must add auth="true" in the <![CDATA[<recv>]]> command to
+              take the challenge into account in order to compute a response in a
+              next message.</p>
+
+              <p><comment>NEW!</comment> In addition, the <code>auth_assign_to</code> argument
+              can specify, in the same &lt;recv&gt; command as the one where auth="true" is
+              specified, a user or call variable into which to store the challenge for
+              later usage (in a subsequent call and possibly  for a different scenario
+              in case storing in a user variable).<br/>
+              This is for example used, in the IMS Bench, to include an authenticatom
+              response in the first REGISTER message of a re-registration, as an attempt
+              to speed up the re-registration process in case the SUT still accepts a
+              response to an earlier challenge (Note: This is probably not correct and
+              might not work against real IMS cores - the re-registration scenario is
+              in need of some rework).</p>
+
+              <p>Computing the authorization header is done through the usage of the
+              [authentication] keyword. Depending on the algorithm ("MD5" or "AKAv1-MD5"), 
+              different parameters must be passed next to the authentication
+              keyword:</p>
+              
+              <ul>
+                <li>Digest/MD5 (example: [authentication username=joe password=schmo])
+                  <ul>
+                    <li><strong>username</strong>: username: if no username is specified,
+                    the username is taken from the '-s' (service) command line parameter</li>
+                    <li><strong>password</strong>: password: if no password is specified,
+                    the password is taken from the '-ap' (authentication password) command
+                    line parameter</li>
+                  </ul>
+                </li>
+                <li>Digest/AKA: (example: [authentication username=HappyFeet aka_OP=0xCDC202D5123E20F62B6D676AC72CB318 aka_K=0x465B5CE8B199B49FAA5F0A2EE238A6BC aka_AMF=0xB9B9])
+                  <ul>
+                    <li><strong>username</strong>: username: if no username is specified,
+                    the username is taken from the '-s' (service) command line parameter</li>
+                    <li><strong>aka_K</strong> (or <strong>password</strong>):
+                    Permanent secret key. If no aka_K is provided,
+                    the &quot;password&quot; attributed is used as aka_K.</li>
+                    <li><strong>aka_OP</strong>: OPerator variant key</li>
+                    <li><strong>aka_AMF</strong>: Authentication Management Field
+                    (indicates the algorithm and key in use)</li>
+                  </ul>
+                </li>
+              </ul>
+              <p>In case you want to use authentication with a different username/password or aka_K
+              for each call, <comment>(NEW!)</comment> you can use keywords within the
+              [authentication] keyword and take the values from user static data fields
+              or from a CSV file.</p>
+              <p><strong>Example:</strong></p>
+<source><![CDATA[  <recv response="401" auth="true" auth_assign_to="u2" rtd="1">
+  </recv>
+
+  <send retrans="500" start_rtd="2">
+    <![CDATA[
+      REGISTER sip:[field1] SIP/2.0
+      Via: SIP/2.0/[transport] [local_ip]:[local_port];branch=[branch]
+      From: "[field0]" <sip:[field0]@[field1]>;tag=[call_number]
+      To: "[field0]" <sip:[field0]@[field1]>
+      Call-ID: [call_id]
+      CSeq: 2 REGISTER
+      Contact: <sip:[field0]@[local_ip]:[local_port]>;expires=[%RegistrationExpire]
+      Expires: [%RegistrationExpire]
+      Content-Length: 0
+      [authentication username=[field2]@[field3] password=[field4]]
+      Supported: path
+    ]]>]]&gt;<![CDATA[
+  </send>
+
+]]></source>
+              <p>If you later (for example in another scenario) want to generate
+              an authentication response based on the challenge that was stored 
+              in user variable <code>u2</code> by the previous example, the
+              following authentication line, using the <code>challenge_from</code>
+              and <code>challenge_type</code> attributes would do it:</p>
+  <source>      [authentication username=[field2]@[field3] password=[field4] challenge_from="u2" challenge_type=401]</source>
+
+      </section>
+    </section> <!-- Writing XML Scenarios -->
+
+    <section><title>Various Topics</title>
+        
+      <anchor id="transports" /><section><title>SIPp Transport Modes</title>
+            <p>From the transport modes supported by the standard SIPp, only UDP transport is
+            currently supported by IMS Bench SIPp. It however adds a few options in the way UDP
+            is used, making it more closely resemble a set of separate client devices.</p>
+        <section><title>UDP one socket per user</title>
+                <p>In UDP &quot;one socket per user&quot; mode, each user that a
+                SIPp instance represents corresponds to a separate UDP port that SIPp uses
+                for the traffic belonging to that user.</p>
+                <p>All users however share a single IP address.</p>
+        </section>
+        <section><title>UDP multiple IP addresses</title>
+                <p>In UDP multiple IP addresses mode, SIPp distributes the users it
+                represents among a set of configured IP addresses. In case there are more
+                users than IP addresses, different UDP ports are used for users that share
+                the same IP address, thereby giving a unique IP adddress / UDP port combination
+                to each user.</p>
+        </section>
+      </section> <!-- Tansport Modes -->
+
+      <section><title>Running SIPp in background</title>
+          <p>SIPp can be launched in background mode (<code>-bg</code> command
+          line option).</p>
+          <p>By doing so, SIPp will be detached from the current terminal and run
+          in the background. The PID of the SIPp process is provided on standard output
+          at startup (can be useful when you run multiple instances!).
+          If you are not controlling SIPp through the IMS Bench SIPp manager and if
+          you didn't specify a number of calls to execute
+          with the <code>-m</code> option, SIPp will run forever.</p>
+          <p>There is a mechanism implemented to stop SIPp smoothly. The command
+          <code>kill -SIGUSR1 [SIPp_PID]</code> will instruct SIPp to stop placing
+          any new calls and finish all ongoing calls before exiting.</p>
+      </section>
+
+      <section><title>Handling Media with SIPp</title>
+          <p>Media plane features have not been tested with IMS Bench SIPp and are
+          therefore likely to be broken. The corresponding code has however not been
+          removed.</p>
+      </section>
+
+      <section><title>SIPp Exit codes</title>
+            <p>To ease automation of testing, upon exit (on fatal error or when
+            the number of asked calls (<code>-m</code> command line option) is
+            reached, sipp exits with one of the following exit codes:</p>
+            <ul>
+                <li>0: All calls were successful</li>
+                <li>1: At least one call failed</li>
+                <li>97: exit on internal command. Calls may have been processed</li>
+                <li>99: Normal exit without calls processed</li>
+                <li>-1: Fatal error</li>
+            </ul>
+            <p>Depending on the system that SIPp is running on, you can echo
+            this exit code by using "<code>echo ?</code>" command.</p>
+      </section>
+
+      <section><title>Statistics</title>
+
+        <section><title>Response times</title>
+
+                 <p>Response times (or more generally time between two scenario
+                 events) can be gathered and reported. SIPp has 5 timers 
+                 (the number is set at compile time) used to compute time between 
+                 two SIPp commands (send, recv or nop). You can start a timer
+                 by using the <a href="#start_rtd">start_rtd</a> attribute
+                 and stop it using the <a href="#rtd">rtd</a> attribute.</p>
+                 <p>You can view the value of those timers in the SIPp interface
+                 by pressing 3, 6, 7, 8 or 9. You can also save the values 
+                 in a CSV file using the -trace_stat option (see below).</p>
+
+                 <p><comment>NEW!</comment>IMS Bench SIPp extends this mechanism
+                 in several ways:</p>
+
+                 <p>As most IMS Bench scenarios require measuring several
+                 delays, the start_rtd and rtd attributes have been extended to
+                 support a list of timers to start or stop at once. This allows,
+                 for example, measuring delays between the same starting
+                 point and different end points, or vice-versa.
+                 See <a href="#start_rtd">start_rtd</a> attribute for an example.</p>
+
+                 <p>IMS Bench SIPp adds the possibility to check at run-time that
+                 the value of a specific timer remains within an allowed range and,
+                 in case it exceeds its maximum allowed value, to flag the call as
+                 inadequately handled even though it was successful from a protocol
+                 point of view.
+                 This is then reflected in the statistics, and in the scenario result
+                 CSV file if the <code>-trace_scen</code> command line option is
+                 used. In a complete IMS Bench SIPp setup, this also impacts the
+                 percentage of inadequately handled scenario attempts as determined
+                 by the manager when deciding whether to do the next step of the load
+                 profile or not.
+                 <br/>In IMS Bench SIPp, the timers that must be dumped into the
+                 scenario CSV result file, and for whch such a maximum value can be
+                 defined are called a &quot;metrics&quot;.
+                 See <a href="#Time+Metrics">Time Metrics</a> to learn more
+                 about this feature and the associated syntax.</p>
+
+                 <p>IMS Bench SIPp being a scalable test system that attempts to
+                 mimic real users connecting to the SUT, it can orchestrate scenario
+                 execution between two SIPp instances possibly running on different
+                 physical systems. New actions were added to allow computation on
+                 timer values (RTDs), including computing an RTD as a difference
+                 between two timestamps, one local, the other from the remote (partner)
+                 SIPp instance.</p>
+
+        </section>
+        <section><title>Available counters</title>
+                <p>The <code>-trace_stat</code> option dumps all statistics in
+                the scenario_name_pid.csv file. The dump starts with one header line
+                with all counters. All following lines are 'snapshots' of
+                statistics counter given the statistics report frequency (-fd
+                option). When SIPp exits, the last values of the statistics
+                are also dumped in this file.</p>
+                <p>This file can be easily imported in any spreadsheet
+                application, like Excel.</p>
+                <p>In counter names, (P) means 'Periodic' - since last statistic
+                row and (C) means 'Cumulated' - since sipp was started.</p>
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+              
+<anchor id="stats" /><p>Available statistics are:</p>
+  <ul>
+    <li>StartTime: 
+    Date and time when the test has started.</li>
+    <li>LastResetTime:
+    Date and time when periodic counters where last reseted.</li>
+    <li>CurrentTime:
+    Date and time of the statistic row.</li>
+    <li>ElapsedTime:
+    Elapsed time.</li>
+    <li>CallRate:
+    Call rate (calls per seconds).</li>
+    <li>IncomingCall:
+    Number of incoming calls.</li>
+    <li>OutgoingCall:
+    Number of outgoing calls.</li>
+    <li>TotalCallCreated:
+    Number of calls created.</li>
+    <li>CurrentCall:
+    Number of calls currently ongoing.</li>
+    <li>SuccessfulCall:
+    Number of successful calls.</li>
+    <li>FailedCall:
+    Number of failed calls (all reasons).</li>
+    <li>FailedCannotSendMessage:
+    Number of failed calls because Sipp cannot send the
+    message (transport issue).</li>
+    <li>FailedMaxUDPRetrans:
+    Number of failed calls because the maximum number of
+    UDP retransmission attempts has been reached.</li>
+    <li>FailedUnexpectedMessage:
+    Number of failed calls because the SIP message received
+    is not expected in the scenario.</li>
+    <li>FailedCallRejected:
+    Number of failed calls because of Sipp internal error.
+    (a scenario sync command is not recognized or a scenario
+    action failed or a scenario variable assignment failed).</li>
+    <li>FailedCmdNotSent:
+    Number of failed calls because of inter-Sipp
+    communication error (a scenario sync command failed to
+    be sent).</li>
+    <li>FailedRegexpDoesntMatch:
+    Number of failed calls because of regexp that doesn't
+    match (there might be several regexp that don't match
+    during the call but the counter is increased only by
+    one).</li>
+    <li>FailedRegexpHdrNotFound:
+    Number of failed calls because of regexp with hdr    
+    option but no matching header found.</li>
+    <li>OutOfCallMsgs:
+    Number of SIP messages received that cannot be associated
+    with an existing call.</li>
+    <li>AutoAnswered:
+    Number of unexpected specific messages received for new Call-ID.
+    The message has been automatically answered by a 200 OK
+    Currently, implemented for 'PING' message only.</li>
+    <li>Retransmissions:<comment> not documented </comment>Number of UDP retransmission.</li>
+    <li>Retransmissions2:<comment> NEW </comment>Stat collected at the server side are added to the client side.</li>
+    <li>FailedTimeoutInRtdOp:<comment> NEW </comment>Number of calls that exceed the defined <a href="#Time+Metrics">metrics</a> or for which the timeout specified in an rtd evaluation action was exceeded.</li>
+    </ul>
+    <p>In addition, two other statistics are gathered:</p>
+    <ul><li>ResponseTime (see previous section)</li>
+    <li>CallLength: this is the time of the duration of an entire call.</li>
+    </ul>
+    <p>Both ResponseTime and CallLength statistics can be tuned using <a href="#resptimerep">ResponseTimeRepartition</a>
+    and <a href="#calllengthrep">CallLengthRepartition</a> commands in the scenario.</p>
+        </section> <!-- Counters -->
+      </section> <!-- Statistics -->
+      <section><title>Error handling</title>
+            <p>SIPp has advanced features to handle errors and unexpected events. 
+            They are detailed in the following sections.</p>
+        <section><title>Unexpected messages</title>
+                <ul>
+                    <li>When a SIP message that <strong>can</strong> be
+                    correlated to an existing call (with the
+                    <code>Call-ID:</code> header) but is not expected in the
+                    scenario is received, SIPp will send a CANCEL message if no
+                    200 OK message has been received or a BYE message if a 200
+                    OK message has been received. The call will be marked 
+                    as failed. If the unexpected message is a 4XX or 5XX,
+                    SIPp will send an ACK to this message, close the call
+                    and mark the call as failed.</li>
+                    <li>When a SIP message that <strong>can't</strong> be
+                    correlated to an existing call (with the
+                    <code>Call-ID:</code> header) is received, SIPp will send a
+                    BYE message. The call will not be counted at all.</li>
+                    <li>When a SIP "PING" message is received, SIPp will send
+                    an ACK message in response. This message is not counted as 
+                    being an unexpected message. But it is counted in the "AutoAnswered"
+                    <a href="#stats">statistic counter</a>.
+                    </li>
+                    <li>An unexpected message that is not a SIP message will
+                    be simply dropped.</li>
+                </ul>
+        </section>
+        <section><title>Retransmissions (UDP only)</title>
+                <p>A retransmission mechanism exists in UDP transport mode. 
+                To activate the retransmission mechanism, the "send" command must include
+                the "retrans" attribute.</p>
+                <p>When it is activated and a SIP message is sent and no ACK or
+                response is received in answer to this message, the message is
+                re-sent.</p>
+                <note>The retransmission mechanism follows RFC 3261, section 17.1.1.2. 
+                Retransmissions are differentiated between INVITE and non-INVITE 
+                methods.</note>
+                <p><code>&lt;send retrans="500"&gt;</code>: will initiate the T1 timer
+                to 500 milliseconds.</p>
+                <p>Even if retrans is specified in your scenarios, you can override this by 
+                using the <code>-nr</code> command line option to globally disable the
+                retransmission mechanism.</p>
+        </section>
+        <section><title>Log files (error + log + screen)</title>
+                <p>There are several ways to trace what is going on during your SIPp runs.</p>
+                <ul>
+                    <li>You can log sent and received SIP messages in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_messages.log by
+                    using the command line parameter <code>-trace_msg</code>. The messages are time-stamped so that you
+                    can track them back.</li>
+                    <li>You can trace all unexpected messages or events in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_errors.log by using
+                    the command line parameter <code>-trace_err</code>.</li>
+                    <li>You can save in a file the statistics screens, as displayed in
+                    the interface. This is especially useful when running SIPp in background
+                    mode.<br/>
+                    This can be done in two ways:
+                    <ul>
+                      <li>When SIPp exits to get a final status report (-trace_screen option)</li>
+                      <li>On demand by using USR2 signal (example: <code>kill -SIGUSR2 738</code>)</li>
+                    </ul>
+                    </li>
+                    <li>You can log all call ids for calls that timeout (the maximum
+                    number of retransmissions for UDP transport is reached)
+                    by using the command line parameter <code>-trace_timeout</code></li>
+                </ul>
+        </section>
+      </section> <!-- Error Handling -->
+
+      <section><title>Online help (-h)</title>
+          <p>The online help, available through the -h option is duplicated here for your
+          convenience</p>
+          <source>Usage:
+
+  sipp remote_host[:remote_port] [options]
+
+  Available options:
+</source>
+<table>
+<tr><td>-aa</td><td>Enable automatic 200 OK answer for INFO, UPDATE and NOTIFY messages.</td></tr>
+<tr><td>-ap password</td><td>Set the password for authentication challenges.<br/>
+                      Default is 'password'</td></tr>
+<tr><td>-auth_uri</td><td>Force the value of the URI for authentication.<br/>
+                      By default, the URI is composed of remote_ip:remote_port.</td></tr>
+<tr><td>-base_cseq n</td><td>Start value of [cseq] for each call.</td></tr>
+<tr><td>-bg</td><td>Launch SIPp in background mode.</td></tr>
+<tr><td>-bind_local</td><td>Bind socket to local IP address, i.e. the local IP address is used as the source IP address.<br/>
+                      If SIPp runs in server mode it will only listen on the local IP address instead of all IP addresses.</td></tr>
+<tr><td>-buff_size buff_size</td><td>Set the send and receive buffer size.</td></tr>
+<tr><td>-cid_str string</td><td>Call ID string (default %u-%p@%s).<br/>
+                      %u=call_number, %s=ip_address, %p=process_number,%%=% (in any order).</td></tr>
+<tr><td>-d duration</td><td>Controls the length (in milliseconds) of calls. More precisely, this controls
+                      the duration of 'pause' instructions in the scenario, if they do not have a
+                      'milliseconds' section.<br/>Default value is 0.</td></tr>
+<tr><td>-f frequency</td><td>Set the statistics report frequency on screen (in seconds).<br/>Default is 1.</td></tr>
+<tr><td>-fd frequency</td><td>Set the statistics dump log report frequency (in seconds).<br/>Default is 60.</td></tr>
+<tr><td>-groupid id</td><td>SIPp group ID to define SIPp pools (see -rmctrl)</td></tr>
+<tr><td>-i local_ip</td><td>Set the local IP address for 'Contact:', 'Via:', and 'From:' headers. <br/>Default is primary host IP address.</td></tr>
+<tr><td>-id</td><td>SIPp Test system ID to communicate to the manager (see -rmctrl)</td></tr>
+<tr><td>-inf file_name</td><td>Inject values from an external CSV file during calls into the scenarios.
+                      First line of this file say whether the data is to be read in sequence (SEQUENTIAL) or random 
+                      (RANDOM) order.<br/>
+                      Each line corresponds to one call and has one or more ';' delimited data fields. Those fields can be referred as [field0], [field1], ... in the xml 
+                      scenario file.</td></tr>
+<tr><td>-ip_field nr</td><td>Set which field from the injection file contains the IP address from which the client will send its messages.<br/>
+                      If this option is omitted and the '-t ui' option is present, then field 0 is assumed.<br/>
+                      Use this option together with '-t ui'</td></tr>
+<tr><td>-key keyword value</td><td>Set the generic parameter named "keyword" to "value".</td></tr>
+<tr><td>-l calls_limit</td><td>Set the maximum number of simultaneous calls. Once this limit is reached, traffic
+                      is decreased until the number of open calls goes down. <br/>
+                      Default: (3 * call_duration (s) * rate).</td></tr>
+<tr><td>-lost</td><td>Set the number of packets to lose by default (scenario specifications override this value).</td></tr>
+<tr><td>-m calls</td><td>Stop the test and exit when 'calls' calls are processed.</td></tr>
+<tr><td>-master</td><td>3pcc extended mode: indicates the name of the twin sipp instance (if master)</td></tr>
+<tr><td>-max_invite_retrans</td><td>Maximum number of UDP retransmissions for invite transactions before call ends on timeout.</td></tr>
+<tr><td>-max_non_invite_retrans</td><td>Maximum number of UDP retransmissions for non-invite transactions before call ends on timeout.</td></tr>
+<tr><td>-max_reconnect</td><td>Set the the maximum number of reconnection.</td></tr>                      
+<tr><td>-max_recv_loops</td><td>Set the maximum number of messages received read per cycle. Increase this value for high traffic level.<br/>
+                      The default value is 1000.</td></tr>
+<tr><td>-max_retrans</td><td>Maximum number of UDP retransmissions before call ends on timeout.<br/>
+                      Default is 5 for INVITE transactions and 7 for others.</td></tr>
+<tr><td>-max_socket max</td><td>Set the max number of sockets to open simultaneously.<br/>
+                      This option is significant if you use one socket per call. Once this limit is reached, traffic is distributed over the sockets already opened.<br/>
+                      Default value is 50000.</td></tr>
+<tr><td>-mb buf_size</td><td>Set the RTP echo buffer size (default: 2048).</td></tr>
+<tr><td>-mi local_rtp_ip</td><td>Set the local media IP address.</td></tr>
+<tr><td>-mp media_port</td><td>Set the local RTP echo port number.<br/>Default is 6000.</td></tr>
+<tr><td>-nd</td><td>No Default. Disable all default behavior of SIPp which are the following: <br/>
+                      - On UDP retransmission timeout, abort the call by<br/>
+                      sending a BYE or a CANCEL<br/>
+                      - On receive timeout with no ontimeout attribute, <br/>
+                      abort the call by sending a BYE or a CANCEL<br/>
+                      - On unexpected BYE send a 200 OK and close the call<br/>
+                      - On unexpected CANCEL send a 200 OK and close the call<br/>
+                      - On unexpected PING send a 200 OK and continue the call<br/>
+                      - On any other unexpected message, abort the call by<br/>
+                      sending a BYE or a CANCEL</td></tr>
+<tr><td>-nr</td><td>Disable retransmission in UDP mode.</td></tr>
+<tr><td>-p local_port</td><td>Set the local port number.<br/>Default is a random free port chosen by the system.</td></tr>
+<tr><td>-pause_msg_ign</td><td>Ignore the messages received during a pause defined in the scenario</td></tr>
+<tr><td>-r rate (cps)</td><td>Set the call rate (in calls per seconds).<br/>This value can be changed during test by pressing
+                      <ul>
+                      <li>'+','_','*' or '/'. Default is 10.</li>
+                      <li>'+' key to increase call rate by 1,</li>
+                      <li>'-' key to decrease call rate by 1,</li>
+                      <li>'*' key to increase call rate by 10,</li>
+                      <li>'/' key to decrease call rate by 10.</li>
+                      </ul>
+                      If the -rp option is used, the call rate is calculated with the period in ms given  by the user.</td></tr>
+<tr><td>-rate_increase</td><td>Specify the rate increase every -fd seconds<br/>
+                      This allows you to increase the load for each independent logging period<br/>
+                      Example: -rate_increase 10 -fd 10 <br/>
+                        ==> increase calls by 10 every 10 seconds.</td></tr>
+<tr><td>-rate_max</td><td>If -rate_increase is set, then quit after the rate reaches this value.<br/>
+                      Example: -rate_increase 10 -max_rate 100<br/>
+                        ==> increase calls by 10 until 100 cps is hit.</td></tr>
+<tr><td>-reconnect_close true/false</td><td>Should calls be closed on reconnect?</td></tr>
+<tr><td>-reconnect_sleep int</td><td>How long to sleep between the close and reconnect?</td></tr>
+<tr><td>-recv_timeout nb</td><td>Global receive timeout in milliseconds.<br/>
+                      If the expected message is not received, the call times out and is aborted</td></tr>
+<tr><td>-rmctrl ip[:port]</td><td>IP of the Master Remote Control</td></tr>
+<tr><td>-rp period (ms)</td><td>Specify the rate period in milliseconds for the call rate.<br/>
+                      Default is 1 second.<br/>
+                      This allows you to have n calls every m milliseconds  (by using -r n -rp m).<br/>
+                      Example:<br/>
+                      -r 7 -rp 2000 ==> 7 calls every 2 seconds.<br/>
+                      -r 10 -rp 5s => 10 calls every 5 seconds.<br/></td></tr>
+<tr><td>-rsa host[:port]</td><td>Set the remote sending address to host:port. for sending the messages.</td></tr>
+<tr><td>-rtp_echo</td><td>Enable RTP echo. RTP/UDP packets received on port defined by -mp are echoed to their sender.<br/>
+                      RTP/UDP packets coming on this port + 2 are also echoed to their sender (used for sound and video echo).</td></tr>
+<tr><td>-rtt_freq freq</td><td>freq is mandatory. Dump response times 
+                      every freq calls in the log file defined by -trace_rtt.<br/>Default value is 200.</td></tr>
+<tr><td>-s service_name</td><td>Set the username part of the resquest URI.<br/>
+                      Default is 'service'.</td></tr>
+<tr><td>-scen_freq</td><td>freq is mandatory. Dump scenario stats every freq calls
+                      in the log file (see -trace_scen).<br/>Default value is 200.</td></tr>
+<tr><td>-sd name</td><td>Dumps a default scenario (embeded in the sipp executable)</td></tr>
+<tr><td>-sf filename</td><td>Loads an alternate xml scenario file.<br/>
+                      To learn more about XML scenario syntax, use the -sd option to dump embedded scenarios. They contain all the necessary help.</td></tr>
+<tr><td>-slave</td><td>3pcc extended mode: indicates the name of the twin sipp instance (if slave)</td></tr>
+<tr><td>-slave_cfg</td><td>3pcc extended mode: indicates the file where the master and slave addresses are stored.<br/>
+                      This option must be set in the command line before the -sf option</td></tr>
+<tr><td>-sn name</td><td>Use a default scenario (embedded in the sipp executable). If this option is omitted, the Standard SipStone UAC scenario is loaded.<br/>
+                      Available values in this version:
+                      <ul>
+                        <li>'uac'      : Standard SipStone UAC (default).</li>
+                        <li>'uac_pcap' : Standard SipStone UAC with pcap play (RTP)</li>
+                        <li>'uas'      : Simple UAS responder.</li>
+                        <li>'regexp'   : Standard SipStone UAC - with regexp and variables.</li>
+                        <li>'branchc'  : Branching and conditional branching in scenarios - client.</li>
+                        <li>'branchs'  : Branching and conditional branching in scenarios - server.</li>
+                      </ul>
+                      Default 3pcc scanerios (see -3pcc option):
+                      <ul>
+                        <li>'3pcc-C-A' : Controller A side (must be started after all other 3pcc scenarios)</li>
+                        <li>'3pcc-C-B' : Controller B side.</li>
+                        <li>'3pcc-A'   : A side.</li>
+                        <li>'3pcc-B'   : B side.</li>
+                      </ul></td></tr>
+<tr><td>-stat_delimiter string</td><td>Set the delimiter for the statistics file</td></tr>
+<tr><td>-stf file_name</td><td>Set the file name to use to dump statistics</td></tr>
+<tr><td>-t [u1|un|ui|t1|tn|l1|ln]</td><td>Set the transport mode:
+                        <ul>
+                        <li>u1: UDP with one socket (default),</li>
+                        <li>un: UDP with one socket per call,</li>
+                        <li>ui: UDP with one socket per IP address<br/>
+                            The IP addresses must be defined in the injection file.</li>
+                        <li>t1: TCP with one socket</li>
+                        <li>tn: TCP with one socket per call</li>
+                        <li>l1: TLS with one socket</li>
+                        <li>ln: TLS with one socket per call</li>
+                        <li>c1: u1 + compression (only if compression plugin loaded),</li>
+                        <li>cn: un + compression (only if compression plugin loaded).</li>
+                        </ul></td></tr>
+<tr><td>-tdmmap map</td><td>Generate and handle a table of TDM circuits.<br/>
+                      A circuit must be available for the call to be placed.<br/>
+                      Format: -tdmmap {0-3}{99}{5-8}{1-31}</td></tr>
+<tr><td>-timeout nb</td><td>Global timeout in seconds.<br/>
+                      If this option is set, SIPp quits after nb seconds</td></tr>
+<tr><td>-timer_resol</td><td>Set the timer resolution in milliseconds.<br/>
+                      This option has an impact on timers precision. Small values allow more precise scheduling but impacts CPU usage.<br/>
+                      If the compression is on, the value is set to 50ms.<br/>
+                      The default value is 10ms.</td></tr>
+<tr><td>-tls_cert name</td><td>Set the name for TLS Certificate file.<br/>
+                      Default is 'cacert.pem'</td></tr>
+<tr><td>-tls_crl name</td><td>Set the name for Certificate Revocation List file.<br/>
+                      If not specified, X509 CRL is not activated.</td></tr>
+<tr><td>-tls_key name</td><td>Set the name for TLS Private Key file.<br/>
+                      Default is 'cakey.pem'</td></tr>
+                     
+<tr><td>-trace_cpumem</td><td>Allow tracing the CPU/MEM per second in sipp_&lt;pid&gt;_cpumem.csv file.</td></tr>
+<tr><td>-trace_err</td><td>Trace all unexpected messages in &lt;scenario file name&gt;_&lt;pid&gt;_errors.log.</td></tr>
+<tr><td>-trace_logs</td><td>Allow tracing of &lt;log&gt; actions in &lt;scenario file name&gt;_&gt;pid&lt;_logs.log.</td></tr>
+<tr><td>-trace_msg</td><td>Displays sent and received SIP messages in
+                      &lt;scenario file name&gt;_&lt;pid&gt;_messages.log</td></tr>
+<tr><td>-trace_retrans</td><td>Allow tracing number of retransmission per second in
+                      &lt;scenario_name&gt;_&lt;pid&gt;_retrans.csv file.</td></tr>
+<tr><td>-trace_rtt</td><td>Allow tracing of all response times in
+                      &lt;scenario file name&gt;_&lt;pid&gt;_rtt.csv.</td></tr>
+<tr><td>-trace_scen</td><td>Allow tracing of scenario execution, result and response
+                      times in sipp_&lt;pid&gt;_scen.csv. (multi-scenario usage)</td></tr>
+<tr><td>-trace_screen</td><td>Dump statistic screens in the  &lt;scenario_name&gt;_&lt;pid&gt;_screens.log file when
+                      quitting SIPp. Useful to get a final status report in background mode (-bg option).</td></tr>
+<tr><td>-trace_stat</td><td>Dumps all statistics in &lt;scenario_name&gt;_&lt;pid&gt;.csv file. <br/>
+                      Use the '-h stat' option for a detailed description of the statistics file content.</td></tr>
+<tr><td>-trace_timeout</td><td>Displays call ids for calls with timeouts in &lt;scenario file name&gt;_&lt;pid&gt;_timeout.log</td></tr>
+<tr><td>-up_nb</td><td>Set the number of updates of the internal clock during the reading of received messages.<br/>
+                      Default value is 1.</td></tr>
+<tr><td>-user_inf file_name</td><td>Similar to -inf but for pre-loading user data.</td></tr>
+<tr><td>-user_ip file_name</td><td>Ip list to be used by users (Requiered MULTI_IP_SUPPORT build option).</td></tr>
+<tr><td>-users</td><td>Instead of starting calls at a fixed rate, begin 'users'
+                      calls at startup, and keep the number of calls constant.</td></tr>
+<tr><td>-v</td><td>Display version and copyright information.</td></tr>
+<tr><td>-3pcc ip:port</td><td>Launch the tool in 3pcc mode ("Third Party call control"). The passed ip address is depending on the 3PCC role.<br/>
+                      - When the first twin command is 'sendCmd' then
+                      this is the address of the remote twin socket.
+                      SIPp will try to connect to this address:port to
+                      send the twin command (This instance must be started
+                      after all other 3PCC scenarii).<br/>
+                      Example: 3PCC-C-A scenario.<br/>
+                      - When the first twin command is 'recvCmd' then
+                      this is the address of the local twin socket. SIPp 
+                      will open this address:port to listen for twin command.<br/>
+                      Example: 3PCC-C-B scenario.</td></tr>
+</table>
+<source>
+Signal handling:
+
+   SIPp can be controlled using posix signals. The following signals
+   are handled:
+   USR1: Similar to press 'q' keyboard key. It triggers a soft exit
+         of SIPp. No more new calls are placed and all ongoing calls
+         are finished before SIPp exits.
+         Example: kill -SIGUSR1 732
+   USR2: Triggers a dump of all statistics screens in
+         &lt;scenario_name&gt;_&lt;pid&gt;_screens.log file. Especially useful 
+         in background mode to know what the current status is.
+         Example: kill -SIGUSR2 732
+
+Exit code:
+
+   Upon exit (on fatal error or when the number of asked calls (-m
+   option) is reached, sipp exits with one of the following exit
+   code:
+    0: All calls were successful
+    1: At least one call failed
+   97: exit on internal command. Calls may have been processed
+   99: Normal exit without calls processed
+   -1: Fatal error
+
+
+Example:
+
+   Run sipp with embedded server (uas) scenario:
+     ./sipp -sn uas
+   On the same host, run sipp with embedded client (uac) scenario
+     ./sipp -sn uac 127.0.0.1
+
+          </source>
+      </section>  <!-- Online Doc -->
+    </section>  <!-- Various Topics -->
+
+<!-- ********************************************* -->
+<!-- ********************************************* -->
+    <section><title>Getting support</title>
+        <p>You can likely get email-based support from the sipp users community.
+        However, <strong>always clearly mention that your message is about IMS Bench SIPp and
+        not the &quot;vanilla&quot; SIPp</strong> because IMS Bench SIPp has just been
+        released and most SIPp users are therefore using the vanilla SIPp and will not know
+        about the specifics of IMS Bench SIPp. Also a bug in IMS Bench SIPp might not be
+        present in the vanilla SIPp and vice-versa.</p>
+        <p>The mailing list address is 
+        <a href="mailto:sipp-users@lists.sourceforge.net">sipp-users@lists.sourceforge.net</a>.
+        To protect you from SPAM, this list is restricted (only people that actually subscribed can
+        post). Also, you can browse the SIPp mailing list archive: 
+        <a href="http://lists.sourceforge.net/lists/listinfo/sipp-users">http://lists.sourceforge.net/lists/listinfo/sipp-users</a></p>
+    </section>
+    <section><title>Contributing</title>
+        <p>Of course, we welcome contributions! If you implemented new scenarios from the IMS/NGN Performance Benchmark
+        specification or if you added a new feature to IMS Bench SIPp, please send the "diff" output 
+        (<code>diff -bruN old_sipp_directory new_sipp_directory</code>)
+        on the <a href="http://lists.sourceforge.net/lists/listinfo/sipp-users">SIPp mailing list</a>,
+        so that we can review and possibly integrate it in IMS Bench SIPp (and/or SIPp).</p>
+    </section>
+
+    <section><title>Removed</title>
+      <p><comment>Remote control</comment></p>
+    </section>
+
+  </body>
+</document>
