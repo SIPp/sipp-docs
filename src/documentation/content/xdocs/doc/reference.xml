@@ -601,7 +601,14 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>rtd</td>
                     <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
                     <td><code>&lt;send rtd="2"&gt;</code>: the timer number 2 will stop when the message is sent.</td>
-                </tr>            
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>repeat_rtd</td>
+                    <td>Used with a rtd attribute, it allows the corresponding "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer
+                    to be counted more than once per call (useful for loop call flows). </td>
+                    <td><code>&lt;send rtd="1" repeat_rtd="true"&gt;</code>: the timer number 1 value will be printed but the timer won't stop.</td>
+                </tr>
                 <tr>
                     <td></td>
                     <td>crlf</td>
@@ -725,7 +732,14 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td>rtd</td>
                     <td>Stops one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.</td>
                     <td><code>&lt;recv rtd="4"&gt;</code>: the timer number 4 will stop when the message is received.</td>
-                </tr>            
+                </tr> 
+                <tr>
+                    <td></td>
+                    <td>repeat_rtd</td>
+                    <td>Used with a rtd attribute, it allows the corresponding "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer
+                    to be counted more than once per call (useful for loop call flows). </td>
+                    <td><code>&lt;recv rtd="1" repeat_rtd="true"&gt;</code>: the timer number 1 value will be printed but the timer won't stop.</td>
+                </tr>           
                 <tr>
                     <td></td>
                     <td>lost</td>
@@ -1187,7 +1201,11 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><strong>[clock_tick]</strong></td>
                     <td>-</td>
                     <td>Includes the internal SIPp clock tick value in the message.</td>
-                    <td>Includes the internal SIPp clock tick value in the message.</td>
+                </tr>
+                <tr>
+                    <td><strong>[tdmmap]</strong></td>
+                    <td>-</td>
+                    <td>Includes the tdm map values used by the call in the message (see -tdmmap option).</td>
                 </tr>
                 <tr>
                     <td><strong>[fill]</strong></td>
@@ -1929,6 +1947,8 @@ User0003;[authentication username=betty password=boop]</source>
                  <p>You can view the value of those timers in the SIPp interface
                  by pressing 3, 6, 7, 8 or 9. You can also save the values 
                  in a CSV file using the -trace_stat option (see below).</p>
+                 <p>If the -trace_rtt option is set, the response times are also dumped
+                 in the &gt;scenario file name&lt;_&gt;pid&lt;_rtt.csv. The dump frequency is tuned by the -rtt_freq parameter</p>
             </section>
             <section><title>Available counters</title>
                 <p>The <code>-trace_stat</code> option dumps all statistics in
@@ -1990,20 +2010,30 @@ User0003;[authentication username=betty password=boop]</source>
     <li>FailedRegexpHdrNotFound:
     Number of failed calls because of regexp with hdr    
     option but no matching header found.</li>
+    <li>FailedOutboundCongestion:
+    Number of failed outgoing calls because of TCP congestion. </li>
+    <li>FailedTimeoutOnRecv:
+    Number of failed calls because of a recv timeout statement.</li>
+    <li>FailedTimeoutOnSend: 
+    Number of failed calls because of a send timeout statement.</li>
     <li>OutOfCallMsgs:
     Number of SIP messages received that cannot be associated
     with an existing call.</li>
+    <li>Retransmissions:
+    Number of SIP messages being retransmitted.</li>
     <li>AutoAnswered:
     Number of unexpected specific messages received for new Call-ID.
     The message has been automatically answered by a 200 OK
     Currently, implemented for 'PING' message only.</li>
     </ul>
+    <p>The counters defined in the scenario are also dumped in the stat file (GenericCounter columns). </p>
     <p>In addition, two other statistics are gathered:</p>
     <ul><li>ResponseTime (see previous section)</li>
     <li>CallLength: this is the time of the duration of an entire call.</li>
     </ul>
     <p>Both ResponseTime and CallLength statistics can be tuned using <a href="#resptimerep">ResponseTimeRepartition</a>
     and <a href="#calllengthrep">CallLengthRepartition</a> commands in the scenario.</p>
+    <p>The standard deviation (STDev) is also available in the log stat file for these two statistics.</p>
             </section>
             <section><title>Importing statistics in spreadsheet applications</title>
                 <section><title>Example: importation in Microsoft Excel</title>
@@ -2057,12 +2087,14 @@ User0003;[authentication username=betty password=boop]</source>
                 using the <code>-nr</code> command line option to globally disable the
                 retransmission mechanism.</p>
             </section>
-            <section><title>Log files (error + log + screen)</title>
+            <section><title>Log files </title>
                 <p>There are several ways to trace what is going on during your SIPp runs.</p>
                 <ul>
                     <li>You can log sent and received SIP messages in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_messages.log by
                     using the command line parameter <code>-trace_msg</code>. The messages are time-stamped so that you
                     can track them back.</li>
+                    <li>You also can trace it using the <code>-trace_shortmsg</code> parameter. This logs the most important
+	                values of a message as CSV into one line of the &lt;scenario file name&gt;_&lt;pid&gt;_shortmessages.log </li>
                     <li>You can trace all unexpected messages or events in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_errors.log by using
                     the command line parameter <code>-trace_err</code>.</li>
                     <li>You can save in a file the statistics screens, as displayed in
@@ -2072,11 +2104,14 @@ User0003;[authentication username=betty password=boop]</source>
                     <ul>
                       <li>When SIPp exits to get a final status report (-trace_screen option)</li>
                       <li>On demand by using USR2 signal (example: <code>kill -SIGUSR2 738</code>)</li>
+                      <li>By pressing 's' key (if -trace_screen option is set)</li>
                     </ul>
                     </li>
                     <li>You can log all call ids for calls that timeout (the maximum
                     number of retransmissions for UDP transport is reached)
                     by using the command line parameter <code>-trace_timeout</code></li>
+                    <li>If the -trace_logs option is set, you can print some scenario traces in the <![CDATA[<scenario file name>_<pid>_logs.log]]> file.
+                    See the <a href="#action_log">Log action section </a></li>
                 </ul>
             </section>
         </section>
@@ -2132,10 +2167,11 @@ User0003;[authentication username=betty password=boop]</source>
    -inf             : Inject values from an external CSV file during calls into
                       the scenarios.
                       First line of this file say whether the data is to be
-                      read in sequence (SEQUENTIAL) or random (RANDOM) order.
+                      read in sequence (SEQUENTIAL), random (RANDOM) or user (USER) order.
                       Each line corresponds to one call and has one or more
                       ';' delimited data fields. Those fields can be referred
                       as [field0], [field1], ... in the xml scenario file.
+                      Several CSV files can be used simultaneously (syntax: -inf f1.csv -inf f2.csv ...)
 
    -ip_field        : Set which field from the injection file contains the IP
                       address from which the client will send its messages.
@@ -2160,6 +2196,9 @@ User0003;[authentication username=betty password=boop]</source>
    -max_recv_loops  : Set the maximum number of messages received read per
                       cycle. Increase this value for high traffic level.  The
                       default value is 1000.
+   
+   -max_sched_loops : Set the maximum number of calls run per event loop. Increase 
+                      this value for high traffic level. The default value is 1000.
 
    -max_reconnect   : Set the the maximum number of reconnection.
 
@@ -2226,7 +2265,7 @@ User0003;[authentication username=betty password=boop]</source>
                         ==> increase calls by 10 every 10 seconds.
 
    -rate_max        : If -rate_increase is set, then quit after the rate
-                      reaches this value.
+                      goes beyond this value.
                       Example: -rate_increase 10 -rate_max 100
                         ==> increase calls by 10 until 100 cps is hit.
 
@@ -2327,7 +2366,7 @@ User0003;[authentication username=betty password=boop]</source>
                       <scenario file name>_<pid>_shortmessages.log
 
    -trace_screen    : Dump statistic screens in the
-                      <scenario_name>_<pid>_cenaris.log file when quitting
+                      <scenario_name>_<pid>_screen.log file when quitting
                       SIPp. Useful to get a final status report in background
                       mode (-bg option).
 
@@ -2403,7 +2442,7 @@ Exit code:
    code:
     0: All calls were successful
     1: At least one call failed
-   97: exit on internal command. Calls may have been processed
+   97: exit on internal command. Calls may have been processed. Also exit on global timeout (see -timeout_global option)
    99: Normal exit without calls processed
    -1: Fatal error
 
@@ -2476,12 +2515,12 @@ Example:
             This parameter can be reduce to reduce retransmissions. If other
             treatments in SIPp are too long, "timer_resol" can not be respected.
             Reduce "max_recv_loops" to reduce retransmissions.</li>
-          <li>max_recv_loops and up_nb:
+          <li>max_recv_loops and max_sched_loops:
             received messages are read and treated in batch. "max_recv_loops" is the
-            maximum number of messages that can be read at one time. During this
-            treatment, internal clock ("clock_tick") is updated every
-            "max_recv_loops/up_nb" read messages. For heavy call rate, reduce
-            "max_recv_loops" and/or increase "up_nb" to limit the retransmissions.
+            maximum number of messages that can be read at one time. "max sched loops" is 
+            the maximum number of processing calls loops. This limit prevents sipp to only 
+            processing current calls exclusively and no more reading new messages.
+            For heavy call rate, increase both values.
             Be careful, those two parameters have a large influence on the CPU
             occupation of SIPp.</li>
          </ul>
