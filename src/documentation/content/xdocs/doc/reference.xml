@@ -1930,7 +1930,7 @@ User0003;[authentication username=betty password=boop]</source>
             <ul>
                 <li>0: All calls were successful</li>
                 <li>1: At least one call failed</li>
-                <li>97: exit on internal command. Calls may have been processed</li>
+                <li>97: exit on internal command. Calls may have been processed. Also exit on global timeout (see -timeout_global option) </li>
                 <li>99: Normal exit without calls processed</li>
                 <li>-1: Fatal error</li>
             </ul>
