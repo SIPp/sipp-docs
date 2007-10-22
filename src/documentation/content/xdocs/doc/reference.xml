@@ -124,7 +124,7 @@
             </ul>
             <anchor id="gsl"/><note>To enable <a href="http://www.gnu.org/software/gsl/">GSL</a> at compile time, 
             you must install GSL and its include files, as well as un-comment 
-            the lines in the global.mk file of SIPp distribution. Then, re-compile SIPp.</note>
+            the lines in the local.mk file of SIPp distribution. Then, re-compile SIPp.</note>
           </li>
           <li>On Windows, SIPp is provided both with the source and the pre-compiled 
           executable. Just execute the installer to have SIPp installed.
