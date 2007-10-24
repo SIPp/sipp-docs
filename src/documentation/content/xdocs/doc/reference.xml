@@ -2100,18 +2100,18 @@ User0003;[authentication username=betty password=boop]</source>
                     <li>You can save in a file the statistics screens, as displayed in
                     the interface. This is especially useful when running SIPp in background
                     mode.<br/>
-                    This can be done in two ways:
+                    This can be done in different ways:
                     <ul>
                       <li>When SIPp exits to get a final status report (-trace_screen option)</li>
                       <li>On demand by using USR2 signal (example: <code>kill -SIGUSR2 738</code>)</li>
                       <li>By pressing 's' key (if -trace_screen option is set)</li>
                     </ul>
                     </li>
-                    <li>You can log all call ids for calls that timeout (the maximum
+                  <!--  <li>You can log all call ids for calls that timeout (the maximum
                     number of retransmissions for UDP transport is reached)
                     by using the command line parameter <code>-trace_timeout</code></li>
                     <li>If the -trace_logs option is set, you can print some scenario traces in the <![CDATA[<scenario file name>_<pid>_logs.log]]> file.
-                    See the <a href="#action_log">Log action section </a></li>
+                    See the <a href="#action_log">Log action section </a></li> -->
                 </ul>
             </section>
         </section>
@@ -2372,9 +2372,13 @@ User0003;[authentication username=betty password=boop]</source>
 
    -trace_err       : Trace all unexpected messages in <scenario file
                       name>_<pid>_errors.log.
+                      
+   ]]> </source>
 
-   -trace_timeout   : Displays call ids for calls with timeouts in <scenario
-                      file name>_<pid>_timeout.log
+   <!-- -trace_timeout   : Displays call ids for calls with timeouts in <scenario
+                      file name>_<pid>_timeout.log -->
+                     
+  <source><![CDATA[
 
    -trace_stat      : Dumps all statistics in <scenario_name>_<pid>.csv file.
                       Use the '-h stat' option for a detailed description of
