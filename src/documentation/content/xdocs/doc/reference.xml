@@ -1948,7 +1948,9 @@ User0003;[authentication username=betty password=boop]</source>
                  by pressing 3, 6, 7, 8 or 9. You can also save the values 
                  in a CSV file using the -trace_stat option (see below).</p>
                  <p>If the -trace_rtt option is set, the response times are also dumped
-                 in the &gt;scenario file name&lt;_&gt;pid&lt;_rtt.csv. The dump frequency is tuned by the -rtt_freq parameter</p>
+                 in the &gt;scenario file name&lt;_&gt;pid&lt;_rtt.csv.</p>
+                 <p>Each line represents a RTD measure (triggered by a message reception with a rtd="n" attribute).
+                 The dump frequency is tuned by the -rtt_freq parameter.</p>
             </section>
             <section><title>Available counters</title>
                 <p>The <code>-trace_stat</code> option dumps all statistics in
@@ -2289,9 +2291,9 @@ User0003;[authentication username=betty password=boop]</source>
                       RTP/UDP packets coming on this port + 2 are also echoed
                       to their sender (used for sound and video echo).
 
-   -rtt_freq        : freq is mandatory. Dump response times every freq calls
-                      in the log file defined by -trace_rtt. Default value is
-                      200.
+   -rtt_freq        : freq is mandatory. The response times are dumped in the 
+                      log file defined by -trace_rtt each time 'freq' measures are performed.
+                      Default value is 200.            
 
    -s               : Set the username part of the resquest URI. Default is
                       'service'.
