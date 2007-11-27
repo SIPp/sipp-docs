@@ -244,7 +244,7 @@
       also communicate together over TCP for the non-SIP messages they exchange (user reservation,
       timing data).</p>
 
-      <p>In order to collect system statistics from the SUT, according to the ESTI benchmark spec,
+      <p>In order to collect system statistics from the SUT, according to the ETSI benchmark spec,
       a small monitoring agent (called CpuMem) must be running on the SUT and communicates over
       TCP with the manager. This agent is included in the source tree and is known to work on
       Linux and Solaris. This is however optional if report compliance with the spec is not an

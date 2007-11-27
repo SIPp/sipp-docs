@@ -7,7 +7,7 @@
     <authors>
         <person name="Richard GAYRAUD [initial SIPp code]" email="richard_gayraud@users.sourceforge.net"/>
         <person name="Olivier JACQUES [SIPp code/documentation]" email="ojacques@users.sourceforge.net"/>
-        <person name="Verbeiren (Intel) [IMS Bench]" email="dverbeir@users.sourceforge.net"/>
+        <person name="David Verbeiren (Intel) [IMS Bench]" email="dverbeir@users.sourceforge.net"/>
         <person name="Philippe Lecluse (Intel) [IMS Bench]" email="plecluse@users.sourceforge.net"/>
         <person name="Xavier Simonart (Intel) [IMS Bench]" email="xsimonar@users.sourceforge.net"/>
         <person name="Many SIPp contributors [code]" email="none@email.com"/>
@@ -46,9 +46,11 @@
 
          <p>The complete source tree containing all the components of IMS
          Bench SIPp can be obtained from the Subversion repository at
-         sipp.svn.sourceforge.net/svnroot/sipp/sipp/branches/ims_bench. For example:</p>
+         sipp.svn.sourceforge.net/svnroot/sipp/sipp/branches/ims_bench. For example, the
+         following command creates the <code>ims_bench</code> directory and populates it with the
+         latest version of the sources:</p>
          <source>
- svn co https://sipp.svn.sourceforge.net/svnroot/sipp/sipp/branches/ims_bench sipp_ims_bench
+ svn co https://sipp.svn.sourceforge.net/svnroot/sipp/sipp/branches/ims_bench ims_bench
          </source>
       </section> <!-- Obtaining source code -->
 <!-- ********************************************* -->
@@ -67,10 +69,10 @@
  rpmbuild -bp --target=i686 kernel-2.6.spec
  cd /usr/src/redhat/BUILD/kernel-2.6.18/linux-2.6.18.i686
  make menuconfig
-  Change:  
+  Change:
      Processor type and features  ---&gt;
        Timer frequency (1000 HZ)  ---&gt;
-     General setup  ---&gt; 
+     General setup  ---&gt;
        () Local version - append to kernel release  &lt;- set your own kernel prefix
 
  make dep bzImage modules modules_install install
@@ -84,22 +86,27 @@
           Protocol (IEEE 1588) deamon , ptpd
           (<a href="http://ptpd.sourceforge.net">ptpd.sourceforge.net</a>)</p>
           <source>
- svn co https://ptpd.svn.sourceforge.net/svnroot/ptpd ptpd 
- make 
- ptpd -g (client side)</source>
+ svn co https://ptpd.svn.sourceforge.net/svnroot/ptpd ptpd
+ cd ptpd/trunk/src
+ make
+ ./ptpd -g (client side)</source>
          </li>
          <li>
           <p>Random number generation for the statistical distributions (scenario
           arrival, pauses in scenarios) require the GSL library. It can be obtained
           from <a href="http://www.gnu.org/software/gsl">http://www.gnu.org/software/gsl</a>
-          and compiled from sources. You may need to add the path to it (/usr/local/lib by default)
-          to the LD_LIBRARY_PATH environment variable.</p>
+          and compiled from sources:</p>
           <source>
  tar xvfz gsl-1.9.tar.gz
  cd gsl-1.9/
- configure
+ ./configure
  make 
  make install</source>
+          <p>You may need to add the path to the library (/usr/local/lib by default)
+          to the LD_LIBRARY_PATH environment variable or to the /etc/ld.so.conf file:</p>
+          <source>
+ echo /usr/local/lib/ >>/etc/ld.so.conf
+ ldconfig</source>
          </li>
          <li>
           <p>In order to be able to use the menu-driven benchmark configuration tool
@@ -108,7 +115,7 @@
            <li>Perl XML::Simple module - <a href="http://search.cpan.org/dist/XML-Simple/">http://search.cpan.org/dist/XML-Simple/</a>
             <source>
  perl -MCPAN -e shell
- {reply with default answer... just select the local ftp server}
+ {reply with default answers... just select the local ftp server}
  cpan&gt; install XML::Simple
  cpan&gt; quit</source>
            </li>
@@ -153,15 +160,15 @@
          </li>
          <li> Modify System Limits (/etc/security/limits.conf) to allow SIPp process to open a large number of sockets, and add:
           <source>
- soft nofile  102400
- hard nofile  409600</source>
+ * soft nofile  102400
+ * hard nofile  409600</source>
          </li>
         </ul>
       </section> <!-- Pre-requisites -->
       <section><title>Building IMS Bench SIPp components</title>
         <p>To build SIPp and the manager in the way appropriate for the benchmark,
         perform the following make invocations:</p>
-        <source> cd sipp
+        <source> cd ims_bench
  make rmtl
  make ossl
  make mgr
@@ -176,7 +183,7 @@
         on your SUT or on compatible development environment. You can then copy the
         IMS Bench SIPp source tree and simply build cpum and its required dependencies:</p>
         <source> make rmtl           (on the SUT)
- make cpum           (&quot;)</source>
+ make cpumem         (&quot;)</source>
       </section>  <!-- Building -->
     </section> <!-- Installation -->
 
@@ -219,7 +226,7 @@
              <code>&lt;param name=&quot;<i>name</i>&quot; value=&quot;<i>value</i>&quot;/&gt;</code></p>
              <p>Possible parameters are described in the table below:</p>
              <table>
-              <tr><td><b>number_test_system</b></td>
+              <tr><td><b>number_test_systems</b></td>
                <td>Number of Test Systems that the manager will wait for before starting
                 the load generation. A value of 0 indicates that the manager should start
                 immediately with the number of SIPp instances connected at the time the
@@ -263,7 +270,7 @@
                 log details of its activities in a manager.log file. This includes
                 the same data as the manager screen output with the highest
                 verbosity.</td></tr>
-              <tr><td><b>transition_time</b></td>
+              <tr><td><b>transient_time</b></td>
                <td>Transient time (in seconds) at the begining of each step
                 (change in the load applied to the SUT) during which scenario outcomes
                 are ignored when computing the IHS percentage (percentage of
@@ -405,11 +412,12 @@
         <p>In case you configured your test system using the <i>ims_bench</i> Perl
         script, you will have received detailed instructions at time of exiting
         the configuration tool. Please follow those instructions which will guide you
-        through the deployment of the components on the systems used for the test
-        and the starting of all components.</p>
+        through the deployment of the components (using the <code>prepare.sh</code> script)
+        on the systems used for the test and the starting of all components (manager and
+        SIPp instances).</p>
  
         <p>In all cases, the first step is to start the manager on the system that you
-        intend to use as central controller for the benchmark
+        intend to use as central controller for the benchmark.
         <source>./manager [-f manager.xml]</source></p>
 
         <p>It will then read its configuration file and wait for SIPp agents and
@@ -428,15 +436,18 @@
         The -trace_scen and -trace_retrans options are also required if you want to generate
         a report for the run (usually the case).</p>
 
-        <p>Example (command to issue on one of the test systems to start one of the SIPp
-        instances):
+        <p>Here is an example of the command to issue on one of the test systems to start one
+        of the SIPp instances, assuming that the manager is at 192.168.1.1, that the instance
+        will use 192.168.1.20 and that the SUT is at 192.168.1.100 and listens for SIP traffic
+        on port 5060:
         <source>./sipp -id 1 -i 192.168.1.20 -user_inf ./ims_users_1.inf
        -rmctrl 192.168.1.1:5000 192.168.1.100:5060
        -trace_err -trace_cpumem -trace_scen -trace_retrans</source></p>
 
         <p>If you used the <i>ims_bench</i> tool to prepare the benchmark configuration,
-        it will have created the necessary scripts for you and you can simply start those
-        on the test systems as you'll have been instructed by the tool.</p>
+        it will have created the necessary scripts for you (<code>run_x.sh</code>) and you
+        can simply start those on the test systems as you'll have been instructed by the
+        tool.</p>
 
         <p>If you have built the resource monitoring tool - cpum - for your system under test,
         you should start it on the SUT now (unless it's already running from a previous run).
@@ -474,14 +485,16 @@
         it is required to merge together the data from all the SIPp instances.<br/>
         A simple script is provided that reads the manager report file to learn the
         IP addresses of the test systems and the PID or TS ID of their SIPp instances,
-        then grabs the corresponding files using <i>scp</i> and merges them together:</p>
+        then grabs the corresponding files using <i>scp</i> and merges them together
+        (assuming you are in a subdirectory as created by <i>ims_bench</i> script or
+        that you created yourself for the execution):</p>
 
-        <source>./scripts/getResults.pl</source>
+        <source>../scripts/getResults.pl</source>
 
         <p>In case you copied the files manually from the test systems, you can use
         the same script to only perform the merging operation:</p>
 
-        <source>./scripts/getResults.pl -merge</source>
+        <source>../scripts/getResults.pl -merge</source>
 
         <p>This merging operation can take some time if the amount of data collected
         was very large. It produces the following files:</p>
@@ -493,7 +506,7 @@
         </ul>
 
         <p><b>Note:</b> After the merge completes, you can delete the partial files by running
-        <source>./getResults.pl -clean</source>
+        <source>../scripts/getResults.pl -clean</source>
         But be sure the merge operation completed successfully (e.g. did not run out of
         disk space!) as the original files will be deleted (but only on the local system,
         not on the remote location where the SIPp instances actually executed - unless
@@ -839,7 +852,7 @@ Server:
  -r specifies the raw benchmark report file (default: report.xml) resulting
     from the run you want to generate a graphical report for.
  -c specifies the configuration file for this script (default: reportConfig.xml)
- -b specifies an optional benchmark info HTML fargment file to include as
+ -b specifies an optional benchmark info HTML fragment file to include as
     introduction in the report (a default generic sentence is otherwise provided)
  -i specifies the ims_bench config file (in case the benchmark run was
     configured using the ims_bench script), containing IMS benchmark parameters.
@@ -2930,10 +2943,6 @@ Example:
         (<code>diff -bruN old_sipp_directory new_sipp_directory</code>)
         on the <a href="http://lists.sourceforge.net/lists/listinfo/sipp-users">SIPp mailing list</a>,
         so that we can review and possibly integrate it in IMS Bench SIPp (and/or SIPp).</p>
-    </section>
-
-    <section><title>Removed</title>
-      <p><comment>Remote control</comment></p>
     </section>
 
   </body>
