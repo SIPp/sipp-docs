@@ -1848,7 +1848,7 @@ User0003;[authentication username=betty password=boop]</source>
                 <ul>
                   <li><strong>-max_reconnect</strong>: Set the maximum number of reconnection attempts.</li>
                   <li><strong>-reconnect_close true/false</strong>: Should calls be closed on reconnect?</li>
-                  <li><strong>-reconnect_sleep int</strong>: How long to sleep (in seconds) between the close and reconnect? </li>
+                  <li><strong>-reconnect_sleep int</strong>: How long to sleep (in milliseconds) between the close and reconnect? </li>
                 </ul>
             </section>
             <anchor id="tls" /><section><title>TLS mono socket</title>
