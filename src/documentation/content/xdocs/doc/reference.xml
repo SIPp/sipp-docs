@@ -1846,9 +1846,9 @@ User0003;[authentication username=betty password=boop]</source>
                 SIPp will try to reconnect. The following parameters on the command line
                 control this behaviour:</p>
                 <ul>
-                  <li><strong>-max_reconnect</strong>: Set the the maximum number of reconnection.</li>
+                  <li><strong>-max_reconnect</strong>: Set the maximum number of reconnection attempts.</li>
                   <li><strong>-reconnect_close true/false</strong>: Should calls be closed on reconnect?</li>
-                  <li><strong>-reconnect_sleep int</strong>: How long to sleep between the close and reconnect?</li>
+                  <li><strong>-reconnect_sleep int</strong>: How long to sleep (in seconds) between the close and reconnect? </li>
                 </ul>
             </section>
             <anchor id="tls" /><section><title>TLS mono socket</title>
@@ -1877,6 +1877,7 @@ User0003;[authentication username=betty password=boop]</source>
                 <source><![CDATA[./sipp -sn uas -i [fe80::204:75ff:fe4d:19d9] -p 5063
 ./sipp -sn uac -i [fe80::204:75ff:fe4d:19d9] [fe80::204:75ff:fe4d:19d9]:5063]]>
                 </source>
+                <warning>The Pcap play feature may currently not work on IPv6.</warning>
             </section>
             <anchor id="maxsocket" /><section><title>Multi-socket limit</title>
                 <p>When using one of the "multi-socket" transports, the maximum number of sockets that can be opened
@@ -2202,7 +2203,7 @@ User0003;[authentication username=betty password=boop]</source>
    -max_sched_loops : Set the maximum number of calls run per event loop. Increase 
                       this value for high traffic level. The default value is 1000.
 
-   -max_reconnect   : Set the the maximum number of reconnection.
+   -max_reconnect   : Set the maximum number of reconnection attempts.
 
    -max_retrans     : Maximum number of UDP retransmissions before call ends on
                       timeout.  Default is 5 for INVITE transactions and 7 for
@@ -2281,7 +2282,7 @@ User0003;[authentication username=betty password=boop]</source>
 
    -reconnect_close : Should calls be closed on reconnect?
 
-   -reconnect_sleep : How long to sleep between the close and reconnect?
+   -reconnect_sleep : How long to sleep (in seconds) between the close and reconnect?
 
    -rsa             : Set the remote sending address to host:port for sending
                       the messages.
