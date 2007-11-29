@@ -2282,7 +2282,7 @@ User0003;[authentication username=betty password=boop]</source>
 
    -reconnect_close : Should calls be closed on reconnect?
 
-   -reconnect_sleep : How long to sleep (in seconds) between the close and reconnect?
+   -reconnect_sleep : How long to sleep (in milliseconds) between the close and reconnect?
 
    -rsa             : Set the remote sending address to host:port for sending
                       the messages.
