@@ -31,9 +31,9 @@ See http://xml.apache.org/forrest/linking.html for more info
      <license label='License' href='license.html' />
   </doc>
 
-   <doc2 label="Doc (2.0)" href="doc2.0/" tab="doc2.0">
-     <refdoc label='Ref doc 2.0 [html]' href='reference.html' />
-     <refdoc_PDF label="Ref doc 2.0 [pdf]" href="reference.pdf"/>
+   <doc2 label="Doc (3.0)" href="doc3.0/" tab="doc3.0">
+     <refdoc label='Ref doc 3.0 [html]' href='reference.html' />
+     <refdoc_PDF label="Ref doc 3.0 [pdf]" href="reference.pdf"/>
   </doc2>
 
   <ims_bench label="IMS Bench" href="ims_bench/" tab="ims_bench">
