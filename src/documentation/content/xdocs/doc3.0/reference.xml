@@ -13,6 +13,8 @@
   <body> 
     <section>
       <title>Foreword</title>
+      <warning>This version of the documentation is for SIPp 2.0 branch.
+      To access the latest version of the documentation, go to <a href="../doc/reference.html">this page</a>.</warning>
       <p>SIPp is a performance testing tool for the SIP protocol. It includes a
       few basic SipStone user agent scenarios (UAC and UAS) and establishes and
       releases multiple calls with the INVITE and BYE methods. It can also reads
@@ -75,10 +77,8 @@
             work on Win2000. This is because of IPv6 support. The Windows installer 
             should prevent someone to install SIPp on Win2000.</note>
             </section> 
-        <anchor id="installing" /><section><title>Installing SIPp</title>
+        <anchor id="Compiling" /><section><title>Compiling SIPp</title>
           <ul>
-          <li>On Linux, SIPp is provided in the form of source code. You will need to
-            compile SIPp to actually use it.</li>
           <li>Pre-requisites to compile SIPp are (see <a href="http://sipp.sourceforge.net/wiki/index.php/Compilation" >Compilation tips</a>):
             <ul>
               <li>C++ Compiler</li>
@@ -139,6 +139,34 @@
           </ul>
           </li>
           </ul>
+        </section>
+        <anchor id="Installing" /><section><title>Installing SIPp</title>
+        <p>Binary packages are also available for several Linux and HP_UX platforms. For each one of these platforms, the given archive contains two packages:</p>
+        <ul><li>sipp-standard was produced compiling sipp without options. Therefore, you can use it only for the sipp features which does'nt need any dependency</li><br></br>
+            <li>sipp-pcapplay-ossl comes with pcap play, TLS, authentication and pause distribution support. So you need openssl, libpcap and gsl libraries to be installed to use this package</li>
+        </ul>
+        <p>Those packages are incompatible to each other.</p>
+        <p>Note that there is currently no sipp-pcapplay-ossl package available for HP_UX 11.23 IA64.</p>
+        <p>First, unzip and untar the sipp archive:</p>
+        <source>sipp-[standard|pcapplay-ossl]-[tool version]-[OS]-[OS release version].tar.gz
+        </source>
+        <p>Then, use the package installer of your platform:</p>
+        <ul>
+          <li>HPUX 11i/11.23: 
+            <source>swinstall -s /full_path_to_the_depot/sipp-[standard|pcapplay-ossl]-[tool version]-[OS]-[OS release version]-[processor].depot</source>
+          </li>
+          <li>Linux RedHat : 
+            <source>rpm -ivh sipp-[standard|pcapplay-ossl]-[tool version]-[OS]-[OS release version]-[processor].rpm</source>
+          </li>
+        </ul>
+        <p>Executable is located at</p>
+         <ul>
+           <li>/usr/local/bin/sipp</li>
+         </ul>
+         <p>The pcapplay-ossl package also provide the following directory, containg the example pcap files:</p>
+         <ul>
+           <li>/usr/local/share/sipp/pcap</li>
+         </ul>
         </section>     
         <anchor id="filedesc" /><section><title>Increasing File Descriptors Limit</title>
         <p>If your system does not supports enough file descriptors, 
