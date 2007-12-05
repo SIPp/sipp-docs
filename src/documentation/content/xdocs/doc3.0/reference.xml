@@ -13,7 +13,7 @@
   <body> 
     <section>
       <title>Foreword</title>
-      <warning>This version of the documentation is for SIPp 2.0 branch.
+      <warning>This version of the documentation is for SIPp 3.0 branch.
       To access the latest version of the documentation, go to <a href="../doc/reference.html">this page</a>.</warning>
       <p>SIPp is a performance testing tool for the SIP protocol. It includes a
       few basic SipStone user agent scenarios (UAC and UAS) and establishes and
