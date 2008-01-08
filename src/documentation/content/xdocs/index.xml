@@ -4,7 +4,9 @@
   <header> 
     <title>Welcome to SIPp</title>
     <authors>
+        <person name="Richard GAYRAUD [Initial code]" email=""/>
         <person name="Olivier JACQUES [code/documentation]" email="ojacques@users.sourceforge.net"/>
+        <person name="Many contributors" email=""/>
     </authors>
   </header>
   <body>
