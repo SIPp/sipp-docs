@@ -372,7 +372,7 @@ nkthread : 4096</source>
              |(7) RTP            |                  |                   |
              |..........................................................|
 </source>
-                <p>As you can see, we need to pass informations
+                <p>As you can see, we need to pass information
                 between both sides of the controller. SDP "offer1" is provided
                 by A in message (2) and needs to be sent to B side in message (3). 
                 This mechanism is implemented 
@@ -478,31 +478,75 @@ nkthread : 4096</source>
 		<img alt="Master / slave feature" src="images/master_slave.png"></img>
 		</p>
                 </section>
+	<anchor id="commands" /><section><title>Controlling SIPp</title>
+
+	<p>SIPp can be controlled interactively through the keyboard or via a
+	UDP socket.  SIPp supports both 'hot' keys that can be entered at any time
+	and also a simple command mode.  The hot keys are:</p>
+	<table>
+	<tr><th>Key</th><th>Action</th></tr>
+	<tr><td>+</td><td>Increase the call rate by 1 * rate_scale</td></tr>
+	<tr><td>*</td><td>Increase the call rate by 10 * rate_scale</td></tr>
+	<tr><td>-</td><td>Decrease the call rate by 1 * rate_scale</td></tr>
+	<tr><td>/</td><td>Decrease the call rate by 10 * rate_scale</td></tr>
+	<tr><td>c</td><td>Enter command mode</td></tr>
+	<tr><td>q</td><td>Quit SIPp (after all calls complete, enter a second time to quit immediately)</td></tr>
+	<tr><td>Q</td><td>Quit SIPp immediately</td></tr>
+	<tr><td>s</td><td>Dump screens to the log file (if -trace_screen is passed)</td></tr>
+	<tr><td>p</td><td>Pause traffic</td></tr>
+	<tr><td>1</td><td>Display the scenario screen</td></tr>
+	<tr><td>2</td><td>Display the statistics screen</td></tr>
+	<tr><td>3</td><td>Display the repartition screen</td></tr>
+	<tr><td>4</td><td>Display the variable screen</td></tr>
+	<tr><td>5</td><td>Display the TDM screen</td></tr>
+	<tr><td>6-9</td><td>Display the second tdrough fifth repartition screen.</td></tr>
+	</table>
+
+	<p>In command mode, you can type a single line command that instructs
+	SIPp to take some action.  Command mode is more versatile than the hot keys,
+	but takes more time to input some common actions.  The following commands
+	are available:</p>
+	<table>
+	<caption>List of Interactive Commands</caption>
+	<tr><th>Command</th><th>Description</th><th>Example</th></tr>
+	<tr><td>dump tasks</td><td>Prints a list of active tasks (most tasks are calls) to the error log.</td><td><code>dump tasks</code></td></tr>
+	<tr><td>set X</td><td></td><td><code>dump tasks</code></td></tr>
+	<tr><td>trace &lt;log&gt; &lt;on|off&gt;</td><td>Turns <emph>log</emph> on or off at run time.  Valid values for log are "error", "logs", "messages", and "shortmessages".</td><td><code>trace error on</code></td></tr>
+	</table>
+
         <anchor id="traffic_control" /><section><title>Traffic control</title>
         <p>SIPp generates SIP traffic according to the scenario specified. You
-        can control the number of calls (scenario) that are started per second.
-        This can be done either: </p>        
-        <ul>
-            <li>Interactively, by pressing keys on the keyboard
-              <ul>
-                  <li>'+' key to increase call rate by 1</li>
-                  <li>'-' key to decrease call rate by 1</li>
-                  <li>'*' key to increase call rate by 10</li>
-                  <li>'/' key to decrease call rate by 10</li>
-              </ul>
-            </li>
-            <li>At starting time, by specifying parameters on the command line:
-                <ul>
-                    <li>"-r" to specify the call rate in number of calls per seconds</li>
-                    <li>"-rp" to specify the "<strong>r</strong>ate <strong>p</strong>eriod" 
-                    in milliseconds for the call rate (default is 1000ms/1sec). 
-                    This allows you to have n calls every m milliseconds (by using <code>-r n -rp m</code>).
-                        <note>Example: run SIPp at 7 calls every 2 seconds (3.5 calls per second)</note>
-                        <source>./sipp -sn uac -r 7 -rp 2000 127.0.0.1</source>
-                    </li>
-                </ul>
-            </li>
-        </ul>
+	can control the number of calls (scenario) that are started per second.
+	If you pass the <code>-users</code> option, then you need to control
+	the number of instantiated users.  You can control the rate through:</p>
+	<ul>
+	<li>Interactive hot keys (described in the previous section)</li>
+	<li>Interactive Commands</li>
+	<li>Startup Parameters</li>
+	</ul>
+
+	<p>There are two
+	commands that control rates: <code>set rate X</code> sets the current
+	call rate to X.  Additionally, <code>set rate-scale X</code> sets the
+	rate_scale parameter to X.  This enables you to use the '+', '-', '*',
+	and '/' keys to set the rate more quickly.  For example, if you do
+	<code>set rate-scale 100</code>, then each time you press '+', the call
+	rate is increased by 100 calls and each time you press '*', the call
+	rate is increased by 1000 calls.  Similarly, for a user based benchmark
+	you can run <code>set users X</code>.</p>
+
+	<p>At starting time, you can control the rate by specifying parameters
+        on the command line: <ul>
+	<li>"-r" to specify the call rate in number of calls per seconds</li>
+	<li>"-rp" to specify the "<strong>r</strong>ate <strong>p</strong>eriod" 
+	in milliseconds for the call rate (default is 1000ms/1sec). 
+	This allows you to have n calls every m milliseconds (by using <code>-r n -rp m</code>).
+	<note>Example: run SIPp at 7 calls every 2 seconds (3.5 calls per second)</note>
+	<source>./sipp -sn uac -r 7 -rp 2000 127.0.0.1</source>
+	</li>
+	</ul>
+        </p>
+
         <p>You can also <strong>pause</strong> the traffic by pressing the 'p' key. 
         SIPp will stop placing new calls and wait until all current calls go to their end. 
         You can <strong>resume</strong> the traffic by pressing 'p' again.</p>
@@ -547,7 +591,9 @@ echo "*" >/dev/udp/127.0.0.1/8889
 sleep 60
 echo "q" >/dev/udp/127.0.0.1/8889
 </source>
+	<p>To send a command to SIPp, preface it with 'c'.  For example: <code>echo "cset rate 100" >/dev/udp/127.0.0.1/8888</code> sets the call rate to 100.</p>
         </section>
+	</section>
         <section><title>Running SIPp in background</title>
           <p>SIPp can be launched in background mode (<code>-bg</code> command
           line option).</p>
@@ -1215,6 +1261,16 @@ echo "q" >/dev/udp/127.0.0.1/8889
 		    <code>variable=N</code> parameter.  By default the text is a sequence
 		    of X's, but can be controlled with the <code>text="text"</code> parameter.</td>
                 </tr>
+                <tr>
+                    <td><strong>[users]</strong></td>
+                    <td>-</td>
+                    <td>If the <code>-users</code> command line option is specified, then this keyword contains the number of users that are currently instantiated.</td>
+                </tr>
+                <tr>
+                    <td><strong>[userid]</strong></td>
+                    <td>-</td>
+                    <td>If the <code>-users</code> command line option is specified, then this keyword containst he integer identifier of the current user (starting at zero and ending at <code>[users-1]</code>).</td>
+                </tr>
             </table>
             <p>Now that the INVITE message is sent, SIPp can wait for an answer by using the "<a href="#recv">recv</a>" command.</p>
 <source>  &lt;recv response="100"&gt; optional="true"
@@ -1604,6 +1660,67 @@ To: sut user &lt;[field0 file="callee.csv"]&gt;
 		<p>Will select the destination user from callee.csv and the sending
 		user from caller.csv.  If no file parameter is specified, then the
 		first input file on the command line is used by default.</p>
+
+		<section><title>PRINTF Injection files</title>
+		<p>An extension of the standard injection file is a "PRINTF" injection file.  Often, an input file will has a repetitive nature such as:</p>
+		<source>
+		USERS
+		user000;password000
+		user001;password001
+		...
+		user999;password999
+		</source>
+		<p>SIPp must maintain this structure in memory, which can reduce performance for very large injection files.  To eliminate this problem, SIPp can automatically generate such a structured file based on one or more template lines. For example:</p>
+		<source>
+		USERS,PRINTF=999
+		user%03d;password%03d
+		</source>
+		<p>Has the same logical meaning as the original example, yet
+		SIPp only needs to store one entry in memory.  Each time a line
+		is used; SIPp will replace %d with the requested line number
+		(starting from zero).  Standard printf format decimal
+		specifiers can be used.  When more than one template line is
+		available, SIPp cycles through them.  This example:</p>
+		<source>
+		USERS,PRINTF=4
+		user%03d;password%03d;Foo
+		user%03d;password%03d;Bar
+		</source>
+		<p>Is equivalent to the following injection file:</p>
+		<source>
+		USERS
+		user000;password000;Foo
+		user001;password001;Bar
+		user002;password002;Foo
+		user003;password003;Bar
+		</source>
+		<p>The following parameters are used to control the behavior of
+		printf injection files:</p>
+		<table>
+		  <caption>Printf Injection File Parameters</caption>
+                  <tr>
+                      <th>Parameter</th>
+                      <th>Description</th>
+                      <th>Example</th>
+                  </tr>
+                  <tr>
+                      <td>PRINTF</td>
+                      <td>How many virtual lines exist in this file.</td>
+                      <td>PRINTF=10, creates 10 virtual lines</td>
+                  </tr>
+                  <tr>
+                      <td>PRINTFMULTIPLE</td>
+                      <td>Multiple the virtual line number by this value before generating the substitutions used.</td>
+                      <td>PRINTF=10,PRINTFMULTIPLE=2 creates 10 virtual lines numbered 0,2,4,...,18.</td>
+                  </tr>
+                  <tr>
+                      <td>PRINTFOFFSET</td>
+                      <td>Add this value to the virtual line number before generating the substitutions used (applied after PRINTFMULTIPLE).</td>
+                      <td>PRINTF=10,PRINTFOFFSET=100 creates 10 virtual lines numbered 100-109.  PRINTF=10,PRINTFMULTIPLE=2,PRINTFOFFSET=10 creates 10 users numbered 10,12,14,...28.</td>
+                  </tr>
+		</table>
+		</section>
+
             </section>
             <anchor id="branching" /><section><title>Conditional branching</title>
 	      <section><title>Conditional branching in scenarios</title>
@@ -2038,6 +2155,17 @@ User0003;[authentication username=betty password=boop]</source>
     and <a href="#calllengthrep">CallLengthRepartition</a> commands in the scenario.</p>
     <p>The standard deviation (STDev) is also available in the log stat file for these two statistics.</p>
             </section>
+            <section><title>Detailed Message Counts</title>
+		 <p>The SIPp screens provide detailed information about the
+number of messages sent or recieved, retransmissions, messages lost, and the
+number of unexpected messages for each scenario element.  Although these
+screens can be parsed, it is much simpler to parse a CSV file.  To produce a
+CSV file that contains the per-message information contained in the main
+display screen pass the -trace_counts option.  Each column of the file
+represents a message and a particular count of interest (e.g., "1_INVITE_Sent"
+or "2_100_Unexp").  Each row corresponds to those statistics at a given
+statistics reporting interval.</p>
+            </section>
             <section><title>Importing statistics in spreadsheet applications</title>
                 <section><title>Example: importation in Microsoft Excel</title>
                   <p>Here is a video (Windows Media Player 9 codec or above
@@ -2386,6 +2514,8 @@ User0003;[authentication username=betty password=boop]</source>
    -trace_stat      : Dumps all statistics in <scenario_name>_<pid>.csv file.
                       Use the '-h stat' option for a detailed description of
                       the statistics file content.
+
+   -trace_counts    : Dumps individual message counts in a CSV file.
 
    -trace_rtt       : Allow tracing of all response times in <scenario file
                       name>_<pid>_rtt.csv.
