@@ -311,6 +311,17 @@ nkthread : 4096</source>
          BYE ---------->
          200 <----------]]></source>
             </section>
+	    <anchor id="scenario_ooc" /><section>
+              <title>UAC Out-of-call Messages</title>
+                <p>Scenario file: <a href="ooc_default.xml.html">ooc_default.xml</a> (<a href="ooc_default.xml">original XML file</a>)</p>
+		<p>When a SIPp UAC receives an out-of-call request, it instantiates an out-of-call scenario.  By default this scenario simply replies with a 200 OK response.  This scenario can be overridden by passing the <code>-oocsf</code> or <code>-oocsn</code> command line options.</p>
+                <source>SIPp UAC            Remote
+    |(1) .*             |
+    |&lt;------------------|
+    |(2) 200            |
+    |------------------&gt;|
+</source>
+            </section>
             <anchor id="ThreePCC" /><section>
               <title>3PCC</title>
                 <p>3PCC stands for 3rd Party Call Control. 3PCC is described in 
@@ -510,7 +521,13 @@ nkthread : 4096</source>
 	<caption>List of Interactive Commands</caption>
 	<tr><th>Command</th><th>Description</th><th>Example</th></tr>
 	<tr><td>dump tasks</td><td>Prints a list of active tasks (most tasks are calls) to the error log.</td><td><code>dump tasks</code></td></tr>
-	<tr><td>set X</td><td></td><td><code>dump tasks</code></td></tr>
+	<tr><td>set rate X</td><td>Sets the call rate.</td><td><code>set rate 10</code></td></tr>
+	<tr><td>set rate-scale X</td><td>Sets the rate scale, which adjusts the speed of '+', '-', '*', and '/'.</td><td><code>set rate-scale 10</code></td></tr>
+	<tr><td>set users X</td><td>Sets the number of users (only valid when <code>-users</code> is specified).</td><td><code>set rate 10</code></td></tr>
+	<tr><td>set limit X</td><td>Sets the open call limit (equivalent to <code>-l</code> option)</td><td><code>set limit 100</code></td></tr>
+	<tr><td>set hide &lt;true|false&gt;</td><td>Should the hide XML attribute be respected?</td><td><code>set hide false</code></td></tr>
+	<tr><td>set index &lt;true|false&gt;</td><td>Display message indexes in the scenario screen.</td><td><code>set index true</code></td></tr>
+	<tr><td>set display &lt;main|ooc&gt;</td><td>Changes the scenario that is displayed to either the main or the out-of-call scenario.</td><td><code>set display main</code><br /><code>set display ooc</code></td></tr>
 	<tr><td>trace &lt;log&gt; &lt;on|off&gt;</td><td>Turns <emph>log</emph> on or off at run time.  Valid values for log are "error", "logs", "messages", and "shortmessages".</td><td><code>trace error on</code></td></tr>
 	</table>
 
@@ -725,6 +742,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><code>&lt;send counter="1"&gt;</code>: Increments counter #1 when the message is sent.</td>
                 </tr>            
                 <tr>
+                    <td></td>
+                    <td>start_txn</td>
+                    <td>Records the branch ID of this sent message so that responses can be properly matched (without this element the transaction matching is done based on the CSeq method, which is imprecise).</td>
+                    <td><code>&lt;send start_txn="invite"&gt;</code>: Stores the branch ID of this message in the transaction named "invite".</td>
+                </tr>            
+
+                <tr>
                     <td><anchor id="recv"/><strong>&lt;recv&gt;</strong></td>
                     <td>response</td>
                     <td>Indicates what SIP message code is expected.</td>
@@ -880,6 +904,12 @@ echo "q" >/dev/udp/127.0.0.1/8889
 		    <source>&lt;recv request="MESSAGE|PUBLISH|SUBSCRIBE" crlf="true" regexp_match="true"&gt;
 &lt;/recv&gt;</source></td>
                 </tr>            
+                <tr>
+                    <td></td>
+                    <td>response_txn</td>
+                    <td>Indicates that this is a response to a transaction that was previously started.  To match, the branch ID of the first via header must match the stored transaction ID.</td>
+                    <td><code>&lt;recv response="200" response_txn="invite" /&gt;</code>: Matches only responses to the message sent with start_txn="invite" attribute.</td>
+                </tr>
                 <tr>
                     <td><strong>&lt;pause&gt;</strong></td>
                     <td>milliseconds</td>
@@ -1189,10 +1219,20 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 </tr>
                 <tr>
                     <td><strong>[field0-n]</strong></td>
-                    <td>-</td>
+                    <td>- TBD: file= line=</td>
                     <td>Used to inject values from an external CSV file. See
                     <a href="#inffile">"Injecting values from an external CSV
                     during calls"</a> section.</td>
+                </tr>
+                <tr>
+                    <td><strong>[timestamp]</strong></td>
+                    <td>-</td>
+                    <td>TBD</td>
+                </tr>
+                <tr>
+                    <td><strong>[last_message]</strong></td>
+                    <td>-</td>
+                    <td>TBD</td>
                 </tr>
                 <tr>
                     <td><strong>[$n]</strong></td>
@@ -1362,6 +1402,10 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <li><a href="#action_log">Log something in aa log file</a> (log)</li>
                 <li><a href="#action_exec">Execute an external (system), internal (int_cmd) or 
                 pcap_play_audio/pcap_play_video command</a> (exec)</li>
+		<li><a href="#action_variables">Manipulate double precision variables using arithmetic</a></li>
+		<li><a href="#action_strings">Assign string values to a variable</a></li>
+		<li><a href="#action_test">Compare double precision variables</a></li>
+		<li><a href="#action_jump">Jump to a particular scenasrio index</a></li>
               </ul>
                 <anchor id="action_regexp" /><section><title>Regular expressions</title>
                   <p>Using regular expressions in SIPp allows to</p>
@@ -1491,6 +1535,8 @@ echo "q" >/dev/udp/127.0.0.1/8889
           <log message="From is [last_From]. Custom header is [$1]"/>
      </action>
    </recv>]]></source>
+		  <p>You can use the alternative "warning" action to log a message to SIPp's error log.  For example:</p>
+                  <source>&lt;warning message="From is [last_From]. Custom header is [$1]"/&gt;</source>
                 </section>
                 <anchor id="action_exec" /><section><title>Execute a command</title>
                   <p>The "exec" action allows you to execute "internal", "external", "play_pcap_audio" or "play_pcap_video" commands.</p>
@@ -1618,6 +1664,27 @@ For example, the following action modifies variable one as follows:</p>
 </nop>
 ]]></source>
                   </section>
+
+                  <anchor id="action_jump" /><section><title>Jumping to an Index</title>
+                  <p>You can jump to an arbitrary scenario index using the &lt;jump&gt; action.  This can be used to create rudimentary subroutines.  The caller can save their index using the [msg_index] substitution, and the callee can jump back to the same place using this action.  If there is a special label named "_unexp.main" in the scenario, SIPp will jump to that label whenever an unexpected message is received and store the previous address in the variable named "_unexp.retaddr".</p>
+
+                  <p>Example that jumps to index 5:</p>
+                  <source><![CDATA[<nop>
+  <action>
+    <jump value="5" />
+  </action>
+</nop>
+]]></source>
+                  <p>Example that jumps to the index contained in the variable named _unexp.retaddr:</p>
+                  <source><![CDATA[<nop>
+  <action>
+    <jump variable="_unexp.retaddr" />
+  </action>
+</nop>
+]]></source>
+                  </section>
+                  <anchor id="action_gettimeofday" /><section><title>gettimeofday</title>TBD</section>
+                  <anchor id="action_verifyauth" /><section><title>verifyauth</title>TBD</section>
             </section>
             <anchor id="inffile" /><section><title>Injecting values from an external CSV during calls</title>
                 <p>You can use "<code>-inf file_name</code>" as a command line parameter
@@ -2228,6 +2295,8 @@ statistics reporting interval.</p>
 	                values of a message as CSV into one line of the &lt;scenario file name&gt;_&lt;pid&gt;_shortmessages.log </li>
                     <li>You can trace all unexpected messages or events in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_errors.log by using
                     the command line parameter <code>-trace_err</code>.</li>
+                    <li>You can trace the counts from the main scenario screen in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_counts.csv by using
+                    the command line parameter <code>-trace_counts</code>.</li>
                     <li>You can save in a file the statistics screens, as displayed in
                     the interface. This is especially useful when running SIPp in background
                     mode.<br/>
@@ -2236,14 +2305,15 @@ statistics reporting interval.</p>
                       <li>When SIPp exits to get a final status report (-trace_screen option)</li>
                       <li>On demand by using USR2 signal (example: <code>kill -SIGUSR2 738</code>)</li>
                       <li>By pressing 's' key (if -trace_screen option is set)</li>
-                    </ul>
-                    </li>
+		      <li>If the -trace_logs option is set, you can use the <code>&lt;log&gt;</code> action to print some scenario traces in the <![CDATA[<scenario file name>_<pid>_logs.log]]> file.  See the <a href="#action_log">Log action section </a></li>
+		      </ul>
+		    </li>
+
                   <!--  <li>You can log all call ids for calls that timeout (the maximum
                     number of retransmissions for UDP transport is reached)
-                    by using the command line parameter <code>-trace_timeout</code></li>
-                    <li>If the -trace_logs option is set, you can print some scenario traces in the <![CDATA[<scenario file name>_<pid>_logs.log]]> file.
-                    See the <a href="#action_log">Log action section </a></li> -->
+                    by using the command line parameter <code>-trace_timeout</code></li> -->
                 </ul>
+		<p>SIPp can treat the messages, short messages, logs, and error logs as ring buffers.  This allows you to limit the total amount of space used by these log files and keep only the most recent messages.  To set the maximum file size use the <code>-ringbuffer_size</code> option.  Once the file exceeds this size (the file size can be exceeded up to the size of a single log message), it is rotated.  SIPp can keep several of the most recent files, to specify the number of files to keep use the <code>-ringbuffer_files</code> option.  The rotated files have a name of the form &lt;name_of_the_scenario&gt;_&lt;pid&gt;_&lt;logname&gt;_&lt;date&gt;.log, where &lt;date&gt; is the number of seconds since the epoch.  If more than one log file is rotated during a one second period, then the date is expressed as &lt;seconds.serial&gt;, where serial is an increasing integer identifier.</p>
             </section>
         </section>
         <section><title>Online help (-h)</title>
@@ -2277,6 +2347,8 @@ statistics reporting interval.</p>
 
    -cid_str         : Call ID string (default %u-%p@%s).  %u=call_number,
                       %s=ip_address, %p=process_number, %%=% (in any order).
+
+   -ci              : Set the local control IP address
 
    -cp              : Set the local control port number. Default is 8888.
 
@@ -2367,6 +2439,8 @@ statistics reporting interval.</p>
 
    -nr              : Disable retransmission in UDP mode.
 
+   -nostdin         : Disable stdin.
+
    -p               : Set the local port number.  By default, the system tries to find a free port, starting at 5060.
 
    -pause_msg_ign   : Ignore the messages received during a pause defined in
@@ -2412,6 +2486,12 @@ statistics reporting interval.</p>
 
    -reconnect_sleep : How long to sleep (in milliseconds) between the close and reconnect?
 
+   -ringbuffer_files: How many error/message files should be kept after
+                      rotation?
+
+   -ringbuffer_size : How large should error/message files be before they get
+                      rotated?
+
    -rsa             : Set the remote sending address to host:port for sending
                       the messages.
 
@@ -2432,6 +2512,13 @@ statistics reporting interval.</p>
    -sf              : Loads an alternate xml scenario file.  To learn more
                       about XML scenario syntax, use the -sd option to dump
                       embedded scenarios. They contain all the necessary help.
+
+   -oocsf           : Load out-of-call scenario.
+
+   -oocsn           : Load out-of-call scenario.
+
+   -skip_rlimit     : Do not perform rlimit tuning of file descriptor limits.
+                      Default: false.
 
    -slave           : 3pcc extended mode: indicates the slave number
 
