@@ -1218,21 +1218,24 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     '[last_*]' keyword.</td>
                 </tr>
                 <tr>
-                    <td><strong>[field0-n]</strong></td>
-                    <td>- TBD: file= line=</td>
+                    <td><strong>[field0-n file=&lt;filename&gt; line=&lt;number&gt;]</strong></td>
+                    <td>-</td>
                     <td>Used to inject values from an external CSV file. See
                     <a href="#inffile">"Injecting values from an external CSV
-                    during calls"</a> section.</td>
+		    during calls"</a> section.  The optional file and line
+		    parameters allow you to select which of the injection files
+		    specified on the command line to use and which line number
+		    from that file.</td>
                 </tr>
                 <tr>
                     <td><strong>[timestamp]</strong></td>
                     <td>-</td>
-                    <td>TBD</td>
+                    <td>The current time using the same format as error log messages.</td>
                 </tr>
                 <tr>
                     <td><strong>[last_message]</strong></td>
                     <td>-</td>
-                    <td>TBD</td>
+                    <td>The last received message.</td>
                 </tr>
                 <tr>
                     <td><strong>[$n]</strong></td>
@@ -1405,7 +1408,10 @@ echo "q" >/dev/udp/127.0.0.1/8889
 		<li><a href="#action_variables">Manipulate double precision variables using arithmetic</a></li>
 		<li><a href="#action_strings">Assign string values to a variable</a></li>
 		<li><a href="#action_test">Compare double precision variables</a></li>
-		<li><a href="#action_jump">Jump to a particular scenasrio index</a></li>
+		<li><a href="#action_jump">Jump to a particular scenario index</a></li>
+		<li><a href="#action_gettimeofday">Store the current time into variables</a></li>
+		<li><a href="#action_lookup">Lookup a key in an indexed injection file</a></li>
+		<li><a href="#action_verifyauth">Verify Authorization credentials</a></li>
               </ul>
                 <anchor id="action_regexp" /><section><title>Regular expressions</title>
                   <p>Using regular expressions in SIPp allows to</p>
@@ -1683,8 +1689,66 @@ For example, the following action modifies variable one as follows:</p>
 </nop>
 ]]></source>
                   </section>
-                  <anchor id="action_gettimeofday" /><section><title>gettimeofday</title>TBD</section>
-                  <anchor id="action_verifyauth" /><section><title>verifyauth</title>TBD</section>
+                  <anchor id="action_gettimeofday" /><section><title>gettimeofday</title>
+		  <p>The gettimeofday action allows you to get the current time in seconds and microseconds since the epoch.  For example:</p>
+                  <source><![CDATA[<nop>
+  <action>
+    <gettimeofday assign_to="seconds,microseconds" />
+  </action>
+</nop>
+]]></source></section>
+
+                  <anchor id="action_lookup" /><section><title>lookup</title>
+		  <p>The lookup action is used for indexed injection files (see <a href="#infindex">indexed injection files</a>).  The lookup action takes a file and key as input and produces an integer line number as output. For example the following action extracts the username from an authorization header and uses it to find the corresponding line in users.csv.</p>
+
+                  <source><![CDATA[<recv request="REGISTER">
+  <action>
+    <ereg regexp="Digest .*username=\"([^\"]*)\"" search_in="hdr" header="Authorization:" assign_to="junk,username" />
+    <lookup assign_to="line" file="users.csv" key="[$username]" />
+  </action>
+</nop>
+]]></source></section>
+
+                  <anchor id="action_verifyauth" /><section><title>verifyauth</title>
+		  <p>The verifyauth action checks the Authorization header in
+		  an incoming message against a provided username and password.
+		  The result of the check is stored in a boolean variable.
+		  This allows you to simulate a server which requires
+		  authorization.  Currently only simple MD5 digest
+		  authentication is supported.  Before using the verifyauth
+		  action, you must send a challenge.  For example:</p>
+
+                  <source><![CDATA[<recv request="REGISTER" />
+  <send>]]>&lt;<![CDATA[![CDATA[
+
+      SIP/2.0 401 Authorization Required
+      [last_Via:]
+      [last_From:]
+      [last_To:];tag=[pid]SIPpTag01[call_number]
+      [last_Call-ID:]
+      [last_CSeq:]
+      Contact: <sip:[local_ip]:[local_port];transport=[transport]>
+      WWW-Authenticate: Digest realm="test.example.com", nonce="47ebe028cda119c35d4877b383027d28da013815"
+      Content-Length: [len]
+
+    ]]]]>&gt;<![CDATA[
+  </send>]]>
+</source>
+		<p>After receiving the second request, you can extract the username provided and compare it against a list of user names and passwords provided as an injection file, and take the appropriate action based on the result:</p>
+		<source><![CDATA[<recv request="REGISTER" />
+        <action>
+                <ereg regexp="Digest .*username=\"([^\"]*)\"" search_in="hdr" header="Authorization:" assign_to="junk,username" />
+                <lookup assign_to="line" file="users.conf" key="[$username]" />
+                <verifyauth assign_to="authvalid" username="[field0 line=\"[$line]\"]" password="[field3 line=\"[$line]\"]" />
+        </action>
+  </recv>
+
+  <nop hide="true" test="authvalid" next="goodauth" />
+  <nop hide="true" next="badauth" />]]></source>
+
+
+		  </section>
+
             </section>
             <anchor id="inffile" /><section><title>Injecting values from an external CSV during calls</title>
                 <p>You can use "<code>-inf file_name</code>" as a command line parameter
@@ -1708,8 +1772,16 @@ Fred;sipphone94</source>
                 "sipphone94" depending on the call. At the end of the file, SIPp
                 will re-start from the beginning. The file is not limited in
                 size.</p>
+		<p>You can override the default line selection strategy with the
+		optional line argument.  For example:</p>
+		<source>[field0 line=1]</source>
+		<p>Selects the second line in the file (the first line is line zero.
+		The line parameters support keywords in the argument, so in
+		conjunction with a lookup action it is possible to select
+		values based on a key.</p>
                 <p>The CSV file can contain comment lines. A comment line is
-                a line that starts with a "#".</p>
+		a line that starts with a "#".</p>
+
                 <p>As a picture says more than 1000 words, here is one:</p>
                 <p><img src="images/sipp-02.gif" alt="Field injection" /></p>
                 <p>Think of the possibilities of this feature. They are huge.</p>
@@ -1786,6 +1858,29 @@ To: sut user &lt;[field0 file="callee.csv"]&gt;
                       <td>PRINTF=10,PRINTFOFFSET=100 creates 10 virtual lines numbered 100-109.  PRINTF=10,PRINTFMULTIPLE=2,PRINTFOFFSET=10 creates 10 users numbered 10,12,14,...28.</td>
                   </tr>
 		</table>
+		</section>
+		<anchor id="infindex" /><section><title>Indexing Injection files</title>
+		<p>The <code>-infindex</code> option allows you to generate an
+		index of an injection file.  The arguments to <code>-infindex</code> are the
+		injection file to index and the field number that should be
+		indexed.  For example if you have an injection file that
+		contains user names and passwords (as the following):</p>
+		<source>
+		USERS
+		alice,pass_A
+		bob,pass_B
+		carol,pass_C
+		</source>
+		<p>You may want to extract the password for a given user in the
+		file.  To do this efficiently, SIPp must build an index for the
+		first field (0).  Thus you would pass the argument
+		<code>-infindex users.csv 0</code> (assuming the file is named
+		users.csv).  SIPp will create an index that contains the
+		logical entries {"alice" => 0, "bob" => 1, "carol" => 2}.  To
+		extract a particular password, you can use the lookup action to
+		store the line number into a variable (say $line) and then use
+		the keyword<code>[field1 line="[$line]"]</code>.</p>
+
 		</section>
 
             </section>
@@ -2319,6 +2414,7 @@ statistics reporting interval.</p>
         <section><title>Online help (-h)</title>
           <p>The online help, available through the -h option is duplicated here for your
           convenience</p>
+	<p>TBD: Fix this up with the most recent help.</p>
           <source><![CDATA[Usage:
 
   sipp remote_host[:remote_port] [options]
@@ -2375,6 +2471,11 @@ statistics reporting interval.</p>
                       ';' delimited data fields. Those fields can be referred
                       as [field0], [field1], ... in the xml scenario file.
                       Several CSV files can be used simultaneously (syntax: -inf f1.csv -inf f2.csv ...)
+
+   -infindex        : file field
+                      Create an index of file using field.  For example -inf
+                      users.csv -infindex users.csv 0 creates an index on the
+                      first key.
 
    -ip_field        : Set which field from the injection file contains the IP
                       address from which the client will send its messages.
