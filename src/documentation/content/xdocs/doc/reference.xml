@@ -7,6 +7,7 @@
     <authors>
         <person name="Richard GAYRAUD [initial code]" email="richard_gayraud@users.sourceforge.net"/>
         <person name="Olivier JACQUES [code/documentation]" email="ojacques@users.sourceforge.net"/>
+        <person name="Charles P. Wright [code]" email="charlespwright@users.sourceforge.net"/>
         <person name="Many contributors [code]" email="none@email.com"/>
     </authors>
   </header> 
@@ -637,6 +638,8 @@ echo "q" >/dev/udp/127.0.0.1/8889
             <p>Easy, huh? Ok, now let's see what can be put inside. You are not
             obliged to read the whole table now! Just go in the next section for
             an example.</p>
+	    <p>TODO: start_txn, response_txn, ack_txn</p>
+	    <p>TODO: condexec, condexec_inverse</p>
             <table>
                 <caption>List of commands with their attributes</caption>
                 <tr>
@@ -1228,6 +1231,14 @@ echo "q" >/dev/udp/127.0.0.1/8889
 		    from that file.</td>
                 </tr>
                 <tr>
+                    <td><strong>[file name=&lt;filename&gt;]</strong></td>
+                    <td>-</td>
+                    <td>Inserts the entire contents of filename into the message.  Whitespace,
+		    including carriage returns and newlines at the end of the line in the file
+		    are not processed as with other keywords; thus your file must be formatted
+		    exactly as you would like the bytes to appear in the message.</td>
+                </tr>
+                <tr>
                     <td><strong>[timestamp]</strong></td>
                     <td>-</td>
                     <td>The current time using the same format as error log messages.</td>
@@ -1290,6 +1301,11 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><strong>[clock_tick]</strong></td>
                     <td>-</td>
                     <td>Includes the internal SIPp clock tick value in the message.</td>
+                </tr>
+                <tr>
+                    <td><strong>[sipp_version]</strong></td>
+                    <td>-</td>
+                    <td>Includes the SIPp version string in the message.</td>
                 </tr>
                 <tr>
                     <td><strong>[tdmmap]</strong></td>
@@ -1412,6 +1428,7 @@ echo "q" >/dev/udp/127.0.0.1/8889
 		<li><a href="#action_gettimeofday">Store the current time into variables</a></li>
 		<li><a href="#action_lookup">Lookup a key in an indexed injection file</a></li>
 		<li><a href="#action_verifyauth">Verify Authorization credentials</a></li>
+		<li><a href="#action_setdest">Change a Call's Network Destination</a></li>
               </ul>
                 <anchor id="action_regexp" /><section><title>Regular expressions</title>
                   <p>Using regular expressions in SIPp allows to</p>
@@ -1444,8 +1461,8 @@ echo "q" >/dev/udp/127.0.0.1/8889
                       <tr>
                           <td>search_in</td>
                           <td>msg</td>
-                          <td>can have 2 values: "msg" (try to match against 
-                          the entire message) or "hdr" (try to match against a specific SIP header).</td>
+                          <td>can have four values: "msg" (try to match against 
+                          the entire message); "hdr" (try to match against a specific SIP header); "body" (try to match against the SIP message body); or "var" (try to match against a SIPp string variable).</td>
                       </tr>
                       <tr>
                           <td>header</td>
@@ -1453,6 +1470,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
                           <td>Header to try to match against. Only used when 
                           the search_in tag is set to hdr. MANDATORY IF 
                           search_in is equal to hdr.</td>
+                      </tr>
+                      <tr>
+                          <td>variable</td>
+                          <td>None</td>
+                          <td>Variable to try to match against. Only used when 
+                          the search_in tag is set to var. MANDATORY IF 
+                          search_in is equal to var.</td>
                       </tr>
                       <tr>
                           <td>case_indep</td>
@@ -1747,6 +1771,10 @@ For example, the following action modifies variable one as follows:</p>
   <nop hide="true" next="badauth" />]]></source>
 
 
+		  </section>
+
+                  <anchor id="action_setdest" /><section><title>setdest</title>
+		  <p>TODO: The setdest action allows you to change the transport endpoint for a call.</p>
 		  </section>
 
             </section>
@@ -2218,6 +2246,7 @@ User0003;[authentication username=betty password=boop]</source>
             this exit code by using "<code>echo ?</code>" command.</p>
         </section>
         <section><title>Statistics</title>
+            <section><title>TODO: Response Times and Counters Can be Named</title></section>
             <section><title>Response times</title>
                  <p>Response times can be gathered and reported. SIPp has 5 timers 
                  (the number is set at compile time) used to compute time between 
@@ -2392,6 +2421,7 @@ statistics reporting interval.</p>
                     the command line parameter <code>-trace_err</code>.</li>
                     <li>You can trace the counts from the main scenario screen in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_counts.csv by using
                     the command line parameter <code>-trace_counts</code>.</li>
+		    <li>TODO: <code>-trace_calldebug</code></li>.
                     <li>You can save in a file the statistics screens, as displayed in
                     the interface. This is especially useful when running SIPp in background
                     mode.<br/>
@@ -2440,6 +2470,10 @@ statistics reporting interval.</p>
 
    -buff_size       : Set the send and receive buffer size.
 
+   -calldebug_file  : Set the name of the call debug file.
+
+   -calldebug_overwrite: Overwrite the call debug file (default true).
+
    -cid_str         : Call ID string (default %u-%p@%s).  %u=call_number,
                       %s=ip_address, %p=process_number, %%=% (in any order).
 
@@ -2466,6 +2500,10 @@ statistics reporting interval.</p>
                       If a behavior is prefaced with a -, then it is turned
                       off.  Example: all,-bye
                       
+
+   -error_file      : Set the name of the error log file.
+
+   -error_overwrite : Overwrite the error log file (default true).
 
    -f               : Set the statistics report frequency on screen. Default is
                       1 and default unit is seconds.
@@ -2504,12 +2542,20 @@ statistics reporting interval.</p>
                       of open calls goes down. Default:
                         (3 * call_duration (s) * rate).
 
+   -log_file        : Set the name of the log actions log file.
+
+   -log_overwrite   : Overwrite the log actions log file (default true).
+
    -lost            : Set the number of packets to lose by default (scenario
                       specifications override this value).
 
+   -rtcheck         : Select the retransmisison detection method: full
+                      (default) or loose.
+
    -m               : Stop the test and exit when 'calls' calls are processed
 
-   -mi              : Set the local media IP address
+   -mi              : Set the local media IP address (default: local primary
+                      host IP address)
 
    -master          : 3pcc extended mode: indicates the master number
 
@@ -2533,12 +2579,18 @@ statistics reporting interval.</p>
    -max_non_invite_retrans: Maximum number of UDP retransmissions for non-invite
                       transactions before call ends on timeout.
 
+   -max_log_size    : What is the limit for error and message log file sizes.
+
    -max_socket      : Set the max number of sockets to open simultaneously.
                       This option is significant if you use one socket per
                       call. Once this limit is reached, traffic is distributed
                       over the sockets already opened. Default value is 50000
 
    -mb              : Set the RTP echo buffer size (default: 2048).
+
+   -message_file    : Set the name of the message log file.
+
+   -message_overwrite: Overwrite the message log file (default true).
 
    -mp              : Set the local RTP echo port number. Default is 6000.
 
@@ -2614,6 +2666,9 @@ statistics reporting interval.</p>
                       message is not sent (due to congestion), the call times
                       out and is aborted.
 
+   -sleep           : How long to sleep for at startup. Default unit is
+                      seconds.
+
    -reconnect_close : Should calls be closed on reconnect?
 
    -reconnect_sleep : How long (in milliseconds) to sleep between the close and
@@ -2645,6 +2700,10 @@ statistics reporting interval.</p>
    -sf              : Loads an alternate xml scenario file.  To learn more
                       about XML scenario syntax, use the -sd option to dump
                       embedded scenarios. They contain all the necessary help.
+
+   -shortmessage_file: Set the name of the short message log file.
+
+   -shortmessage_overwrite: Overwrite the short message log file (default true).
 
    -oocsf           : Load out-of-call scenario.
 
@@ -2704,6 +2763,9 @@ statistics reporting interval.</p>
                       is set, SIPp quits after nb units (-timeout 20s quits
                       after 20 seconds).
 
+   -timeout_error   : SIPp fails if the global timeout is reached is set
+                      (-timeout option required).
+
    -timer_resol     : Set the timer resolution. Default unit is milliseconds. 
                       This option has an impact on timers precision.Small
                       values allow more precise scheduling but impacts CPU
@@ -2727,6 +2789,9 @@ statistics reporting interval.</p>
    -trace_err       : Trace all unexpected messages in <scenario file
                       name>_<pid>_errors.log.
 
+   -trace_calldebug : Dumps debugging information about aborted calls to
+                      <scenario_name>_<pid>_calldebug.log file.
+
    -trace_stat      : Dumps all statistics in <scenario_name>_<pid>.csv file.
                       Use the '-h stat' option for a detailed description of
                       the statistics file content.
@@ -2741,6 +2806,24 @@ statistics reporting interval.</p>
 
    -users           : Instead of starting calls at a fixed rate, begin 'users'
                       calls at startup, and keep the number of calls constant.
+
+   -watchdog_interval: Set gap between watchdog timer firings.  Default is 400.
+
+   -watchdog_reset  : If the watchdog timer has not fired in more than this
+                      time period, then reset the max triggers counters. 
+                      Default is 10 minutes.
+
+   -watchdog_minor_threshold: If it has been longer than this period between watchdog
+                      executions count a minor trip.  Default is 500.
+
+   -watchdog_major_threshold: If it has been longer than this period between watchdog
+                      executions count a major trip.  Default is 3000.
+
+   -watchdog_major_maxtriggers: How many times the major watchdog timer can be tripped
+                      before the test is terminated.  Default is 10.
+
+   -watchdog_minor_maxtriggers: How many times the minor watchdog timer can be tripped
+                      before the test is terminated.  Default is 120.
 
    -ap              : Set the password for authentication challenges. Default
                       is 'password
@@ -2775,6 +2858,10 @@ statistics reporting interval.</p>
    -key             : keyword value
                       Set the generic parameter named "keyword" to "value".
 
+   -set             : variable value
+                      Set the global variable parameter named "variable" to
+                      "value".
+
 Signal handling:
 
    SIPp can be controlled using posix signals. The following signals
@@ -2806,7 +2893,6 @@ Example:
      ./sipp -sn uas
    On the same host, run sipp with embedded client (uac) scenario
      ./sipp -sn uac 127.0.0.1
-
 
 ]]>
           </source>
@@ -2878,7 +2964,18 @@ Example:
             Be careful, those two parameters have a large influence on the CPU
             occupation of SIPp.</li>
          </ul>
+	<p>TODO: Watchdog timer.</p>
       </section>
+    </section>
+    <section><title>Undocumented (and as yet uncategorized) Features</title>
+	<p>
+	<ul>
+		<li>TODO: Variable Scope (Global and User)</li>
+		<li>TODO: Reference</li>
+		<li>TODO: Init Stanza</li>
+		<li>TODO: Inserting and Replacing Injection Lines</li>
+	</ul>
+	</p>
     </section>
     <section><title>Useful tools aside SIPp</title>
         <section><title>JEdit</title>
