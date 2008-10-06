@@ -639,7 +639,6 @@ echo "q" >/dev/udp/127.0.0.1/8889
             obliged to read the whole table now! Just go in the next section for
             an example.</p>
 	    <p>TODO: start_txn, response_txn, ack_txn</p>
-	    <p>TODO: condexec, condexec_inverse</p>
             <table>
                 <caption>List of commands with their attributes</caption>
                 <tr>
@@ -658,9 +657,9 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 <tr>
                     <td><anchor id="start_rtd"/></td>
                     <td>start_rtd</td>
-                    <td>Starts one of the 5 "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
+                    <td>Starts one of the "<strong>R</strong>esponse <strong>T</strong>ime <strong>D</strong>uration" timer.
                     (see <a href="#Response+times">statistics section</a>).</td>
-                    <td><code>&lt;send start_rtd="2"&gt;</code>: the timer number 2 will start when the message is sent.</td>
+                    <td><code>&lt;send start_rtd="invite"&gt;</code>: the timer named &quot;invite&quot; will start when the message is sent.</td>
                 </tr>            
                 <tr>
                     <td><anchor id="rtd"/></td>
@@ -739,10 +738,22 @@ echo "q" >/dev/udp/127.0.0.1/8889
                 </tr>
                 <tr>
                     <td></td>
+                    <td>condexec</td>
+                    <td>Executes an element only if the variable in the condexec attribute is set.  This attribute allows you to write complex XML scenarios with fewer next attributes and labels.</td>
+                    <td><code>&lt;nop condexec="executethis"&gt;</code></td>
+                </tr>            
+                <tr>
+                    <td></td>
+                    <td>condexec_inverse</td>
+                    <td>If condexec is set, condexec_inverse inverts the condition in condexec.  This allows you to execute an element only when a variable is <b>not</b> set.</td>
+                    <td><code>&lt;nop condexec="skipthis" condexec_inverse="true"&gt;</code></td>
+                </tr>            
+                <tr>
+                    <td></td>
                     <td>counter</td>
-                    <td>Increments the counter given as parameter when the message is sent. A total of 5 counter can be used.
-                    The counter are saved in the <a href="#Available+counters">statistic file</a>.</td>
-                    <td><code>&lt;send counter="1"&gt;</code>: Increments counter #1 when the message is sent.</td>
+                    <td>Increments the counter given as parameter when the message is sent.
+                    The counters are saved in the <a href="#Available+counters">statistic file</a>.</td>
+                    <td><code>&lt;send counter="MsgA"&gt;</code>: Increments counter &quot;MsgA&quot; when the message is sent.</td>
                 </tr>            
                 <tr>
                     <td></td>
@@ -2246,10 +2257,11 @@ User0003;[authentication username=betty password=boop]</source>
             this exit code by using "<code>echo ?</code>" command.</p>
         </section>
         <section><title>Statistics</title>
-            <section><title>TODO: Response Times and Counters Can be Named</title></section>
             <section><title>Response times</title>
-                 <p>Response times can be gathered and reported. SIPp has 5 timers 
-                 (the number is set at compile time) used to compute time between 
+		 <p>Response times can be gathered and reported. Response time
+		names can be arbitrary strings, but for backwards compatibility
+		the value "true" is treated as if it were named "1".  Each
+		response time can be used to compute time between
                  two SIPp commands (send, recv or nop). You can start a timer
                  by using the <a href="#start_rtd">start_rtd</a> attribute
                  and stop it using the <a href="#rtd">rtd</a> attribute.</p>
@@ -2337,7 +2349,7 @@ User0003;[authentication username=betty password=boop]</source>
     The message has been automatically answered by a 200 OK
     Currently, implemented for 'PING' message only.</li>
     </ul>
-    <p>The counters defined in the scenario are also dumped in the stat file (GenericCounter columns). </p>
+    <p>The counters defined in the scenario are also dumped in the stat file.  Counters that have a numeric name are identified by the GenericCounter columns. </p>
     <p>In addition, two other statistics are gathered:</p>
     <ul><li>ResponseTime (see previous section)</li>
     <li>CallLength: this is the time of the duration of an entire call.</li>
@@ -2421,7 +2433,11 @@ statistics reporting interval.</p>
                     the command line parameter <code>-trace_err</code>.</li>
                     <li>You can trace the counts from the main scenario screen in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_counts.csv by using
                     the command line parameter <code>-trace_counts</code>.</li>
-		    <li>TODO: <code>-trace_calldebug</code></li>.
+		    <li>You can trace the messages and state transitions of
+		    failed calls in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_calldebug.log using
+		    the <code>-trace_calldebug</code> command line parameter.  This is useful,
+		    because it has less overhead than <code>-trace_msg</code> yet allows you to
+		    debug call flows that were not completed successfully.</li>.
                     <li>You can save in a file the statistics screens, as displayed in
                     the interface. This is especially useful when running SIPp in background
                     mode.<br/>
@@ -2925,25 +2941,23 @@ Example:
         like <a href="http://www.wireshark.org/">Wireshark</a> will allow you to do so).</p>
       </section>
       <anchor id="scheduling" /><section><title>SIPp's internal scheduling</title>
-        <p>Three parameters can be set to allow SIPp to benefit of the
-        hardware it is running on. Tuning those parameters will also reduce the risk
-        of unwanted retransmissions at high call rates.</p>
-        <p>Let's first describe SIPp's main scheduling loop:</p>
-        <source><![CDATA[+-->---+
-|      | 
-|    Management of new calls (creation of new calls if needed ...):
-|      | ->done every time 
-|      |
-|    Management of ongoing calls (calculate wait, retransmissions ...): 
-|      | ->done every "timer_resol" ms at best
-|      |
-|    Management of received messages: 
-|      | ->done every time, "max_recv_loops" messages are read at the very most
-|      |
-|    Management of statistics: 
-|      | ->done every time
-|      |
-+--<---+]]></source>
+	<p>SIPp has a single-threaded event-loop architecture, which allows it to handle
+	high SIP traffic loads.  SIPp's event loop tracks various tasks, most of which are
+	the calls that are defined in your scenario.  In addition to tasks that represent
+	calls there are several special tasks: a screen update task, a
+	statistics update task, a call opening task, and a watchdog task.  SIPp's main
+	execution loop consists of:</p>
+	<ol>
+		<li>Waking up tasks that have expired timers.</li>
+		<li>Running up to max_sched_loop tasks that are in a running
+		state (each call is executed until it is no longer runnable).</li>
+		<li>Handling each of the sockets in turn, reading max_recv_loops messages
+		from the various sockets.</li>
+		</li>
+	</ol>
+	<p>SIPp executes this loop continuously, until some condition tells it
+	to stop (e.g., the user pressing the 'q' key or the global call limit
+	or timeout being reached).</p>
 
         <p>Several parameters can be specified on the command line to fine tune
         this scheduling.</p>
@@ -2952,19 +2966,37 @@ Example:
             during the main loop, the management of calls (management of wait,
             retransmission ...) is done for all calls, every "timer_resol" ms at
             best. The delay of retransmission must be higher than "timer_resol".
-            This parameter can be reduce to reduce retransmissions. If other
-            treatments in SIPp are too long, "timer_resol" can not be respected.
-            Reduce "max_recv_loops" to reduce retransmissions.</li>
+	    The default timer resolution is 1 millisecond, and that is the most
+	    precise resolution that SIPp currently supports.  If you increase
+	    this parameter, SIPp's traffic will be burstier and you are likely
+	    to encounter retransmissions at high load.  If you have too many calls,
+	    or each call takes too long, the timer resolution will not be
+	    respected.<li>
+
           <li>max_recv_loops and max_sched_loops:
             received messages are read and treated in batch. "max_recv_loops" is the
-            maximum number of messages that can be read at one time. "max sched loops" is 
-            the maximum number of processing calls loops. This limit prevents sipp to only 
-            processing current calls exclusively and no more reading new messages.
-            For heavy call rate, increase both values.
-            Be careful, those two parameters have a large influence on the CPU
-            occupation of SIPp.</li>
-         </ul>
-	<p>TODO: Watchdog timer.</p>
+            maximum number of messages that can be read at one time. "max sched loops" is
+	    the maximum number of processing calls loops. These limits prevent
+	    SIPp from reading and processing new messages from sockets to the
+	    exclusion of processing existing calls, and vice versa.  For heavy
+	    call rate, increase both values.  Be careful, those two parameters
+	    have a large influence on the CPU occupation of SIPp.</li>
+
+	  <li>watchdog_interval, watchdog_minor_threshold, watchdog_major_threshold,
+	   watchdog_minor_maxtriggers, and watchdog_major_maxtriggers:
+	   The watchdog timer is designed to provide feedback if your call load is
+	   causing SIPp's scheduler to be overwhelmed.  The watchdog task sets a timer
+	   that should fire every watchdog_interval milliseconds (by defualt
+	   400ms).  If the timer is not serviced for more than
+	   watchdog_minor_threshold milliseconds (by default 500s), then a
+	   "minor" trigger is recorded.  If the number of minor triggers is more than
+	   watchdog_minor_maxtriggers; the watchdog task terminates SIPp.  Similarly,
+	   if the timer is not serviced for more than watchdog_major_threshold
+	   milliseconds (by default 3000ms), then a major trigger is recorded; and if more
+	   than watchdog_major_maxtriggers are recorded SIPp is terminated. If you only
+	   see occasional messages, your test is likely acceptable, but if these events
+	   are frequent you need to consider using a more powerful machine or
+	   set of machines to run your scenario.</li> </ul>
       </section>
     </section>
     <section><title>Undocumented (and as yet uncategorized) Features</title>
