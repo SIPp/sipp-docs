@@ -2953,7 +2953,6 @@ Example:
 		state (each call is executed until it is no longer runnable).</li>
 		<li>Handling each of the sockets in turn, reading max_recv_loops messages
 		from the various sockets.</li>
-		</li>
 	</ol>
 	<p>SIPp executes this loop continuously, until some condition tells it
 	to stop (e.g., the user pressing the 'q' key or the global call limit
@@ -2971,7 +2970,7 @@ Example:
 	    this parameter, SIPp's traffic will be burstier and you are likely
 	    to encounter retransmissions at high load.  If you have too many calls,
 	    or each call takes too long, the timer resolution will not be
-	    respected.<li>
+	    respected.</li>
 
           <li>max_recv_loops and max_sched_loops:
             received messages are read and treated in batch. "max_recv_loops" is the
