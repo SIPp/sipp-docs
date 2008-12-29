@@ -1675,6 +1675,47 @@ variable, and value.  For example:</p>
 ]]></source>
                   </section>
 
+                  <anchor id="action_lookup" /><section><title>lookup</title>
+		  <p>The lookup action is used for indexed injection files (see <a href="#infindex">indexed injection files</a>).  The lookup action takes a file and key as input and produces an integer line number as output. For example the following action extracts the username from an authorization header and uses it to find the corresponding line in users.csv.</p>
+
+                  <source><![CDATA[<recv request="REGISTER">
+  <action>
+    <ereg regexp="Digest .*username=\"([^\"]*)\"" search_in="hdr" header="Authorization:" assign_to="junk,username" />
+    <lookup assign_to="line" file="users.csv" key="[$username]" />
+  </action>
+</nop>
+]]></source></section>
+
+
+		  <anchor id="action_insert" /><section><title>Updating In-Memory Injection files</title>
+		  <p>Injection files, particularly when an <a
+		  href="#infindex">index</a> is defined can serve as an
+		  in-memory data store for your SIPp scenario.  The
+		  &lt;insert&gt; and &lt;replace&gt; actions provide
+		  a method of programmatically updating SIPp's
+		  in-memory version of an injection file (there is presently no
+		  way to update the disk-based version).  The insert action takes
+		  two parameters: file and value, and the replace action takes an
+		  additional line value.  For example, to inserting a new line can
+		  be accomplished as follows:</p>
+                  <source><![CDATA[<nop display="Insert User">
+        <action>
+                <insert file="usersdb.conf" value="[$user];[$calltype]" />
+        </action>
+</nop>]]></source>
+		  <p>Replacing a line is similar, but a line number must be specified.
+		  You will probably want to use the lookup action to obtain the
+		  line number for use with replace as follows:</p>
+		<source><![CDATA[<nop display="Update User">
+        <action>
+		<lookup assign_to="index" file="usersdb.conf" key="[$user]" />
+		<!-- Note: This assumes that the lookup always succeeds. -->
+                <replace file="usersdb.conf" line="[$index]" value="[$user];[$calltype]" />
+        </action>
+</nop>]]></source>
+		  </section>
+
+
                   <anchor id="action_jump" /><section><title>Jumping to an Index</title>
                   <p>You can jump to an arbitrary scenario index using the &lt;jump&gt; action.  This can be used to create rudimentary subroutines.  The caller can save their index using the [msg_index] substitution, and the callee can jump back to the same place using this action.  If there is a special label named "_unexp.main" in the scenario, SIPp will jump to that label whenever an unexpected message is received and store the previous address in the variable named "_unexp.retaddr".</p>
 
@@ -1698,17 +1739,6 @@ variable, and value.  For example:</p>
                   <source><![CDATA[<nop>
   <action>
     <gettimeofday assign_to="seconds,microseconds" />
-  </action>
-</nop>
-]]></source></section>
-
-                  <anchor id="action_lookup" /><section><title>lookup</title>
-		  <p>The lookup action is used for indexed injection files (see <a href="#infindex">indexed injection files</a>).  The lookup action takes a file and key as input and produces an integer line number as output. For example the following action extracts the username from an authorization header and uses it to find the corresponding line in users.csv.</p>
-
-                  <source><![CDATA[<recv request="REGISTER">
-  <action>
-    <ereg regexp="Digest .*username=\"([^\"]*)\"" search_in="hdr" header="Authorization:" assign_to="junk,username" />
-    <lookup assign_to="line" file="users.csv" key="[$username]" />
   </action>
 </nop>
 ]]></source></section>
@@ -2132,6 +2162,32 @@ User0003;[authentication username=betty password=boop]</source>
 
 ]]></source>
             </section>
+	<anchor id="initstanza" /><section><title>Initialization Stanza</title>
+	<p>Some complex scenarios require setting appropriate global variables
+	at SIPp startup.  The initialization stanza allows you do do just that.
+	To create an initialization stanza, simply surround a series of
+	&lt;nop&gt; and &lt;label&gt; commands with &lt;init&gt; and
+	&lt;/init&gt;.  These &lt;nop&gt;s are executed once at SIPp startup.
+	The variables within the init stanza, except for globals, are not
+	shared with calls.  For example, this init stanza sets $THINKTIME to 1
+	if it is not already set (e.g., by the -set command line parameter).</p>
+<source><![CDATA[
+<init>
+	<!-- By Default THINKTIME is true. -->
+	<nop>
+		<action>
+			<strcmp assign_to="empty" variable="THINKTIME" value="" />
+			<test assign_to="empty" compare="equal" variable="empty" value="0" />
+		</action>
+	</nop>
+	<nop condexec="empty">
+		<action>
+			<assignstr assign_to="THINKTIME" value="1" />
+		</action>
+	</nop>
+</init>
+]]></source>
+	</section>
         </section>
         <section><title>Screens</title>
             <p>Several screens are available to monitor SIP traffic. You can 
@@ -3045,14 +3101,6 @@ Example:
 	   are frequent you need to consider using a more powerful machine or
 	   set of machines to run your scenario.</li> </ul>
       </section>
-    </section>
-    <section><title>Undocumented (and as yet uncategorized) Features</title>
-	<p>
-	<ul>
-		<li>TODO: Init Stanza</li>
-		<li>TODO: Inserting and Replacing Injection Lines</li>
-	</ul>
-	</p>
     </section>
     <section><title>Useful tools aside SIPp</title>
         <section><title>JEdit</title>
