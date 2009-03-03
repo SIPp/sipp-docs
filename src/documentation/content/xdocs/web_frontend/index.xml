@@ -37,7 +37,7 @@
 		<section>
 		  <title>Installation instructions</title>
 		  <p>For detailed installation instructions refer to the file <code>INSTALL.TXT</code> shipped with the SIPp webfrontend package.</p>
-		  <p><a href="http://sourceforge.net/project/showfiles.php?group_id=104305&package_id=119322&release_id=593806">webfrontend download page </a></p>
+		  <p><link href="http://sourceforge.net/project/showfiles.php?group_id=104305&package_id=119322&release_id=593806">webfrontend download page </link></p>
 		</section>
 		<section>
 		  <title>Login</title>
