@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>SIPp web frontend</title>
+    <subtitle>SIPp web frontend 1.2 reference documentation</subtitle>
+    <authors>
+        <person name="Mario SMERITSCHNIG [code/documentation]" email="mario@polymorph.at"/>
+    </authors>
+  </header> 
+  <body> 
+    <section>
+      <title>Description</title>
+      <p>With SIPp web frontend you can</p>
+      <ul>
+	  	<li>upload XML templates (SIPp scenarios) and CSV injection files</li>
+		<li>create and modify test processes using these files</li>
+		<li>manage test versions</li>
+		<li>run created test processes</li>
+		<li>display realtime feedback during test runs</li>
+		<li>store created test information in a database</li>
+	  </ul>
+    </section>
+	<section>
+		<title>Terms and definitions</title>
+		<ul>
+			<li>Scenario<br/>A user can upload XML files containing SIP call flows, named scenario files. Optionally, one can upload a CSV field injection file. These files are stored along with a scenario name and a description. There are also some standard scenarios, that cannot be modified (from the command line parameter <code>-sn</code>, e.g., <code>uac</code>, <code>uas</code>, <code>regexp</code>, ...)</li>
+			<li>Call<br />A call consists of all information necessary to run one instance of SIPp. Thus a SIPp executable, a scenario, and a collection of parameters (e.g., destination ip-address).</li>
+			<li>Call sequence<br />In some test scenarios it is not enough to run only one call. For example in a first call SIP user agents get registered at a SIP proxy, in a second call those user agents communicate with a server, and in a last call the registrations are removed again. Thus a call sequence is an ordered list of calls, that can be executed automatically one by one.</li>
+			<li>Call sequence pair / call parties<br />SIPp webfrontend has the capability to execute two calls in a test simultaneously. This is useful for example if you want to simulate a server and a client communicating with each other. In this case two call sequences can be defined each in a separate party (<i>A party</i> and <i>B party</i>).</li>
+			<li>Test<br />A test can be a call, a call sequence or a call sequence pair. There also may be several versions of a test that can be executed.</li>
+			<li>Run<br />After a test has been executed, collected information (e.g., about the progress, test parameters, date and time, log files...) is stored as a run for further processing.</li>
+		</ul>
+	</section>
+	<section>
+      <title>Admin guide</title>
+		<section>
+		  <title>Installation instructions</title>
+		  <p>For detailed installation instructions refer to the file <code>INSTALL.TXT</code> shipped with the SIPp webfrontend package.</p>
+		</section>
+		<section>
+		  <title>Login</title>
+		  <p>In order to act as an admin, you first need to login to the admin section by entering the correct password, defined in the config file <code>config.ini.php</code> with the parameter <code>admin_pwd</code>. If you want everybody to be admin, assign <code>admin_pwd</code> an empty password (<code>admin_pwd=""</code>).</p>
+		</section>
+		<section>
+		  <anchor id="managescenarios" />
+		  <title>Manage scenarios</title>
+		  <p>There is a list of scenarios available for creating tests in the <i>manage scenarios</i> tab. Scenarios tagged with the word <i>default</i> are SIPp default scenarios, and cannot be modified or removed. Change the order of the scenarios by using the arrow up and the arrow down buttons, or remove a scenario by pressing the red <i>X</i> button. To modify a scenario, just click the row of the scenario, and to create a new scenario use the <i>create new scenario</i> link.<br />
+		  <img alt="Manage scenarios tab" src="images/webfrontend_managescenarios.gif"></img></p>
+			<section>
+			  <title>Create / modify a scenario</title>
+			  <p>To create a scenario, a name has to be specified and a XML scenario file has to be given (upload the file by pressing the corresponding <i>Browse...</i> button). Optionally the user can enter a description, upload a CSV injection file and enter a <i>bind_local</i> ip address to instruct a server to listen only to the given address instead to all available (see <code>sipp -h</code> for more details).</p>
+			  <img alt="Create a scenario" src="images/webfrontend_createscenario.gif"></img>
+			  <p>After you have created a scenario, you can modify it any time if you want. You can even remove a CSV file or replace the XML file.
+			  <note>When you modify a scenario, you do not implicitly modify all tests using the scenario. Tests use copies of the scenarios to stay consistent with test runs.</note></p>
+			</section>
+		</section>
+
+		<section>
+		  <title>Manage tests</title>
+		  <p>Open the <i>Manage tests</i> tab to get a list of available tests.</p>
+		  <ul>
+		  	<li>to completely delete a test press the red <i>X</i> button</li>
+			<li>to modify a test, click on the corresponding table row</li>
+			<li>to create a new test, use the <i>create new test</i> link</li>
+		  </ul>
+		  <img alt="Manage scenarios tab" src="images/webfrontend_managescenarios.gif"></img>
+		  <p>For more information about this window see section <a href="#managetests">Manage tests</a> in the User guide.</p>
+			<section>
+			  <title>Create a test</title>
+			  <p>To create a test
+			  <ul>
+			  	<li>enter a test title into the <i>name</i> field</li>
+				<li>optionally enter a test description into the <i>description</i> field</li>
+				<li>click on the <i>save test</i> link</li>
+			  </ul>
+			  </p>
+			  <img alt="Create a test" src="images/webfrontend_createtest.gif"></img>
+			  <p>After an empty test is created, it is in its version 1. Now calls can be added. A call is an instruction to SIPp, so a test is an instruction set. There are two parties the calls can be added, the <i>A party</i> and the <i>B party</i>. The calls in a party are executed one by one like in a queue, but the two parties are executed simultaneously. With this the parties can communicate with each other.</p>
+			  <p>Sometimes the <i>A party</i> and the <i>B party</i> should not begin the execution at the same time (e.g., the client waits for the server to start). In this case a party can be delayed using the corresponding <i>delay</i> dropdown field.</p>
+			  <img alt="Add calls to parties" src="images/webfrontend_addcalls.gif"></img>
+			  <p>The test screen is split in 3 areas. In the first (upper) one, the test name and description can be modified, and the entire test can be duplicated or removed. In the second (middle) area calls can be added, removed or reordered. The third (lower) area shows the test-runs that has been done with the current version.</p>
+			</section>
+			<section>
+			  <title>Adding calls to a test</title>
+			  <p>To add a call, use the <i>add a call</i> link of the corresponding party (see in the figure above) and get to the <i>Create new call</i> screen.</p>
+			  <img alt="Add a call" src="images/webfrontend_addcall.gif"></img>
+			  <p>Here the command line parameters to pass to SIPp can be set up (the corresponding parameters are stated in round brackets, e.g., <code>-timeout</code>) or (<code>-m</code>), but first
+			  <ul>
+			  	<li>choose an <i>Executable</i> (the version of SIPp you want to use, defined in <code>config.ini.php</code>. See section <a href="#configfile">Config file</a> for more details).</li>
+				<li>choose a <i>Scenario</i> defined earlier in the <i>Manage scenarios</i> tab (Section <a href="#managescenarios">Manage scenarios</a>).</li>
+				<li>if a client scenario is used, enter a <i>Remote host</i>. This is where SIPp addresses its messages to.</li>
+				<li>check the <i>Monitor call</i> checkbox, if during the test execution realtime feedback of the test progress should be displayed. In that case the tester can also influence the test by pausing it, or by adjusting the packet rate (See section <h href="#runatest">Run a test</h> for more details).</li>
+				<li>check the <i>Log</i> checkbox, if log files (<code>-trace_err, -trace_logs, -trace_rtt, -trace_stat</code>) should be stored in the database.</li>
+			  </ul></p>
+			  <p>If the given configuration options are not enough, the <i>Extended parameters</i> text field can be used to pass any command line parameters to SIPp. The <i>Extended parameters</i> are not evaluated or modified in any way. It is up to the administrator to use a correct syntax. There may be some command line options that do not work, or even cause SIPp to hang (i.e. <code>-bg</code>).</p>
+			  <p>If a parameter is specified in the form and also as <i>extended parameter</i>, the <i>extended parameter</i> has the higher priority, and overwrites the other.</p>
+			  <p>Global parameters (applied to any call) can be defined in the <code>AVP Section</code> of the <code>config.ini.php</code>. These have the lowest priority.</p>
+			</section>
+			<section>
+			  <title>Modify a test / create a new test version</title>
+			  <p>Tests and calls can be modified at any time. If a test has already runs, a crucial modification of the test would mean that test information belonging to these runs is lost, and thus the run is not reproducible anymore. To avoid this, a new version is created automatically.</p>
+			  <p>Simply switch between the versions of a test by clicking the version numbers. A version can even be deleted by using the <i>remove this version</i> link, but then all its runs are lost too.</p>
+			  <img alt="Test versions" src="images/webfrontend_version.gif"></img>
+			</section>
+			<section>
+			  <title>Duplicate a test</title>
+			  <p>If a test is duplicated using the <i>duplicate test</i> link, the currently displayed version of the test is copied into version 1 of the duplicate. The new name of the duplicate is composed with the original name followed by the word <i>copy</i>. A duplicate initially has no runs.</p>
+			</section>
+		</section>
+		<section>
+		  <title>System information</title>
+		  <p>In the <i>System information</i> tab, the page is split in 3 areas. First a list of currently running SIPp instances is displayed. Then the available free disk space is stated. Finally there is a list with the versions of SIPp that are defined in the <code>config.ini.php</code> file, along with their verbose screens.</p>
+		  <img alt="System information tab" src="images/webfrontend_sysinfo.gif"></img>
+			<section>
+			  <title>Kill a hanging SIPp instance</title>
+			  <p>An admin can try to kill an instance of SIPp by pressing the corresponding red <i>X</i> button in the list of currently running SIPp instances. Although SIPp runs that are not started through the web frontend are also in the list, they cannot be killed.</p>
+			</section>
+		</section>
+		<section>
+		  <anchor id="configfile" />
+		  <title>Config file</title>
+		  <p>A line in the config file with a leading ; is a comment and has no effect to the configuration.<br />
+		  The configuration file is divided in three sections respectively tagged with<br />
+		  <code>[EXECUTABLES], [AVP], and [CONFIG]</code>.</p>
+		  <ul>
+		  	<li>In the <code>[EXECUTABLES]</code>-section SIPp executables and their versions can be specified. At least one executable is mandatory.</li>
+			<li>In the <code>[AVP]</code>-section global command line parameters for SIPp can be specified in form of attribute-value pairs (<code>attribute = value</code>). <br />
+			I.e. most parameters of SIPp (without the leading -) will be accepted (see <code>sipp -h</code> for more details).<br />
+			These parameters can be overwritten in each individual call by using the <i>Extended parameters</i> textarea in the web tool. Take care that you only use parameters that work with every version of SIPp you are using with this tool. If a attribute has no value, but is a switch, use TRUE as a value (e.g., <code>aa = TRUE</code>). If a value contains non-alphanumeric characters it needs to be enclosed in double-quotes (").<br /><br />
+			Parameters not allowed are:<br />
+			<code>i, m, nd, nr, t, p, r, timeout, pause_msg_ign, v, bind_local, inf, sd, sf, sn, stf, trace_msg, trace_shortmsg, trace_screen, trace_err, linebreak trace_timeout, trace_stat, trace_rtt, trace_logs</code></li>
+			<li>In the <code>[CONFIG]</code>-section you will find program specific parameters, like admin password or MySQL-database connection information...</li>
+		  </ul>
+		  <p>Refer to the config file <code>config.ini.php</code> to get more detailed information about the specific parameters.</p>
+		</section>
+	</section>
+	<section>
+      <title>User guide</title>
+	  	<anchor id="managetests" />
+		<section>
+		  <title>Manage tests</title>
+		  <p>There is a list of available tests in the <i>Manage tests</i>. If there are many tests, it may be useful to sort the tests by clicking one of the column headings.</p>
+		</section>
+		<section>
+		  <anchor id="runatest" />
+		  <title>Run a test</title>
+		  <p>Click on a test to get a more detailed view. There choose a version and click on the <i>run this version</i> link to open the test popup.</p>
+		  <img alt="Execute test screen" src="images/webfrontend_exec.gif"></img>
+		  <p>Click on <i>Run test now</i> to begin testing. Both parties start to process their queues. On the left hand side of each call there is a small image showing the actual state of the call.</p>
+		  <img alt="Call state icons" src="images/webfrontend_states.gif"></img>
+			<section>
+			  <title>Key commands</title>
+			  <p>If monitoring is turned on, the test progress can be influenced by using key commands (this is the same as in the command line). First set the focus to the corresponding monitoring screen by clicking on it. When the border of the screen turns red, use the key commands on your keyboard.
+			  <ul>
+			  	<li><i>0-9</i> to switch between screens</li>
+				<li><i>+ , - , * , /</i> to adjust packet rate</li>
+				<li><i>q</i> to soft exit</li>
+				<li><i>p</i> to pause/resume execution</li>
+			  </ul>
+			  </p>
+			</section>
+			<section>
+			  <title>Abort a call / test</title>
+			  <p>Never close the test window without the test finished, because there may reside SIPp processes running on the server. If for some reason a call does not terminate by itself, there are three possibilities to finish the test anyway:
+			  <ul>
+			  	<li>If the call has monitoring turned on, try to end the call with the key command <i>q</i> (soft exit).</li>
+				<li>A call that hangs can be terminated by pressing the red <i>X</i> on its right hand side.</li>
+				<li>The whole test can be stopped with the <i>Abort test</i> link at the top of the window.</li>
+			  </ul>
+			  </p>
+			</section>
+		</section>
+		<section>
+		  <title>Runs</title>
+		  <p>After a test has finished, the test window is closed automatically and the created run is displayed. The <i>exit</i> and the <i>std error</i> column may contain important information (roll the mouse over the columns for more details in a tooltip box). Click the grey eye buttons to download the log files created during the test.</p>
+		  <img alt="Runs screen" src="images/webfrontend_runs.gif"></img>
+		  <p>It is possible to return to this page, or to another run, any time. Just navigate to the corresponding test in the <i>Manage tests</i> tab, choose the right version and click on a run at the bottom of the page.</p>
+		</section>
+	</section>
+	<section>
+      <title>Programming guide</title>
+		<section>
+		  <title>Database (ER Diagram)</title>
+		  <img alt="Entity Relationship diagram" src="images/webfrontend_er.gif"></img>
+		</section>
+		<section>
+		  <title>Files</title>
+		  <ul>
+		  	<li><code>add_call.php</code> is responsible for the <i>add/modify call</i> screen. Adds/modifies calls in the database.</li>
+		  	<li><code>authentication.php</code>: checks if admin is logged in. It is included everywhere, where admin should have special permissions.</li>
+		  	<li><code>Call_Data.php</code>: class Call_Data: contains call specific data (process-id, log filenames...) of a currently running call. It has methods to store log files in the database, delete the log files and determine the exit code after execution. When a call is about to be executed, an object of this class is generated and stored in a session variable.</li>
+		  	<li><code>config.ini.php</code>: configuration file</li>
+		  	<li><code>create_run.php</code>: is called from run_progress.php via ajax. It creates a run in the database with the current timestamp.</li>
+		  	<li><code>dbHelper.php</code>: is where the SQL happens. For each table in the database, there is a corresponding class that handles database communication.</li>
+		  	<li><code>db.php</code>: generates the MySQL database connection object.</li>
+		  	<li><code>exec_call.php</code>: is called from <code>run_progress.php</code> via ajax. The basic function of this file is to build up the command line, create the XML-scenario file and the CSV-injection file in the system's temporary folder, execute the call and return its process id (pid).</li>
+		  	<li><code>garbagecollector.php</code>: removes all SIPp directories in the system's temp folder that have not been modified for a specific time (defined in <code>config.ini.php</code>). Further all SIPp processes older than a specific time get killed.</li>
+		  	<li><code>get_screen.php</code>: During execution of a call this file is requested periodically via ajax. Here the actual monitor-screen is extracted from the screen file, and returned to <code>status_screen.php</code> (if monitoring is turned on). Further this file checks if the SIPp process is still running, and if not, it returns exit-code and standard-error to <code>status_screen.php</code>.</li>
+		  	<li><code>helper.php</code>: just some useful functions.</li>
+		  	<li><code>index.php</code>: redirect to <code>tests.php</code>.</li>
+		  	<li><code>info.php</code>: represents the <i>System information</i> tab.</li>
+		  	<li><code>kill_process.php</code>: is called from <code>run_progress.php</code> via ajax, if the user wants to kill a SIPp process.</li>
+		  	<li><code>read_config.php</code>: reads the config file in the three arrays <code>$executables, $avp,</code> and <code>$config</code>. Default values are set if necessary, and there is a function <code>getConfig-Parameters</code> that assembles command line parameters from the <code>AVP</code> section.</li>
+		  	<li><code>run_detail.php</code>: represents the <i>show run</i> page.</li>
+		  	<li><code>run_progress.php</code>: represents the <i>run test</i> popup. This is where all the ajax happens. Refer to the file itself for detailed information.</li>
+		  	<li><code>scenario_detail.php</code>: represents the <i>create/modify scenario</i> screen. Inserts or updates scenario data in the database.</li>
+		  	<li><code>scenarios.php</code>: represents the <i>Manage scenarios</i> tab.</li>
+		  	<li><code>send_key.php</code>: is called via ajax from <code>status_screen.php</code> when the user presses a key on the keyboard.</li>
+		  	<li><code>status_screen.php</code>: is displayed in a iframe in <code>run_progress.php</code> during test. Here the status monitor screen of a running SIPp instance is displayed by polling it from the server frequently. Further, keyboard action is sent to <code>send_key.php</code>, that forwards it to the running SIPp instance.</li>
+		  	<li><code>stop_sipp.php</code>: has a function that tries to stop a running SIPp instance. It takes care that the pid belongs to a SIPp process.</li>
+		  	<li><code>sys_get_temp_dir.php</code>: provides functions that determine the working directory and the systems temp directory.</li>
+		  	<li><code>test_detail.php</code>: represents the <i>create/modify test</i> screen.</li>
+		  	<li><code>tests.php</code>: represents the <i>Manage tests</i> tab.</li>
+		  	<li><code>view_csv.php</code>: is for downloading CSV files (log files etc.) that are stored in the database.</li>
+		  	<li><code>view_messages.php</code>: is for downloading the file created by the command line option <code>-trace_messages</code>. The trace_messages file is not stored in the database because it may be very large, but it is left for a short time in the systems temp folder until the garbage collector removes it.</li>
+		  	<li><code>view_text.php</code>: is for downloading text files (log files etc.) that are stored in the database.</li>
+		  	<li><code>view_xml.php</code>: is for downloading XML files (scenario files) that are stored in the database.</li>
+		  	<li><code>/js/ajaxConnection.js</code>: crossbrowser function to create an ajax request object in javascript.</li>
+		  	<li><code>/js/helper.js</code>: some useful javascript functions.</li>
+		  	<li><code>/js/run.js</code>: opens a window for a test run.</li>
+		  	<li><code>/js/tooltip.js</code>: provides functions to display tooltip texts.</li>
+		  	<li><code>/navigation/pagehead.php</code>: If you want to add a new tab to the navigation, do it here.</li>
+		  	<li><code>/navigation/register.php</code>: Here the navigation of the webfrontend is created.</li>
+		  </ul>
+		</section>
+		<section>
+		  <title>Command flow during test process</title>
+		  <img alt="Command flow" src="images/webfrontend_commandflow.gif"></img>
+		</section>
+	</section>
+  </body>
+</document>
