@@ -57,7 +57,9 @@ See http://xml.apache.org/forrest/linking.html for more info
     <scen label="Scenarios" href="ext:wikiscen" description="Scenario wiki"/>
     <tips label="Tips and tricks" href="ext:wikitips" description="Tips wiki"/>
   </wiki>
-  
+  <WebFrontEnd label="WebFrontEnd" href="web_frontend">
+     <refdoc label='Ref doc [html]' href='reference.html' />
+  </WebFrontEnd>
   <external-refs>
     <download_unstable href="http://sipp.sourceforge.net/snapshots/">
     </download_unstable>
