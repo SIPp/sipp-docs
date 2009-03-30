@@ -60,6 +60,9 @@ See http://xml.apache.org/forrest/linking.html for more info
   <WebFrontEnd label="WebFrontEnd" href="web_frontend/">
      <refdoc label='Ref doc [html]' href='index.html' />
   </WebFrontEnd>
+  <SIPpGUI label="SIPpGUI" href="SIPP_GUI/">
+     <refdoc label='Ref doc [pdf]' href='reference.pdf' />
+  </SIPpGUI>
   <external-refs>
     <download_unstable href="http://sipp.sourceforge.net/snapshots/">
     </download_unstable>
