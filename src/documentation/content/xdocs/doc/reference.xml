@@ -1458,7 +1458,13 @@ echo "q" >/dev/udp/127.0.0.1/8889
                           <td>check_it</td>
                           <td>false</td>
                           <td>if set to true, the call is marked as failed if 
-                          the regexp doesn't match.</td>
+                          the regexp doesn't match. Can not be combined with check_it_inverse.</td>
+			  </tr>
+                      <tr>
+                          <td>check_it_inverse</td>
+                          <td>false</td>
+                          <td>Inverse of check_it. iff set to true, the call is marked as failed if 
+                          the regexp does match. Can not be combined with check_it.</td>
                       </tr>
                       <tr>
                           <td>assign_to</td>
@@ -2432,6 +2438,11 @@ User0003;[authentication username=betty password=boop]</source>
     <li>FailedRegexpDoesntMatch:
     Number of failed calls because of regexp that doesn't
     match (there might be several regexp that don't match
+    during the call but the counter is increased only by
+    one).</li>
+    <li>FailedRegexpShouldntMatch:
+    Number of failed calls because of regexp that shouldn't
+    match (there might be several regexp that shouldn't match
     during the call but the counter is increased only by
     one).</li>
     <li>FailedRegexpHdrNotFound:
