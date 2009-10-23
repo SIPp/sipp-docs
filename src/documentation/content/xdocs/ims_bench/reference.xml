@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
 <document> 
   <header> 
@@ -74,10 +74,31 @@
        Timer frequency (1000 HZ)  ---&gt;
      General setup  ---&gt;
        () Local version - append to kernel release  &lt;- set your own kernel prefix
+</source>
 
+          <p>Then, rebuild your kernel and point your /etc/grub.conf to it.
+          <b>Wait! ...</b> Before you rebuild your kernel, you may want to include the
+          change for the next item below and only rebuild once!</p>
+
+<source>
  make dep bzImage modules modules_install install
-
- (modify /etc/grub.conf to point to this new kernel)</source></li>
+</source></li>
+         <li>
+          <p>When a SIPp load-generator instance must represent a large number of users
+          (beyond a few 10K users), and when it is configured to use a different IP + UDP
+          port combination for each user, the system may exhibit poor performance
+          (very long delay at startup, high CPU utilisation) making it unsuitable as a
+          Test System. This may be due to the default size of internal hash tables within
+          the IP stack of the Linux kernel.</p>
+          <p>In order to avoid this problem, you can change the UDP_HTABLE_SIZE constant and
+          rebuild your kernel (see above).
+          At time of writing, this setting was not an exposed kernel parameter and must
+          be changed directly in the source code, at
+          /usr/src/redhat/BUILD/kernel-2.6.18/linux-2.6.18.i686/include/net/udp.h
+          (assuming sources as in above example). The constant can be set to 32768.</p>
+          <p>This only applies to UDP mode. This parameter has no (positive) impact on
+          TCP mode performance.</p>
+         </li>
          <li>
           <p>In order for the timing precision to remain when measuring a time difference
           between two different physical systems, all systems that constitute the Test
@@ -439,7 +460,7 @@
         <p>Here is an example of the command to issue on one of the test systems to start one
         of the SIPp instances, assuming that the manager is at 192.168.1.1, that the instance
         will use 192.168.1.20 and that the SUT is at 192.168.1.100 and listens for SIP traffic
-        on port 5060:
+        on UDP port 5060:
         <source>./sipp -id 1 -i 192.168.1.20 -user_inf ./ims_users_1.inf
        -rmctrl 192.168.1.1:5000 192.168.1.100:5060
        -trace_err -trace_cpumem -trace_scen -trace_retrans</source></p>
@@ -587,7 +608,7 @@
 Client:
 <source>
   Call-rate(length)     Port   Total-time  Total-calls  Remote-host
-   <i>[Desactivated]</i>(0 ms)/1.000s   5060      10.00 s            0  <i><b>&lt;sut_address&gt;</b></i>(UDP)
+   <i>[Desactivated]</i>(0 ms)/1.000s   5060      10.00 s            0  <i><b>&lt;sut_address&gt;</b></i>(<i><b>&lt;UDP or TCP&gt;</b></i>)
   0 new calls during 1.000 s period      1 ms scheduler resolution
   0 calls (limit 0)                      Peak was 0 calls, after 0 s
   0 Running, 0 Paused, 0 Woken up, 0 Sync
@@ -597,7 +618,7 @@ Client:
 Server:
 <source>
   Port   Total-time  Total-calls  Transport
-  5060     695.00 s            0  UDP
+  5060     695.00 s            0  <i><b>&lt;UDP or TCP&gt;</b></i>
 
   0 new calls during 1.000 s period      1 ms scheduler resolution
   0 calls                                Peak was 0 calls, after 0 s
@@ -889,7 +910,7 @@ Server:
 <!-- ********************************************* -->
 <!-- ********************************************* -->
       <anchor id="multi_scenario" /><section><title>Multi-scenario mode</title>
-        <p><comment>NEW!</comment>A key feature in IMS Bench SIPp is its support for
+        <p>A key feature in IMS Bench SIPp is its support for
         multiple scenarios within a single SIPp instance. Multiple scenarios
         are uploaded by the manager to the SIPp instance(s) and each call is
         executing one of the scenarios.</p>
@@ -1015,12 +1036,17 @@ Server:
           scenario creates.</li>
         </ol>
 
-        <p>In addition, IMS Bench SIPp will assign a different combination
+        <p>In UDP mode, IMS Bench SIPp will assign a different combination
         of IP address and UDP port number to each user that it represents.
-        This makes the traffic more realistic. Depending on the transport
-        mode used, it will distribute the users on the configured IP addresses
+        This makes the traffic more realistic. It will distribute the users
+        on one IP address or optionally, on several configured IP addresses,
         and then on the available ports on that address
         (see also <link href="#transports">SIPp Transport Modes</link>).</p>
+        <p>In TCP mode, each IMS Bench SIPp instance has a single IP address
+        and creates one pair of TCP sockets to the SUT. The first socket is
+        used for server side scenarios, and the second one is used for client
+        side scenarios. All users represented by the SIPp instance share this
+        single pair of TCP sockets.</p>
       </section>
 
 <!-- ********************************************* -->
@@ -1048,7 +1074,7 @@ Server:
         option) and that can be checked against a specified maximum value are
         called &quot;metrics&quot;.</p>
 
-        <p>These metrics are defined within the scenario file in a <comment>new</comment>
+        <p>These metrics are defined within the scenario file in a new
         &lt;info&gt; section, as in the following example:</p>
 <source><![CDATA[
   <info>
@@ -1107,7 +1133,7 @@ Server:
         of the manager or when the manager exits.</p>
         <p>The 'q' key is however still handled in the SIPp instance as well. If you press it,
         SIPp will stop placing new calls and will wait until all current calls go to their end.
-        During this phase, <comment>(NEW!)</comment> SIPp will regularly look at all calls that are
+        During this phase, SIPp will regularly look at all calls that are
         executing a pause command and will shorten the duration of this pause so as to 
         speed up the exit while still trying to complete all calls in their normal flow.
         SIPp will then exit.</p>
@@ -1817,7 +1843,7 @@ Server:
                 <tr>
                     <td><strong>[%&lt;<i>param</i>&gt;]</strong></td>
                     <td>-</td>
-                    <td><comment>NEW!</comment>Use to inject a global generic parameters
+                    <td>Use to inject a global generic parameters
                      (see <code>-key</code> command line option and manager
                      <a href="#scen_params">scenario parameters</a>).<br/>
                      Example: <code>&lt;pause poisson="true" mean="%RingTime"/&gt;</code></td>
@@ -1998,7 +2024,7 @@ Server:
                           by using the content of the variables for <a href="#branching">conditional 
                           branching</a>.
 
-                          <p><comment>NEW!</comment>With the introduction by IMS
+                          <p>With the introduction by IMS
                           Bench SIPp of the concept of users, it is now also possible
                           to store results of regular expression matching into
                           user variables. These variables can then be used just
@@ -2250,7 +2276,7 @@ Server:
 <!-- ********************************************* -->
       <anchor id="inffile" /><section><title>Injecting values from an external CSV during calls</title>
 
-                <p><comment>NEW!</comment>In addition to the standard value injection mechanism provided by SIPp,
+                <p>In addition to the standard value injection mechanism provided by SIPp,
                 IMS Bench SIPp supports a new, more user-centric mode of operation.
                 This is triggered by the use of the <code>-user_inf</code> command line
                 parameter. For the standard SIPp mode of operation, please refer to the
@@ -2258,7 +2284,7 @@ Server:
 
                 <p>When the <code>-user_inf</code> command line parameter is used
                 to specify a user data file, corresponding user entities are created
-                within SIPp and are each assigned a different IP and port combination.
+                within SIPp and, in UDP mode, are each assigned a different IP and port combination.
                 Data from the specified file is also loaded into user specific data
                 fields which can then be used within the scenarios.</p>
 
@@ -2289,15 +2315,18 @@ Server:
 </source>
                 <p>In this example, all users are initially in pool 0 (for example, the pool
                 of not registered users). The meaning of the remaining fields
-                depends of what the scenario files do with them but in case of
+                depends on what the scenario files do with them but in case of
                 the provided IMS Benchmark scenarios, the user data fields have
-                the following meaning:</p>
+                the following meaning, and can be specified in the associated entries in
+                the <i>Users provisioning</i> menu of the <i>ims_bench</i> tool:</p>
                 <ul>
-                 <li>username part of the public identity of the user</li>
-                 <li>domain part of the public identity of the user</li>
-                 <li>authentication username</li>
-                 <li>authentication realm</li>
-                 <li>authentication password (AKA Key value)</li>
+                 <li>username part of the public identity of the user: <i>PublicIdentityFormat</i></li>
+                 <li>domain part of the public identity of the user: <i>UserDomain</i>
+                     <br/>or IP address of the IMS Bench SIPp instance: <i>when DontPreRegisterButUseSippIP = 1</i>
+                     (in order to execute scenarios without the need for a pre-registration phase)</li>
+                 <li>authentication username: <i>PrivateIdentityFormat</i></li>
+                 <li>authentication realm: <i>UserRealm</i></li>
+                 <li>authentication password (AKA Key value): <i>UserPasswordFormat</i></li>
                  <li>example extra data - not used</li>
                 </ul>
 
@@ -2322,7 +2351,7 @@ Server:
 		      it goes to the label only if variable [$m] is set. This allows you 
 		      to look for some string in a received packet and alter the 
 		      flow either on that or a later part of the script.</p>
-		      <warning>If you add special cases at the end, don’t forget to put 
+		      <warning>If you add special cases at the end, don't forget to put 
 		      a label at the real end and jump to it at the end of the normal flow.</warning>
 		      <p><strong>Example:</strong></p>
 		      <p>The following example corresponds to the embedded '<a href="#scenario_branch">branchc</a>' (client side) scenario.
@@ -2359,7 +2388,7 @@ Server:
               take the challenge into account in order to compute a response in a
               next message.</p>
 
-              <p><comment>NEW!</comment> In addition, the <code>auth_assign_to</code> argument
+              <p>In addition, the <code>auth_assign_to</code> argument
               can specify, in the same &lt;recv&gt; command as the one where auth="true" is
               specified, a user or call variable into which to store the challenge for
               later usage (in a subsequent call and possibly  for a different scenario
@@ -2437,9 +2466,13 @@ Server:
     <section><title>Various Topics</title>
         
       <anchor id="transports" /><section><title>SIPp Transport Modes</title>
-            <p>From the transport modes supported by the standard SIPp, only UDP transport is
-            currently supported by IMS Bench SIPp. It however adds a few options in the way UDP
-            is used, making it more closely resemble a set of separate client devices.</p>
+            <p>From the transport modes supported by the standard SIPp, IMS Bench SIPp currently
+            supports:</p>
+            <ul>
+              <li>UDP transport, on top of which it adds a few options (see below) making
+                  it more closely resemble a set of separate client devices</li>
+              <li>TCP transport</li>
+            </ul>
         <section><title>UDP one socket per user</title>
                 <p>In UDP &quot;one socket per user&quot; mode, each user that a
                 SIPp instance represents corresponds to a separate UDP port that SIPp uses
@@ -2447,11 +2480,17 @@ Server:
                 <p>All users however share a single IP address.</p>
         </section>
         <section><title>UDP multiple IP addresses</title>
-                <p>In UDP multiple IP addresses mode, SIPp distributes the users it
+                <p>In UDP &quot;multiple IP addresses&quot; mode, SIPp distributes the users it
                 represents among a set of configured IP addresses. In case there are more
                 users than IP addresses, different UDP ports are used for users that share
                 the same IP address, thereby giving a unique IP adddress / UDP port combination
                 to each user.</p>
+        </section>
+        <section><title>TCP one pair of sockets per SIPp instance</title>
+                <p>In TCP mode, each SIPp instance has a single IP address and creates one pair
+                of TCP sockets to the SUT. The first socket carries SIP traffic for server side
+                scenarios, and the second one is used for client side scenarios.</p>
+                <p>All users represented by the SIPp instance share this single pair of TCP sockets.</p>
         </section>
       </section> <!-- Tansport Modes -->
 
@@ -2504,8 +2543,7 @@ Server:
                  by pressing 3, 6, 7, 8 or 9. You can also save the values 
                  in a CSV file using the -trace_stat option (see below).</p>
 
-                 <p><comment>NEW!</comment>IMS Bench SIPp extends this mechanism
-                 in several ways:</p>
+                 <p>IMS Bench SIPp extends this mechanism in several ways:</p>
 
                  <p>As most IMS Bench scenarios require measuring several
                  delays, the start_rtd and rtd attributes have been extended to
@@ -2610,9 +2648,9 @@ Server:
     Number of unexpected specific messages received for new Call-ID.
     The message has been automatically answered by a 200 OK
     Currently, implemented for 'PING' message only.</li>
-    <li>Retransmissions:<comment> not documented </comment>Number of UDP retransmission.</li>
-    <li>Retransmissions2:<comment> NEW </comment>Stat collected at the server side are added to the client side.</li>
-    <li>FailedTimeoutInRtdOp:<comment> NEW </comment>Number of calls that exceed the defined <a href="#Time+Metrics">metrics</a> or for which the timeout specified in an rtd evaluation action was exceeded.</li>
+    <li>Retransmissions: Number of UDP retransmission.</li>
+    <li>Retransmissions2: Stat collected at the server side are added to the client side.</li>
+    <li>FailedTimeoutInRtdOp: Number of calls that exceed the defined <a href="#Time+Metrics">metrics</a> or for which the timeout specified in an rtd evaluation action was exceeded.</li>
     </ul>
     <p>In addition, two other statistics are gathered:</p>
     <ul><li>ResponseTime (see previous section)</li>
@@ -2622,6 +2660,7 @@ Server:
     and <a href="#calllengthrep">CallLengthRepartition</a> commands in the scenario.</p>
         </section> <!-- Counters -->
       </section> <!-- Statistics -->
+
       <section><title>Error handling</title>
             <p>SIPp has advanced features to handle errors and unexpected events. 
             They are detailed in the following sections.</p>
@@ -2649,6 +2688,7 @@ Server:
                     be simply dropped.</li>
                 </ul>
         </section>
+
         <section><title>Retransmissions (UDP only)</title>
                 <p>A retransmission mechanism exists in UDP transport mode. 
                 To activate the retransmission mechanism, the "send" command must include
@@ -2665,6 +2705,7 @@ Server:
                 using the <code>-nr</code> command line option to globally disable the
                 retransmission mechanism.</p>
         </section>
+
         <section><title>Log files (error + log + screen)</title>
                 <p>There are several ways to trace what is going on during your SIPp runs.</p>
                 <ul>

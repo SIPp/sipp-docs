@@ -26,6 +26,15 @@
       <p>To learn how to use IMS Bench SIPp and how to create scenarios that take advantage of
       the features it brings, please refer to the <link href="reference.html">Reference documentation</link>.</p>
 
+      <p><b>New features in SVN revision 587 (28-Jul-2009):</b></p>
+      <ul>
+       <li>Support for SIP traffic over TCP. SIP traffic between each SIPp
+       instance and the System Under Test goes over a pair of TCP sockets.</li>
+       <li>Support in the <i>ims_bench</i> Perl script, for scenarios without
+       pre-registration. The script can now generate user data files suitable
+       for tests without a pre-registration phase (e.g. for Application Server
+       testing).</li>
+      </ul>
 
   </body>
 </document>

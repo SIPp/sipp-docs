@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V1.2//EN" "http://apache.org/forrest/dtd/document-v12.dtd">
 <document> 
   <header> 
@@ -165,7 +165,7 @@
 
         <p>The current implementation does not support IPSec. This means that the connection
         between the Test Systems and the P-CSCF component of the SUT is using unencrypted
-        SIP messages over UDP.
+        SIP messages over UDP or TCP.
         One should be aware that IPSec processing is likely to have a high performance impact
         on the P-CSCF component. The current implementation is therefore
         not suitable for evaluating the performance of a P-CSCF as it would normally be
@@ -183,7 +183,7 @@
 
         <p>The following are the known areas that have been intentionally left out:</p>
         <ul>
-         <li> Other transports than UDP (TCP, TLS) (known to be broken)</li>
+         <li> Other transports than UDP and TCP (TLS)</li>
          <li> IPv6 support (known to be broken)</li>
          <li> 3PCC operation (presumably broken)</li>
          <li> PCAP Play (not tested)</li>
@@ -205,11 +205,15 @@
       is loaded with the full set of scenarios. Originating scenario attempts are started
       according to a statistical distribution, and the scenario to execute is itself selected
       at random, as well as the users involved in the scenario. Each SIPp instance has its static
-      set of users that it emulates. Each user is assigned a unique IP address + UDP port
+      set of users that it emulates.</p>
+      <p>In UDP mode, each user is assigned a unique IP address + UDP port
       combination. By default, each SIPp instance has a single IP address and assigns different
       UDP ports to the users, but a compile time option and corresponding configuration allow
       supporting many IP addresses in a single SIPp instance in order to make the setup more
       realistic and avoid that traffic be blocked by overflow attack protections at the SUT.</p>
+      <p>In TCP mode, each SIPp instance has a single IP address and creates one pair of TCP sockets to
+      the SUT. The first socket is used for server side scenarios, and the second one is used for client
+      side scenarios. All users emulated by the SIPp instance share this single pair of TCP sockets.</p>
 
       <p>The manager is responsible for
       <ol>
@@ -304,17 +308,28 @@
        scenarios to remain very simple as they don't have to accommodate multiple possible
        paths and outcomes.</td></tr>
 
-       <tr><td>One UDP port per User</td>
+       <tr><td>One UDP port per User (in UDP mode)</td>
        <td>In order to be as realistic as possible, each user is associated with its own
        IP address + UDP port combination. Default operation uses a single IP address.
        One can then run multiple SIPp instances on the same system, each running on a
        different (real or virtual) IP address.</td></tr>
 
-       <tr><td>Multiple IP addresses</td>
+       <tr><td>Multiple IP addresses (in UDP mode)</td>
        <td>Optionally, to make it even more realistic or to optimize performance of the
        test system (Linux IP stack may scale better with the number of IP addresses than
        with the number of ports), it is also possible to distribute the users onto many
        IP addresses within the same SIPp instance.</td></tr>
+
+       <tr><td>One pair of TCP sockets per SIPp instance (in TCP mode)</td>
+       <td>Since each SIPp instance can simultaneously execute multiple scenarios, possibly
+       with both the client side user and the server side user represented by the same SIPp
+       instance, the incoming SIP traffic must be properly routed to the relevant emulated
+       user. In TCP mode, this is efficiently achieved by means of a single pair of TCP
+       sockets per SIPp instance. The first socket carries SIP traffic for server side
+       scenarios, and the second one is used for client side scenarios. All users
+       represented by the SIPp instance share this single pair of TCP sockets.
+       As in UDP mode, multiple SIPp instances can run on the same system, each one
+       assigned to a different (real or virtual) IP address.</td></tr>
 
        <tr><td>Poisson distribution for scenario attempts</td>
        <td>New scenario attempts can be initiated following a statistical Poisson
