@@ -26,6 +26,28 @@
       <p>To learn how to use IMS Bench SIPp and how to create scenarios that take advantage of
       the features it brings, please refer to the <link href="reference.html">Reference documentation</link>.</p>
 
+      <p><b>New features and Fixes in SVN revision 591 (15-Oct-2010):</b></p>
+      <ul>
+      <li>Support for automatic re-registration of the users. The users can now be re-registerd for instance after 1/2 hour, using new &lt;start_scen&gt; action in registration scenarios .</li>
+      <li>Support for Call Forwarding and VoiceMail scenarios. See new scenarios sut_fwd_A.xml, sut_fwd_B.xml and sut_fwd_C.xml</li>
+      <li>Support for UDP Keep-Alive. See <a href="reference.html#KeepAlive">Keep Alive</a></li> 
+      <li>Support for generating load to multiple SUT by setting &lt;multiple_sut&gt; parameter to 1 within the configuration section of manager.xml;</li>
+      <li>Support gcc-4.4 C++ stdlib changes, which changes the prototypes for many of the str*() family of functions.</li>
+
+      <li>(Fix) Changed the way sipp react to 4xx messages in reply to INVITES. Content of ACK message is now based on the INVITE content, not hard-coded anymore.
+</li>
+      <li>(Fix) Fixed a race condition in CManager:CheckTimeEvents which could in rare cases cause some statistics to be be incorrectly set to 0.</li>
+      <li>(Fix) Fixed a segmentation fault when the last run of a bench is a run with a max_calls condition, and the manager is not run in full automated mode (-e switch)</li>
+      <li>(Fix) Increased maximum number of RTD from 5 to 20 </li>
+      <li>(Fix) The test was stopped when no scenario was <i>completed</i> in the step, with a message "no scenario <i>attempted</i> in this step". The test is now stopped only if the number of attempted scenario in the step is zero. A test with attempted scenario but no successfull ones in a step would not stop for this reason (if there are failed ones, it would stop because of over-ihs). This helps with tests with small steps and very long scenarios (long call duractions for instance).
+</li> </ul>
+
+      <p><b>New features and Fixes in SVN revision 589 (4-Aug-2009):</b></p>
+      <ul>
+      <li>Increased system limits (e.g. number of SIPP test systems)</li>
+      <li>Cleaned up lots of warning related to const char*. Also made parts of manager code more readable.</li>
+      <li>(Fix) Fixed max_calls condition when used in other run than first one or in multiple runs</li>
+      </ul>
       <p><b>New features in SVN revision 587 (28-Jul-2009):</b></p>
       <ul>
        <li>Support for SIP traffic over TCP. SIP traffic between each SIPp

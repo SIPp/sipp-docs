@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
 <document> 
   <header> 
@@ -301,6 +301,16 @@
               <tr><td><b>max_time_offset</b></td>
                <td>Maximum offest (in microseconds) allowed between each TS
                 and the manager (0 = not checked)</td></tr>
+              <tr><td><b>multiple_sut</b></td>
+               <td>Support for generating load from one manager to multiple SUT. 
+                For instance, to have a manager supporting 8 sipp connected to 2 SUT
+                you need to have 4 SIPP connected to the first SUT and 4 to the other SUT.
+                By default (multiple_sut = 0), a sipp user is calling a user from a sipp with 
+                a groupid different from its groupid (the groupid is specified using -groupid sipp 
+                command line). So, it might call one of the 4 SIPP connected to the other SUT.
+                If multiple_sut parameter is set then a sipp user will be calling a user from 
+                a sipp with the the SAME groupid. So, if all SIPP connected to the same SUT share 
+                the same groupid, then they will only call SIPP connected to the same SUT.</td></tr>
              </table><br/>
             </li>
             <li><anchor id="scen_params" /><strong>Scenario Parameters</strong>
@@ -1291,14 +1301,14 @@ Server:
                 <tr>
                     <td></td>
                     <td>rrs</td>
-                    <td><strong>R</strong>ecord <strong>R</strong>oute <strong>S</strong>et. if this attribute is set to "true",
+                    <td><strong>R</strong>ecord <strong>R</strong>oute <strong>S</strong>et. If this attribute is set to "true",
                     then the "Record-Route:" header of the message received is stored and can be recalled using the <strong>[routes]</strong> keyword.</td>
                     <td><code>&lt;recv response="100" rrs="true"&gt;</code>.</td>
                 </tr>            
                 <tr>
                     <td></td>
                     <td>auth</td>
-                    <td><a href="#authentication">Authentication</a>. if this attribute is set to "true",
+                    <td><a href="#authentication">Authentication</a>. If this attribute is set to "true",
                     then the "Proxy-Authenticate:" header of the message received is stored and is used to build
                     the <strong>[authentication]</strong> keyword.</td>
                     <td><code>&lt;recv response="407" auth="true"&gt;</code>.</td>
@@ -1565,7 +1575,11 @@ Server:
                     <td>type</td>
                     <td>
                       The command sends a (non-SIP) message to the partner SIPp instance. In case no partner has been assigned yet to the scenario, 
-                      a partner SIPp instance is selected at random (uniform) before sending the message.
+                      a partner SIPp instance is selected at random (uniform) before sending the message (except if partner_id parameter is specified,
+                      in which case the sipp instance specified by the partner_id parameter is choosen - this partner_id parameter is usefull when sending 
+                      call to a voicemail or a C party in a call forwarding scenario for instance).
+                      Username and domain parameters can be specified in the req_user command to select a well-defined user (typically used together 
+                      with the partner_id parameter in a voicemail or a call-forwarding scenario).
                      </td>
                     <td>
 <source>
@@ -1574,7 +1588,17 @@ Server:
  &lt;param name="from_uri" value="[field0]@[field1]"/&gt;
  &lt;param name="call_id" value="[call_id]"/&gt;
 &lt;/sendRmt&gt;
+</source> or  (in case of Voicemail or call forwarding)
+<source>
+&lt;sendRmt type="req_user"&gt;
+ &lt;param name="scenario" value="ims_uas"/&gt;
+ &lt;param name="from_uri" value="[field0]@[field1]"/&gt;
+ &lt;param name="user_name" value="[field5]"/&gt;
+ &lt;param name="user_domain" value="[field6]"/&gt;
+ &lt;param name="partner_id" value="[field7]"/&gt;
+&lt;/sendRmt&gt;
 </source><br/>
+
                   </td>
                 </tr>
                 <tr>
@@ -2116,11 +2140,32 @@ Server:
                     file where the actual SIP scenario really starts.</td>
                    <td><source>&lt;exec int_cmd="set_start_time"/&gt;</source></td></tr>
                   <tr><td><code>set_target_ip</code></td>
-                   <td>Forces the target IP to the one of the partner SIPp (To be used in
-                    "loop-back" configuration, SIPp against SIPp without any SUT in
-                    between).</td>
+                   <td>If used w/o parameter, forces the target IP to the one of the partner SIPp 
+                   (To be used in "loop-back" configuration, SIPp against SIPp without any SUT in
+                    between).
+                    If used with a parameter, forces the target IP to the parametrer specified 
+                    (Parameter can be obtained through a regexp parsing the Via header for instance)
+                    </td>
                    <td>
-                    <source>&lt;exec int_cmd="set_target_ip"/&gt;</source></td></tr>
+                     <source>&lt;exec int_cmd="set_target_ip"/&gt;</source> 
+                     or
+                     <source>&lt;ereg regexp="[0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[.][0-9]{1,3}[:][0-9]*" 
+   search_in="hdr" occurence="1" header="Via:"  assign_to="3" /&gt;</source>
+                     <source>&lt;exec int_cmd="set_target_ip" parm=="[$3]" /&gt;</source>
+                    </td></tr>
+                  <tr><td><code>start_scen</code></td>
+                   <td>Launches a new scenario from a scenario file.This is useful to perform 
+                   for instance automatic re-registration: the registration scenario can end  
+                   launching a "pause" scenario doing a pause followed by lauching the 
+                   re-registration scenario. The re-registration scenario would do the re-registration and 
+                   end lauching the "pause" scenario.</td>
+                   <td>
+                    <source>&lt;exec int_cmd="start_scen" parm="sut_rereg"/&gt;</source></td></tr>
+                   <tr><td><code>keep_alive_on</code><br/><code>keep_alive_off</code></td>
+                   <td>Send UDP Keep-Alive to the remote SIPP if keep_alive_period command line has been set
+                   when starting SIPP. See <a href="#KeepAlive">Keep Alive</a></td>
+                   <td>
+                    <source>&lt;exec int_cmd="keep_alive_on"/&gt;</source></td></tr>
                   </table>
                   <p>Example that stops the execution of the script on receiving a 603 response:</p>
                   <source><![CDATA[   <recv response="603" optional="true">
@@ -2302,7 +2347,9 @@ Server:
                   user will initially be placed in.</li>
                  <li>Subsequent columns hold the static user data fields that
                   scenarios can refer to using the [field<i>n</i>] keyword.</li>
-                </ul>
+                 <li>The port used by a user is usually sequentially choosen. It can also be specified 
+                 using PORT=xxxx in the inf file e.g. PORT=5060.This is mainly used when simulating
+                 Voicemail which must run on a port configured by the SUT</li> </ul>
 
                 <p>Example:</p>
 <source>
@@ -2311,6 +2358,7 @@ Server:
 0;subs000002;ims.test;usim000002;sp1.ims.test;pass000002;data2_1
 0;subs000003;ims.test;usim000003;sp1.ims.test;pass000003;data3_1
 0;subs000004;ims.test;usim000004;sp1.ims.test;pass000004;data4_1
+0;subs000005;ims.test;usim000005;sp1.ims.test;pass000004;data5_1;PORT=5060
 ...
 </source>
                 <p>In this example, all users are initially in pool 0 (for example, the pool
@@ -2528,6 +2576,28 @@ Server:
             <p>Depending on the system that SIPp is running on, you can echo
             this exit code by using "<code>echo ?</code>" command.</p>
       </section>
+
+      <anchor id="KeepAlive" /><section><title>UDP Keep-Alive support for NAT pinhole tunneling</title>
+            <p>SIP users may be configured to periodically send small 4-byte UDP packets 
+            to their remote (typically a proxy). This serves to keep any NAT pinholes
+            open, so that the SIP server can contact the client later thru the NAT box.
+            To enable: </p>
+            <ul>
+              <li><code>-keep_alive_period &lt;secs&gt;</code> command line option
+              where	&lt;secs&gt; is the period between keep alive messages. Typically ~20sec.</li>
+              <li>Add scenario action <source>&lt;exec int_cmd="keep_alive_on"/&gt;</source>. 
+              Typically this would	occur at the end of the registration scenario.</li>
+              <li>Add scenario action <source>&lt;exec int_cmd="keep_alive_off"/&gt;</source>
+              Typically at end	of de-registration scenario (At point where it is ok for pinhole to close</li>
+            </ul>              
+            <p>Keep alives are implemented on a per-user basis: the int_cmd changes the state for each user.  
+            (e.g., the keep alive state is remembered into the next call for that user. 
+            The keep_alive_period defaults to  zero, which disable sending and keep alives.</p>
+            <p>As currently implemented, enabling keep alives, esp. For many users, may have a negative effect 
+            on latency measurements. Sending keep alives requires walking thru the entire user list. 
+            This occurs every 2 secs. Note that this overhead is entirely avoided when the keep alive period
+            is set to zero. Thus there is no performance impact when this feature is not enabled.</p>
+        </section>
 
       <section><title>Statistics</title>
 
@@ -2768,6 +2838,7 @@ Server:
 <tr><td>-ip_field nr</td><td>Set which field from the injection file contains the IP address from which the client will send its messages.<br/>
                       If this option is omitted and the '-t ui' option is present, then field 0 is assumed.<br/>
                       Use this option together with '-t ui'</td></tr>
+<tr><td>-keep_alive &lt;secs&gt;</td><td>Send small 4-byte UDP packets to their remote where &lt;secs&gt; is the period between keep alive messages. Typically ~20sec.See <a href="#KeepAlive">Keep Alive</a> </td></tr>
 <tr><td>-key keyword value</td><td>Set the generic parameter named "keyword" to "value".</td></tr>
 <tr><td>-l calls_limit</td><td>Set the maximum number of simultaneous calls. Once this limit is reached, traffic
                       is decreased until the number of open calls goes down. <br/>
