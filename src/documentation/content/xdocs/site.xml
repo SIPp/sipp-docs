@@ -31,10 +31,15 @@ See http://xml.apache.org/forrest/linking.html for more info
      <license label='License' href='license.html' />
   </doc>
 
-   <doc2 label="Doc (3.0)" href="doc3.0/" tab="doc3.0">
+  <doc2 label="Doc (3.2)" href="doc3.2/" tab="doc3.2">
+     <refdoc label='Ref doc 3.2 [html]' href='reference.html' />
+     <refdoc_PDF label="Ref doc 3.2 [pdf]" href="reference.pdf"/>
+  </doc2>
+
+   <doc3 label="Doc (3.0)" href="doc3.0/" tab="doc3.0">
      <refdoc label='Ref doc 3.0 [html]' href='reference.html' />
      <refdoc_PDF label="Ref doc 3.0 [pdf]" href="reference.pdf"/>
-  </doc2>
+  </doc3>
 
   <ims_bench label="IMS Bench" href="ims_bench/" tab="ims_bench">
      <refdoc label='Ref doc [html]' href='reference.html' />

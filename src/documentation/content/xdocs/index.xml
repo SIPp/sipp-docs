@@ -13,7 +13,7 @@
       <p>SIPp is a free Open Source test tool / traffic generator for the SIP protocol. 
       It includes a few basic <a href="http://www.sipstone.org">SipStone</a> 
       user agent scenarios (UAC and UAS) and establishes and releases multiple calls with 
-      the INVITE and BYE methods. It can also reads 
+      the INVITE and BYE methods. It can also reads
       <a href="doc/uac.xml.html">custom XML</a> scenario files describing 
       from very simple to <a href="doc/reference.html#3PCC">complex</a> call flows. 
       It features the <a href="doc/reference.html#stat_screen">dynamic display</a> of 
@@ -23,7 +23,7 @@
       retransmission management and <a href="doc/reference.html#traffic_control">dynamically 
       adjustable</a> call rates.</p>
       <p>Other advanced features include support of <a href="doc/reference.html#ipv6">IPv6</a>, 
-      <a href="doc/reference.html#tls">TLS</a>, SIP <a href="doc/reference.html#authentication">authentication</a>,
+      <a href="doc/reference.html#tls">TLS</a>, SCTP, SIP <a href="doc/reference.html#authentication">authentication</a>,
       <a href="doc/reference.html#branching">conditional scenarios</a>, UDP retransmissions, 
       <a href="doc/reference.html#Error+handling">error robustness</a> (call
       timeout, protocol defense), call specific variable, Posix <a href="doc/reference.html#action_regexp">regular expression</a> 
@@ -31,12 +31,12 @@
       (log, system command exec, call stop)
       on message receive, field injection from <a href="doc/reference.html#inffile">external CSV</a> file to emulate live users.</p>
       <p>SIPp can also send media (RTP) traffic through <a href="doc/reference.html#RTP+echo">RTP echo</a> and 
-      <a href="doc/reference.html#PCAP+Play">RTP / pcap</a> replay. Media can be audio or audio+video.</p>
+      <a href="doc/reference.html#PCAP+Play">RTP / pcap</a> replay. Media can be audio or video.</p>
       <p>While optimized for traffic, stress and performance testing, SIPp can be used to
       run one single call and exit, providing a <a href="doc/reference.html#Exit+codes">passed/failed</a> verdict.</p>
       <p>Last, but not least, SIPp has a <a href="doc/reference.html" >comprehensive documentation</a> available
       both in HTML and PDF format.</p>
-      <p>SIPp can be used to test many real SIP equipements like SIP proxies, 
+      <p>SIPp can be used to test various real SIP equipment like SIP proxies, 
       B2BUAs, SIP media servers, SIP/x gateways, SIP PBX, ... 
       It is also very useful to emulate thousands of user agents calling your SIP system.</p>
       <p>Here is a screenshot:</p>
