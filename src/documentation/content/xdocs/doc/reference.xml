@@ -893,9 +893,8 @@ echo "q" >/dev/udp/127.0.0.1/8889
                     <td><code>&lt;pause variable="1" /&gt;</code> pauses for the number of milliseconds specified by call variable 1.</td>
                 </tr>
                 <tr>
-		    <anchor id="pause_distributions" />
                     <td></td>
-                    <td>distribution</td>
+                    <td><anchor id="pause_distributions" />distribution</td>
                     <td>Indicates which statistical distribution to use to determine the length of the pause.  Without GSL, you may use <code>uniform</code> or <code>fixed</code>.  With GSL, normal, exponential, gamma, lambda, lognormal, negbin, (negative binomial), pareto, and weibull are available.  Depending on the distribution you select, you must also supply distribution specific parameters.</td>
                     <td>
 			The following examples show the various types of distributed pauses:
@@ -2548,26 +2547,22 @@ statistics reporting interval.</p>
                     the command line parameter <code>-trace_err</code>.</li>
                     <li>You can trace the counts from the main scenario screen in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_counts.csv by using
                     the command line parameter <code>-trace_counts</code>.</li>
-		    <li>You can trace the messages and state transitions of
-		    failed calls in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_calldebug.log using
-		    the <code>-trace_calldebug</code> command line parameter.  This is useful,
-		    because it has less overhead than <code>-trace_msg</code> yet allows you to
-		    debug call flows that were not completed successfully.</li>.
+                    <li>You can trace the messages and state transitions of
+                    failed calls in &lt;name_of_the_scenario&gt;_&lt;pid&gt;_calldebug.log using
+                    the <code>-trace_calldebug</code> command line parameter.  This is useful,
+                    because it has less overhead than <code>-trace_msg</code> yet allows you to
+                    debug call flows that were not completed successfully.</li>
                     <li>You can save in a file the statistics screens, as displayed in
                     the interface. This is especially useful when running SIPp in background
-                    mode.<br/>
+                    mode. <br/>
                     This can be done in different ways:
-                    <ul>
-                      <li>When SIPp exits to get a final status report (-trace_screen option)</li>
-                      <li>On demand by using USR2 signal (example: <code>kill -SIGUSR2 738</code>)</li>
-                      <li>By pressing 's' key (if -trace_screen option is set)</li>
-		      <li>If the -trace_logs option is set, you can use the <code>&lt;log&gt;</code> action to print some scenario traces in the <![CDATA[<scenario file name>_<pid>_logs.log]]> file.  See the <a href="#action_log">Log action section </a></li>
-		      </ul>
-		    </li>
-
-                  <!--  <li>You can log all call ids for calls that timeout (the maximum
-                    number of retransmissions for UDP transport is reached)
-                    by using the command line parameter <code>-trace_timeout</code></li> -->
+                        <ul>
+                          <li>When SIPp exits to get a final status report (-trace_screen option)</li>
+                          <li>On demand by using USR2 signal (example: <code>kill -SIGUSR2 738</code>)</li>
+                          <li>By pressing 's' key (if -trace_screen option is set)</li>
+                          <li>If the -trace_logs option is set, you can use the <code>&lt;log&gt;</code> action to print some scenario traces in the &lt;scenario file name&gt;_&lt;pid&gt;_logs.log file.  See the <a href="#action_log">Log action section </a></li>
+                        </ul>
+                    </li>
                 </ul>
 		<p>SIPp can treat the messages, short messages, logs, and error logs as ring buffers.  This allows you to limit the total amount of space used by these log files and keep only the most recent messages.  To set the maximum file size use the <code>-ringbuffer_size</code> option.  Once the file exceeds this size (the file size can be exceeded up to the size of a single log message), it is rotated.  SIPp can keep several of the most recent files, to specify the number of files to keep use the <code>-ringbuffer_files</code> option.  The rotated files have a name of the form &lt;name_of_the_scenario&gt;_&lt;pid&gt;_&lt;logname&gt;_&lt;date&gt;.log, where &lt;date&gt; is the number of seconds since the epoch.  If more than one log file is rotated during a one second period, then the date is expressed as &lt;seconds.serial&gt;, where serial is an increasing integer identifier.</p>
             </section>
