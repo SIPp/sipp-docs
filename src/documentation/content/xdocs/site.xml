@@ -53,15 +53,21 @@ See http://xml.apache.org/forrest/linking.html for more info
 
   <sourceforge label="Sourceforge">
      <dev label='Sourceforge' href='ext:sourceforge_dev' />
-     <cvs label='SVN' href='ext:sourceforge_svn' />
+     <cvs label='Git' href='ext:sourceforge_git' />
      <cvs label='Mailing list' href='ext:sourceforge_ml' />
   </sourceforge>
 
+  <devtools label="Devtools">
+      <dev label="Jenkins build system" href='ext:jenkins' />
+      <dev label="Barkeep code review" href='ext:barkeep' />
+  </devtools>
+  <!--
   <wiki label="Wiki" href="ext:wikilink">
     <main label="Mainpage" href="ext:wikilink" description="SIPp's wiki"/>
     <scen label="Scenarios" href="ext:wikiscen" description="Scenario wiki"/>
     <tips label="Tips and tricks" href="ext:wikitips" description="Tips wiki"/>
   </wiki>
+  -->
   <WebFrontEnd label="WebFrontEnd" href="web_frontend/">
      <refdoc label='Ref doc [html]' href='index.html' />
   </WebFrontEnd>
@@ -69,6 +75,8 @@ See http://xml.apache.org/forrest/linking.html for more info
      <refdoc label='Ref doc [pdf]' href='reference.pdf' />
   </SIPpGUI>
   <external-refs>
+    <jenkins href="http://sipp-voip.org:8080/" />
+    <barkeep href="http://sipp-voip.org:8040/" />
     <download_unstable href="http://sipp.sourceforge.net/snapshots/">
     </download_unstable>
     <download_stable href="http://sourceforge.net/project/showfiles.php?group_id=104305">
@@ -77,8 +85,8 @@ See http://xml.apache.org/forrest/linking.html for more info
     </sourceforge_dev>
     <sourceforge_home href="http://sipp.sourceforge.net/">
     </sourceforge_home>
-    <sourceforge_svn href="http://sourceforge.net/svn/?group_id=104305">
-    </sourceforge_svn>
+    <sourceforge_git href="https://sourceforge.net/p/sipp/git/">
+    </sourceforge_git>
     <sourceforge_ml href="http://lists.sourceforge.net/lists/listinfo/sipp-users">
     </sourceforge_ml>
     <wikilink href="http://sipp.sourceforge.net/wiki/">

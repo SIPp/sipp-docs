@@ -1,0 +1,17 @@
+This git repository contains the underlying code from which the SIPp documentation and website are generated. This document fives a brief overview on how to modify and build it.
+
+Building the site
+  * Download and extract the two Apache Forrest tarballs: http://mirror.lividpenguin.com/pub/apache//forrest/apache-forrest-0.9-sources.tar.gz and http://mirror.lividpenguin.com/pub/apache//forrest/apache-forrest-0.9-dependencies.tar.gz
+  * You should now be able to run Apache Forrest from apache-forrest-0.9/bin/forrest (assuming you have Java installed)
+  * Change directory to the root of sipp-doc (i.e. the directory where this README file is)
+  * Run Apache Forrest
+  * The project website should now be built in the build/ directory. Some errors may be reported; these are only worth tracking down if they actually prevent files from being created.
+
+Modifications
+  * The directory src/documentation/content/xdocs/ contains the XML source files.
+  * site.xml defines the main sidebar, index.xml defines the front page, and the doc* directories define the documentation for each version of SIPp.
+  * When releasing a new version of SIPp:
+    * Copy the doc/ directory to doc<old version>, e.g. doc3.2
+    * Update the doc/ directory with the documentation changes for the latest version.
+    * Modify the tabs.xml and site.xml files to include links to doc<old version>.
+    * Rebuild the site and upload it to the Sourceforge project website (https://sourceforge.net/apps/trac/sourceforge/wiki/Project%20web)
