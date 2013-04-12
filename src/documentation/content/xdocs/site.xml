@@ -75,8 +75,8 @@ See http://xml.apache.org/forrest/linking.html for more info
      <refdoc label='Ref doc [pdf]' href='reference.pdf' />
   </SIPpGUI>
   <external-refs>
-    <jenkins href="http://sipp-voip.org:8080/" />
-    <barkeep href="http://sipp-voip.org:8040/" />
+    <jenkins href="http://sipp-voip.org/jenkins" />
+    <barkeep href="http://sipp-voip.org/barkeep" />
     <download_unstable href="http://sipp.sourceforge.net/snapshots/">
     </download_unstable>
     <download_stable href="http://sourceforge.net/project/showfiles.php?group_id=104305">
