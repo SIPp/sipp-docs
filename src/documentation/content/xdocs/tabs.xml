@@ -16,10 +16,8 @@
 
   <tab id="home" label="Home" dir="" indexfile="index.html"/>
   <tab id="doc" label="Documentation (current)" dir="doc" indexfile="reference.html"/>
+  <tab id="doc3.3" label="Documentation (3.3)" dir="doc3.3" indexfile="reference.html"/>
   <tab id="doc3.2" label="Documentation (3.2)" dir="doc3.2" indexfile="reference.html"/>
-  <tab id="doc3.0" label="Documentation (3.0)" dir="doc3.0" indexfile="reference.html"/>
-  <tab id="ims_bench" label="IMS Bench SIPp" dir="ims_bench" indexfile="index.html"/>
-  <tab id="web_frontend" label="Web frontend" dir="web_frontend" indexfile="index.html"/>
   <!-- Add new tabs here, eg:
   <tab label="How-Tos" dir="community/howto/"/>
   <tab label="XML Site" dir="xml-site/"/>

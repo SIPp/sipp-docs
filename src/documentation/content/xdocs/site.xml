@@ -9,7 +9,7 @@ This file contains an outline of the site's information content.  It is used to:
 <link href="site:changes"> links to changes.html (or ../changes.html if in
   subdir).
 - Provide aliases for external URLs in the external-refs section.  Eg, <link
-  href="ext:cocoon"> links to http://xml.apache.org/cocoon/ 
+  href="ext:cocoon"> links to http://xml.apache.org/cocoon/
 
 See http://xml.apache.org/forrest/linking.html for more info
 -->
@@ -18,84 +18,66 @@ See http://xml.apache.org/forrest/linking.html for more info
 
   <about label="Home">
     <index label="Index" href="index.html" description="Welcome to SIPp"/>
-    <!-- <changes label="Changes" href="changes.html" description="History of Changes" /> -->
-    <!--<todo label="Todo" href="todo.html"  description="Todo List" />-->
-    <!--<all_site label="Full site in HTML" href="site.html"/>    
-    <all_sitePDF label="Full site in PDF" href="site.pdf"/>-->
   </about>
 
-  <doc label="Doc (current)" href="doc/" tab="doc">
-     <refdoc label='Ref doc last [html]' href='reference.html' />
-     <refdoc_PDF label="Ref doc last [pdf]" href="reference.pdf"/>
+  <doc label="SIPp v3.4 (current)" href="doc/" tab="doc">
+     <refdoc label='Documentation [html]' href='reference.html' />
+     <refdoc_PDF label="Documentation [pdf]" href="reference.pdf"/>
      <howto label='FAQ' href='faq.html' />
      <license label='License' href='license.html' />
   </doc>
 
-  <doc2 label="Doc (3.2)" href="doc3.2/" tab="doc3.2">
-     <refdoc label='Ref doc 3.2 [html]' href='reference.html' />
-     <refdoc_PDF label="Ref doc 3.2 [pdf]" href="reference.pdf"/>
+  <doc2 label="SIPp v3.3" href="doc3.3/" tab="doc3.3">
+     <refdoc label='Documentation [html]' href='reference.html' />
+     <refdoc_PDF label="Documentation [pdf]" href="reference.pdf"/>
   </doc2>
 
-   <doc3 label="Doc (3.0)" href="doc3.0/" tab="doc3.0">
-     <refdoc label='Ref doc 3.0 [html]' href='reference.html' />
-     <refdoc_PDF label="Ref doc 3.0 [pdf]" href="reference.pdf"/>
+  <doc3 label="SIPp v3.2" href="doc3.2/" tab="doc3.2">
+     <refdoc label='Documentation 3.2 [html]' href='reference.html' />
+     <refdoc_PDF label="Documentation 3.2 [pdf]" href="reference.pdf"/>
   </doc3>
 
-  <ims_bench label="IMS Bench" href="ims_bench/" tab="ims_bench">
-     <refdoc label='Ref doc [html]' href='reference.html' />
-     <refdoc_PDF label="Ref doc [pdf]" href="reference.pdf"/>
-  </ims_bench>
-
   <download label="Download">
-     <dev label='Unstable' href='ext:download_unstable' />
-     <cvs label='Stable' href='ext:download_stable' />
+     <dev label='Github downloads (3.4 release)' href='ext:github_dl' />
+     <dev label='Sourceforge downloads (3.3 release and earlier)' href='ext:sourceforge_dl' />
   </download>
 
-  <sourceforge label="Sourceforge">
-     <dev label='Sourceforge' href='ext:sourceforge_dev' />
-     <cvs label='Git' href='ext:sourceforge_git' />
-     <cvs label='Mailing list' href='ext:sourceforge_ml' />
-  </sourceforge>
+  <development label="Development">
+     <dev label='Github' href='ext:github' />
+     <dev label="New developers' guide" href='ext:github_guide' />
+  </development>
 
-  <devtools label="Devtools">
-      <dev label="Jenkins build system" href='ext:jenkins' />
-      <dev label="Barkeep code review" href='ext:barkeep' />
-  </devtools>
-  <!--
-  <wiki label="Wiki" href="ext:wikilink">
-    <main label="Mainpage" href="ext:wikilink" description="SIPp's wiki"/>
-    <scen label="Scenarios" href="ext:wikiscen" description="Scenario wiki"/>
-    <tips label="Tips and tricks" href="ext:wikitips" description="Tips wiki"/>
-  </wiki>
-  -->
-  <WebFrontEnd label="WebFrontEnd" href="web_frontend/">
-     <refdoc label='Ref doc [html]' href='index.html' />
-  </WebFrontEnd>
-  <SIPpGUI label="SIPpGUI" href="SIPP_GUI/">
-     <refdoc label='Ref doc [pdf]' href='reference.pdf' />
-  </SIPpGUI>
+  <support label="Support">
+     <dev label='Mailing list' href='ext:sourceforge_ml' />
+  </support>
+
+  <related label="Related Tools">
+    <ims_bench label="IMS Bench" href="ims_bench/" tab="ims_bench">
+      <refdoc label='Documentation [html]' href='reference.html' />
+      <refdoc_PDF label="Documentation [pdf]" href="reference.pdf"/>
+    </ims_bench>
+    <WebFrontEnd label="WebFrontEnd" href="web_frontend/">
+      <refdoc label='Documentation [html]' href='index.html' />
+    </WebFrontEnd>
+    <SIPpGUI label="SIPpGUI">
+      <refdoc label='Documentation [pdf]' href='SIPP_GUI/reference.pdf' />
+      <refdoc label='Download' href='ext:download_gui' />
+    </SIPpGUI>
+  </related>
+
   <external-refs>
-    <jenkins href="http://sipp-voip.org/jenkins" />
-    <barkeep href="http://sipp-voip.org/barkeep" />
-    <download_unstable href="http://sipp.sourceforge.net/snapshots/">
-    </download_unstable>
-    <download_stable href="http://sourceforge.net/project/showfiles.php?group_id=104305">
-    </download_stable>
-    <sourceforge_dev href="http://www.sourceforge.net/projects/sipp/">
-    </sourceforge_dev>
-    <sourceforge_home href="http://sipp.sourceforge.net/">
-    </sourceforge_home>
-    <sourceforge_git href="https://sourceforge.net/p/sipp/git/">
-    </sourceforge_git>
-    <sourceforge_ml href="http://lists.sourceforge.net/lists/listinfo/sipp-users">
-    </sourceforge_ml>
-    <wikilink href="http://sipp.sourceforge.net/wiki/">
-    </wikilink>
-    <wikiscen href="http://sipp.sourceforge.net/wiki/index.php/Scenarios">
-    </wikiscen>
-    <wikitips href="http://sipp.sourceforge.net/wiki/index.php/Tips">
-    </wikitips>
-    
+    <sourceforge_dl
+        href="http://sourceforge.net/project/showfiles.php?group_id=104305"
+        />
+    <github href="https://github.com/SIPp/sipp" />
+    <github_guide href="https://github.com/SIPp/sipp/wiki/New-Developers'-Guide" />
+    <github_dl href="https://github.com/SIPp/sipp/releases" />
+    <sourceforge_ml
+        href="http://lists.sourceforge.net/lists/listinfo/sipp-users" />
+    <download_gui
+        href="https://sourceforge.net/projects/sipp/files/SIPP_GUI/Sipp_gui_V1.0/"
+        />
+
     <xml.apache.org href="http://xml.apache.org/">
       <forrest href="forrest/">
         <validation href="validation.html"/>
